@@ -1,0 +1,3 @@
+./hadoop fs -put /home/valer/Projects/eu.larkc.reasoner/workspace/pariris/iris-impl-distributed/output/software-project.txt software-project
+
+./hadoop jar /home/valer/Projects/eu.larkc.reasoner/workspace/pariris/iris-impl-distributed/target/build/iris-impl-distributed.jar software-project software-project-output

@@ -3,16 +3,11 @@
  */
 package eu.larkc.reasoner;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
@@ -38,12 +33,12 @@ public class ExtractRdfTriples {
 		repository.initialize();
 		
 		RepositoryConnection repConnection = repository.getConnection();
-		repConnection.add(new File("/home/valer/Projects/eu.larkc.reasoner/workspace/DistributedReasoner/input/disease.owl"), 
-				"http://purl.org/obo/owl/", RDFFormat.RDFXML, (Resource) null);
+		repConnection.add(new File("/home/valer/Projects/eu.larkc.reasoner/workspace/pariris/iris-impl-distributed/input/software-project.owl"), 
+				"http://www.know-center.at/ontologies/2009/2/software-project.owl", RDFFormat.RDFXML, (Resource) null);
 		
 		repConnection.commit();
 
-		File outputFile = new File("/home/valer/Projects/eu.larkc.reasoner/workspace/DistributedReasoner/output/diseases_triples.txt");
+		File outputFile = new File("/home/valer/Projects/eu.larkc.reasoner/workspace/pariris/iris-impl-distributed/output/software-project.txt");
 		FileOutputStream outputStream = new FileOutputStream(outputFile);
 		OutputStreamWriter osw = new OutputStreamWriter(outputStream);
 		

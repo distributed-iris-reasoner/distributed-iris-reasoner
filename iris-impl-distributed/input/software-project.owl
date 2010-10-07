@@ -1,0 +1,1194 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY dc "http://purl.org/dc/elements/1.1#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY owl2xml "http://www.w3.org/2006/12/owl2-xml#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY software-project "http://www.know-center.at/ontologies/2009/2/software-project.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://www.know-center.at/ontologies/2009/2/software-project.owl#"
+     xml:base="http://www.know-center.at/ontologies/2009/2/software-project.owl"
+     xmlns:dc="http://purl.org/dc/elements/1.1#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:software-project="http://www.know-center.at/ontologies/2009/2/software-project.owl#">
+    <owl:Ontology rdf:about="">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >This ontology model project details of source code procects: javadoc as rdf.</rdfs:comment>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#ancestor-package -->
+
+    <owl:ObjectProperty rdf:about="#ancestor-package">
+        <rdfs:domain rdf:resource="#Class"/>
+        <rdfs:range rdf:resource="#Package"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#assignable-to -->
+
+    <owl:ObjectProperty rdf:about="#assignable-to">
+        <rdfs:domain rdf:resource="#Class"/>
+        <rdfs:range rdf:resource="#Class"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#assigned-topic -->
+
+    <owl:ObjectProperty rdf:about="#assigned-topic">
+        <rdfs:range>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#assigned-topic"/>
+                <owl:someValuesFrom rdf:resource="#Topic"/>
+            </owl:Restriction>
+        </rdfs:range>
+        <rdfs:domain>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#assigned-topic"/>
+                <owl:someValuesFrom rdf:resource="#Person"/>
+            </owl:Restriction>
+        </rdfs:domain>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#author -->
+
+    <owl:ObjectProperty rdf:about="#author">
+        <rdfs:domain>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#author"/>
+                <owl:someValuesFrom rdf:resource="#Member"/>
+            </owl:Restriction>
+        </rdfs:domain>
+        <rdfs:domain>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#author"/>
+                <owl:someValuesFrom rdf:resource="#Project"/>
+            </owl:Restriction>
+        </rdfs:domain>
+        <rdfs:domain>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#author"/>
+                <owl:someValuesFrom rdf:resource="#Class"/>
+            </owl:Restriction>
+        </rdfs:domain>
+        <rdfs:range>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#author"/>
+                <owl:someValuesFrom rdf:resource="#Person"/>
+            </owl:Restriction>
+        </rdfs:range>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#changeEvent -->
+
+    <owl:ObjectProperty rdf:about="#changeEvent">
+        <rdfs:range rdf:resource="#ChangeLog"/>
+        <rdfs:domain rdf:resource="#Project"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#containing-class -->
+
+    <owl:ObjectProperty rdf:about="#containing-class">
+        <rdfs:range rdf:resource="#Class"/>
+        <rdfs:domain rdf:resource="#Class"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#containing-package -->
+
+    <owl:ObjectProperty rdf:about="#containing-package">
+        <rdfs:domain rdf:resource="#Class"/>
+        <rdfs:range rdf:resource="#Package"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#developed-by -->
+
+    <owl:ObjectProperty rdf:about="#developed-by">
+        <rdfs:range rdf:resource="#Organization"/>
+        <rdfs:domain>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#developed-by"/>
+                <owl:someValuesFrom rdf:resource="#Member"/>
+            </owl:Restriction>
+        </rdfs:domain>
+        <rdfs:domain>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#developed-by"/>
+                <owl:someValuesFrom rdf:resource="#Class"/>
+            </owl:Restriction>
+        </rdfs:domain>
+        <rdfs:range>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#developed-by"/>
+                <owl:someValuesFrom rdf:resource="#Person"/>
+            </owl:Restriction>
+        </rdfs:range>
+        <rdfs:domain>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#developed-by"/>
+                <owl:someValuesFrom rdf:resource="#Project"/>
+            </owl:Restriction>
+        </rdfs:domain>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#employed-at -->
+
+    <owl:ObjectProperty rdf:about="#employed-at">
+        <rdfs:domain>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#assigned-topic"/>
+                <owl:someValuesFrom rdf:resource="#Person"/>
+            </owl:Restriction>
+        </rdfs:domain>
+        <rdfs:range>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#assigned-topic"/>
+                <owl:someValuesFrom rdf:resource="#Organization"/>
+            </owl:Restriction>
+        </rdfs:range>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#extends -->
+
+    <owl:ObjectProperty rdf:about="#extends">
+        <rdfs:range rdf:resource="#Class"/>
+        <rdfs:domain rdf:resource="#Class"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#extends-indirectly -->
+
+    <owl:ObjectProperty rdf:about="#extends-indirectly">
+        <rdfs:domain rdf:resource="#Class"/>
+        <rdfs:range rdf:resource="#Class"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#has-constructor -->
+
+    <owl:ObjectProperty rdf:about="#has-constructor">
+        <rdfs:domain rdf:resource="#Class"/>
+        <rdfs:range rdf:resource="#Constructor"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#has-field -->
+
+    <owl:ObjectProperty rdf:about="#has-field">
+        <rdfs:domain rdf:resource="#Class"/>
+        <rdfs:range rdf:resource="#Field"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#has-method -->
+
+    <owl:ObjectProperty rdf:about="#has-method">
+        <rdfs:domain rdf:resource="#Class"/>
+        <rdfs:range rdf:resource="#Method"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#has-parameter -->
+
+    <owl:ObjectProperty rdf:about="#has-parameter">
+        <rdfs:domain rdf:resource="#Method"/>
+        <rdfs:range rdf:resource="#Parameter"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#has-resource -->
+
+    <owl:ObjectProperty rdf:about="#has-resource">
+        <rdfs:range rdf:resource="#ExternalResource"/>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="#InvocationLog"/>
+                    <rdf:Description rdf:about="#Project"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:domain>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#has-summary -->
+
+    <owl:ObjectProperty rdf:about="#has-summary">
+        <rdfs:domain rdf:resource="#InvocationLog"/>
+        <rdfs:range rdf:resource="#InvocationSummary"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#has-tag -->
+
+    <owl:ObjectProperty rdf:about="#has-tag">
+        <rdfs:range rdf:resource="#Tag"/>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="#Class"/>
+                    <rdf:Description rdf:about="#Method"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:domain>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#implements -->
+
+    <owl:ObjectProperty rdf:about="#implements">
+        <rdfs:range rdf:resource="#Class"/>
+        <rdfs:domain rdf:resource="#Class"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#implements-indirectly -->
+
+    <owl:ObjectProperty rdf:about="#implements-indirectly">
+        <rdfs:domain rdf:resource="#Class"/>
+        <rdfs:range rdf:resource="#Class"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#invocation -->
+
+    <owl:ObjectProperty rdf:about="#invocation">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >list of Single Invokations</rdfs:comment>
+        <rdfs:range rdf:resource="#Invocation"/>
+        <rdfs:domain rdf:resource="#InvocationLog"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#invocation-type -->
+
+    <owl:ObjectProperty rdf:about="#invocation-type">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >links an invokation event to a type like method call begin/end</rdfs:comment>
+        <rdfs:domain rdf:resource="#Invocation"/>
+        <rdfs:range rdf:resource="#InvocationType"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#invoked-from -->
+
+    <owl:ObjectProperty rdf:about="#invoked-from">
+        <rdfs:domain rdf:resource="#Invocation"/>
+        <rdfs:range>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="#Class"/>
+                    <rdf:Description rdf:about="#Constructor"/>
+                    <rdf:Description rdf:about="#Method"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:range>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#modifier -->
+
+    <owl:ObjectProperty rdf:about="#modifier">
+        <rdfs:range rdf:resource="#Modifier"/>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="#Class"/>
+                    <rdf:Description rdf:about="#Member"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:domain>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#operation -->
+
+    <owl:ObjectProperty rdf:about="#operation">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >specifies/groups all allowed opertions (e.g. method calls) for one Invokation log instance</rdfs:comment>
+        <rdfs:range rdf:resource="#Operation"/>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="#Invocation"/>
+                    <rdf:Description rdf:about="#InvocationSummary"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:domain>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#overrides-class -->
+
+    <owl:ObjectProperty rdf:about="#overrides-class">
+        <rdfs:range rdf:resource="#Class"/>
+        <rdfs:domain rdf:resource="#Method"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#overrides-method -->
+
+    <owl:ObjectProperty rdf:about="#overrides-method">
+        <rdfs:range rdf:resource="#Method"/>
+        <rdfs:domain rdf:resource="#Method"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#overrides-type -->
+
+    <owl:ObjectProperty rdf:about="#overrides-type">
+        <rdfs:range rdf:resource="#Class"/>
+        <rdfs:domain rdf:resource="#Method"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#project -->
+
+    <owl:ObjectProperty rdf:about="#project">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >assigns individuals to projects. domain is open because nearly everything is assignet to a project</rdfs:comment>
+        <rdfs:range rdf:resource="#Project"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#return-type -->
+
+    <owl:ObjectProperty rdf:about="#return-type">
+        <rdfs:range rdf:resource="#Class"/>
+        <rdfs:domain rdf:resource="#Method"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#throws -->
+
+    <owl:ObjectProperty rdf:about="#throws">
+        <rdfs:range rdf:resource="#Class"/>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="#Class"/>
+                    <rdf:Description rdf:about="#Method"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:domain>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#throws-descendent-of -->
+
+    <owl:ObjectProperty rdf:about="#throws-descendent-of">
+        <rdfs:range rdf:resource="#Class"/>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="#Class"/>
+                    <rdf:Description rdf:about="#Method"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:domain>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#tool -->
+
+    <owl:ObjectProperty rdf:about="#tool">
+        <rdfs:range rdf:resource="#Tool"/>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="#ChangeLog"/>
+                    <rdf:Description rdf:about="#InvocationLog"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:domain>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#type -->
+
+    <owl:ObjectProperty rdf:about="#type">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Type of variables, e.g. the the return type of methods , the type of field variables or the type of member input paramters (paramter = name +type)</rdfs:comment>
+        <rdfs:range rdf:resource="#Class"/>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="#Field"/>
+                    <rdf:Description rdf:about="#Parameter"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:domain>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#abstract -->
+
+    <owl:DatatypeProperty rdf:about="#abstract">
+        <rdfs:range rdf:resource="&xsd;boolean"/>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="#Class"/>
+                    <rdf:Description rdf:about="#Method"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:domain>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#comment -->
+
+    <owl:DatatypeProperty rdf:about="#comment">
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="#Class"/>
+                    <rdf:Description rdf:about="#ExternalResource"/>
+                    <rdf:Description rdf:about="#Field"/>
+                    <rdf:Description rdf:about="#Method"/>
+                    <rdf:Description rdf:about="#Parameter"/>
+                    <rdf:Description rdf:about="#Project"/>
+                    <rdf:Description rdf:about="#Tag"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:domain>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#constructor -->
+
+    <owl:DatatypeProperty rdf:about="#constructor">
+        <rdfs:domain rdf:resource="#Method"/>
+        <rdfs:range rdf:resource="&xsd;boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#creation-date -->
+
+    <owl:DatatypeProperty rdf:about="#creation-date">
+        <rdfs:range rdf:resource="&xsd;date"/>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="#Class"/>
+                    <rdf:Description rdf:about="#Project"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:domain>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#email -->
+
+    <owl:DatatypeProperty rdf:about="#email">
+        <rdfs:domain rdf:resource="#Person"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#event-date -->
+
+    <owl:DatatypeProperty rdf:about="#event-date">
+        <rdfs:domain rdf:resource="#ChangeLog"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#externalizable -->
+
+    <owl:DatatypeProperty rdf:about="#externalizable">
+        <rdfs:domain rdf:resource="#Class"/>
+        <rdfs:range rdf:resource="&xsd;boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#files -->
+
+    <owl:DatatypeProperty rdf:about="#files">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >amount of java source files this project consists of</rdfs:comment>
+        <rdfs:domain rdf:resource="#Project"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#files-tests -->
+
+    <owl:DatatypeProperty rdf:about="#files-tests">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Amount of test files (java files) for this project</rdfs:comment>
+        <rdfs:domain rdf:resource="#Project"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#imported-date -->
+
+    <owl:DatatypeProperty rdf:about="#imported-date">
+        <rdfs:comment
+            >date the data has been imported as rdf model. Can be used to determine the date this data represents.</rdfs:comment>
+        <rdfs:domain rdf:resource="#Project"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#is-interface -->
+
+    <owl:DatatypeProperty rdf:about="#is-interface">
+        <rdfs:domain rdf:resource="#Class"/>
+        <rdfs:range rdf:resource="&xsd;boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#is-test -->
+
+    <owl:DatatypeProperty rdf:about="#is-test">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >flag indicating a test class</rdfs:comment>
+        <rdfs:domain rdf:resource="#Class"/>
+        <rdfs:range rdf:resource="&xsd;boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#isException -->
+
+    <owl:DatatypeProperty rdf:about="#isException">
+        <rdfs:domain rdf:resource="#Class"/>
+        <rdfs:range rdf:resource="&xsd;boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#issue-management -->
+
+    <owl:DatatypeProperty rdf:about="#issue-management">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Link to the issue management tool for this project: mantis, bugzilla, jira,...</rdfs:comment>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#lastmodified-date -->
+
+    <owl:DatatypeProperty rdf:about="#lastmodified-date">
+        <rdfs:comment
+            >date the data entity was modified the last time</rdfs:comment>
+        <rdfs:domain rdf:resource="#Class"/>
+        <rdfs:domain rdf:resource="#Project"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#library-size -->
+
+    <owl:DatatypeProperty rdf:about="#library-size">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >size of the compiled library (e.g. jar files for java) in bytes</rdfs:comment>
+        <rdfs:domain rdf:resource="#Project"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#library-size-tests -->
+
+    <owl:DatatypeProperty rdf:about="#library-size-tests">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >size of the compiled test library (e.g. jar files for java) in bytes</rdfs:comment>
+        <rdfs:domain rdf:resource="#Project"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#lines-of-code -->
+
+    <owl:DatatypeProperty rdf:about="#lines-of-code">
+        <rdfs:domain rdf:resource="#Project"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#lines-of-code-tests -->
+
+    <owl:DatatypeProperty rdf:about="#lines-of-code-tests">
+        <rdfs:domain rdf:resource="#Project"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#memory-stamp-mb -->
+
+    <owl:DatatypeProperty rdf:about="#memory-stamp-mb">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >currently used memory of the application at recording time in mega byte</rdfs:comment>
+        <rdfs:domain rdf:resource="#Invocation"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#mimetype -->
+
+    <owl:DatatypeProperty rdf:about="#mimetype">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >mimetype for external files like images .</rdfs:comment>
+        <rdfs:domain rdf:resource="#ExternalResource"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#name -->
+
+    <owl:DatatypeProperty rdf:about="#name">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >The name of classes, methods and so on</rdfs:comment>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#native -->
+
+    <owl:DatatypeProperty rdf:about="#native">
+        <rdfs:domain rdf:resource="#Method"/>
+        <rdfs:range rdf:resource="&xsd;boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#originator -->
+
+    <owl:DatatypeProperty rdf:about="#originator">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Who caused the invokation event</rdfs:comment>
+        <rdfs:domain rdf:resource="#Invocation"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#process-instance-name -->
+
+    <owl:DatatypeProperty rdf:about="#process-instance-name">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >specifies a specific event workflow instance . e.g. process-instance-name is &quot;holiday-request-sepp&quot; or &quot;holiday-request-franz&quot; (process instance names). But all of them can have the name &quot;holiday-requests&quot; (intention of the workflow).</rdfs:comment>
+        <rdfs:domain rdf:resource="#Invocation"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#program-version -->
+
+    <owl:DatatypeProperty rdf:about="#program-version">
+        <rdfs:domain rdf:resource="#Project"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#serializable -->
+
+    <owl:DatatypeProperty rdf:about="#serializable">
+        <rdfs:domain rdf:resource="#Class"/>
+        <rdfs:range rdf:resource="&xsd;boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#synchronized -->
+
+    <owl:DatatypeProperty rdf:about="#synchronized">
+        <rdfs:range rdf:resource="&xsd;boolean"/>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="#Class"/>
+                    <rdf:Description rdf:about="#Method"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:domain>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#synthetic -->
+
+    <owl:DatatypeProperty rdf:about="#synthetic">
+        <rdfs:domain rdf:resource="#ExecutableMember"/>
+        <rdfs:range rdf:resource="&xsd;boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#timestamp -->
+
+    <owl:DatatypeProperty rdf:about="#timestamp">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >When did the invokation event happen</rdfs:comment>
+        <rdfs:domain rdf:resource="#Invocation"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#transient -->
+
+    <owl:DatatypeProperty rdf:about="#transient">
+        <rdfs:domain rdf:resource="#Field"/>
+        <rdfs:range rdf:resource="&xsd;boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#url -->
+
+    <owl:DatatypeProperty rdf:about="#url">
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="#ExternalResource"/>
+                    <rdf:Description rdf:about="#Organization"/>
+                    <rdf:Description rdf:about="#Project"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:domain>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#varargs -->
+
+    <owl:DatatypeProperty rdf:about="#varargs">
+        <rdfs:domain rdf:resource="#Method"/>
+        <rdfs:range rdf:resource="&xsd;boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#version -->
+
+    <owl:DatatypeProperty rdf:about="#version">
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="#Project"/>
+                    <rdf:Description rdf:about="#Tool"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:domain>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#version-control-system -->
+
+    <owl:DatatypeProperty rdf:about="#version-control-system">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Link to a version control system like subverions or cvs.</rdfs:comment>
+        <rdfs:domain rdf:resource="#Project"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#volatile -->
+
+    <owl:DatatypeProperty rdf:about="#volatile">
+        <rdfs:domain rdf:resource="#Field"/>
+        <rdfs:range rdf:resource="&xsd;boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#word -->
+
+    <owl:DatatypeProperty rdf:about="#word">
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#ChangeLog -->
+
+    <owl:Class rdf:about="#ChangeLog">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Logs data transformation on the rdf-data. The intendion is to find out later what operationshave den used on the data. Other tools can use this to check that needed preconditions have been fullfilled.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#Class -->
+
+    <owl:Class rdf:about="#Class">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Class holding java classes, java interfaces and java exceptions</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#Constructor -->
+
+    <owl:Class rdf:about="#Constructor">
+        <rdfs:subClassOf rdf:resource="#ExecutableMember"/>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Constructors within classes</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#ExecutableMember -->
+
+    <owl:Class rdf:about="#ExecutableMember">
+        <rdfs:subClassOf rdf:resource="#Member"/>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Base class for constructors and Members</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#ExternalResource -->
+
+    <owl:Class rdf:about="#ExternalResource">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Holds data for one external resource like an image uri. resources can be connected to other classes using the has-resource property.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#Field -->
+
+    <owl:Class rdf:about="#Field">
+        <rdfs:subClassOf rdf:resource="#Member"/>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Field variable in a class</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#Invocation -->
+
+    <owl:Class rdf:about="#Invocation">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Specifies one invocation event</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#InvocationLog -->
+
+    <owl:Class rdf:about="#InvocationLog">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Main acces points for invocation logs. assagings some logging lists  to projcets and operations</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#InvocationSummary -->
+
+    <owl:Class rdf:about="#InvocationSummary">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Some useful summary information</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#InvocationType -->
+
+    <owl:Class rdf:about="#InvocationType">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >specifies the type of an invocation, e.g. method entered/method end, exception, ...</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#Member -->
+
+    <owl:Class rdf:about="#Member">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Base type for field variables an methods. Uses same base stuff because they have the same modifiers: static, public, ...</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#Method -->
+
+    <owl:Class rdf:about="#Method">
+        <rdfs:subClassOf rdf:resource="#ExecutableMember"/>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Member variable of a class or interface</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#Modifier -->
+
+    <owl:Class rdf:about="#Modifier">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Modifiers for classes/fields and mebers: final, static, public, ....</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#Operation -->
+
+    <owl:Class rdf:about="#Operation">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >name of an operation event, e.g. method calls</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#Organization -->
+
+    <owl:Class rdf:about="#Organization"/>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#Package -->
+
+    <owl:Class rdf:about="#Package">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >holds the package information where java classes are grouped by</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#Parameter -->
+
+    <owl:Class rdf:about="#Parameter">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >The input paramters of methods (paramter = name + type)</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#Person -->
+
+    <owl:Class rdf:about="#Person">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#Project -->
+
+    <owl:Class rdf:about="#Project">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >The main class definining a project. All javadoc info are related to a project. A project can specify more details: version, where the source code is, where the libraries can be downloaded, .....</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#Tag -->
+
+    <owl:Class rdf:about="#Tag">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Tags in the java comment like @param or @returns</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#Tool -->
+
+    <owl:Class rdf:about="#Tool">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >A piece of software that has performed some data transformation on the rdf-data. The intendion is to find out later what algorithms have den used on the data. Other tools can use this to check that needed preconditions have been fullfilled.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#Topic -->
+
+    <owl:Class rdf:about="#Topic">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:comment
+            >Contains a name of a topic. Topics can be assignet e.g. to persions indicationg their interests or or occuption. Topics e.g. are generated by analying source code comments.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#Thing -->
+
+    <owl:Class rdf:about="&owl;Thing"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#complete -->
+
+    <InvocationType rdf:about="#complete"/>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#error -->
+
+    <InvocationType rdf:about="#error"/>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#final -->
+
+    <Modifier rdf:about="#final"/>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#package-private -->
+
+    <Modifier rdf:about="#package-private"/>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#private -->
+
+    <Modifier rdf:about="#private"/>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#protected -->
+
+    <Modifier rdf:about="#protected"/>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#public -->
+
+    <Modifier rdf:about="#public"/>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#start -->
+
+    <InvocationType rdf:about="#start"/>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#static -->
+
+    <Modifier rdf:about="#static"/>
+    
+
+
+    <!-- http://www.know-center.at/ontologies/2009/2/software-project.owl#void -->
+
+    <Class rdf:about="#void"/>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 2.2.1.1042) http://owlapi.sourceforge.net -->
+
