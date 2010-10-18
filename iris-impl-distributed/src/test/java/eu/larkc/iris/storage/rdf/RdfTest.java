@@ -10,7 +10,7 @@
  * conditions, unless such conditions are required by law.
  */
 
-package cascading.rdf;
+package eu.larkc.iris.storage.rdf;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,7 +18,7 @@ import java.io.IOException;
 
 import org.ontoware.rdf2go.ModelFactory;
 import org.ontoware.rdf2go.RDF2Go;
-import org.openrdf.rdf2go.RepositoryModel;
+import org.ontoware.rdf2go.model.Model;
 import org.openrdf.rio.RDFFormat;
 
 import cascading.ClusterTestCase;
@@ -34,13 +34,15 @@ import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryIterator;
+import eu.larkc.iris.storage.rdf.RdfScheme;
+import eu.larkc.iris.storage.rdf.RdfTap;
 
 /**
  *
  */
 public class RdfTest extends ClusterTestCase {
 	String inputFile = "output/humans.txt";
-	private RepositoryModel repositoryModel = null; 
+	private Model repositoryModel = null; 
 		
 	public RdfTest() {
 		super("rdf tap test", false);

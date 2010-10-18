@@ -1,0 +1,133 @@
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  
+  <parent>
+    <artifactId>iris</artifactId>
+    <groupId>at.sti2.iris</groupId>
+    <version>0.7.2</version>
+  </parent>
+  
+  <groupId>at.sti2.iris</groupId>
+  <artifactId>iris-impl-distributed</artifactId>
+  <name>IRIS Distributed Reference Implementation</name>
+  
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+    
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.7</version>
+      <scope>test</scope>
+    </dependency>  
+    
+    <dependency>
+			<groupId>at.sti2.iris</groupId>
+			<artifactId>iris-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>at.sti2.iris</groupId>
+			<artifactId>iris-parser</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>at.sti2.iris</groupId>
+			<artifactId>iris-impl</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.5.10</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-jdk14</artifactId>
+			<version>1.5.10</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jgrapht</groupId>
+			<artifactId>jgrapht-jdk1.5</artifactId>
+			<version>0.7.3</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-httpclient</groupId>
+			<artifactId>commons-httpclient</artifactId>
+			<version>3.1</version>
+		</dependency>		
+		
+		<dependency>
+    		<groupId>openrdf-sesame</groupId>
+    		<artifactId>openrdf-sesame</artifactId>
+    		<version>2.3.2</version>
+    		<scope>system</scope>
+    		<systemPath>${basedir}/lib/openrdf-sesame-2.3.2.jar</systemPath>
+		</dependency>		
+		
+		<dependency>
+    		<groupId>hadoop-core</groupId>
+    		<artifactId>hadoop-core</artifactId>
+    		<version>0.19.2</version>
+    		<scope>system</scope>
+    		<systemPath>${basedir}/lib/hadoop-0.19.2-core.jar</systemPath>
+		</dependency>	
+		
+		<dependency>
+    		<groupId>cascading-core</groupId>
+    		<artifactId>cascading-core</artifactId>
+    		<version>1.1.2</version>
+    		<scope>system</scope>
+    		<systemPath>${basedir}/lib/cascading-core-1.1.2.jar</systemPath>
+		</dependency>	
+		
+		<dependency>
+    		<groupId>cascading-xml</groupId>
+    		<artifactId>cascading-xml</artifactId>
+    		<version>1.1.2</version>
+    		<scope>system</scope>
+    		<systemPath>${basedir}/lib/cascading-xml-1.1.2.jar</systemPath>
+		</dependency>	
+		
+		<dependency>
+    		<groupId>cascading-test</groupId>
+    		<artifactId>cascading-test</artifactId>
+    		<version>1.1.2</version>
+    		<scope>system</scope>
+    		<systemPath>${basedir}/lib/cascading-test-1.1.2.jar</systemPath>
+		</dependency>
+
+		<dependency>
+    		<groupId>rdf2go-api</groupId>
+    		<artifactId>rdf2go-api</artifactId>
+    		<version>4.7.3</version>
+    		<scope>system</scope>
+    		<systemPath>${basedir}/lib/rdf2go.api-4.7.3.jar</systemPath>
+		</dependency>		
+		
+  </dependencies>
+  <build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.5</version>
+				<configuration>
+					<skipTests>true</skipTests>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	  
+</project>

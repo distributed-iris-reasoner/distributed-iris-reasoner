@@ -1,4 +1,4 @@
-package eu.larkc.reasoner;
+package eu.larkc.iris.functional;
 
 import java.util.Properties;
 
@@ -10,12 +10,12 @@ import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.scheme.RdfTripleScheme;
 import cascading.scheme.Scheme;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
+import eu.larkc.iris.storage.RdfTripleScheme;
 
 public class DistributedReasoner {
 

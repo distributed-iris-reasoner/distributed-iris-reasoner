@@ -1,4 +1,4 @@
-package cascading.rdf;
+package eu.larkc.iris.storage.rdf;
 
 import java.io.IOException;
 
@@ -6,14 +6,14 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.JobConf;
 
-import cascading.rdf.rdf2go.Rdf2GoConfiguration;
-import cascading.rdf.rdf2go.Rdf2GoConfiguration.RDF_REPOSITORY_IMPLEMENTATION;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.TapCollector;
 import cascading.tap.hadoop.TapIterator;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
+import eu.larkc.iris.storage.rdf.rdf2go.Rdf2GoConfiguration;
+import eu.larkc.iris.storage.rdf.rdf2go.Rdf2GoConfiguration.RDF_REPOSITORY_IMPLEMENTATION;
 
 public class RdfTap extends Tap {
 

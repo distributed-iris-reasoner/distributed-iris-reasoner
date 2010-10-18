@@ -1,4 +1,4 @@
-package cascading.rdf.rdf2go;
+package eu.larkc.iris.storage.rdf.rdf2go;
 
 import java.io.DataInput;
 import java.io.DataOutput;

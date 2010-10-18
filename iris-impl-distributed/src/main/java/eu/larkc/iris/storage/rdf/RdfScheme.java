@@ -1,17 +1,17 @@
-package cascading.rdf;
+package eu.larkc.iris.storage.rdf;
 
 import java.io.IOException;
 
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 
-import cascading.rdf.rdf2go.Rdf2GoInputFormat;
-import cascading.rdf.rdf2go.Rdf2GoOutputFormat;
 import cascading.scheme.Scheme;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import eu.larkc.iris.storage.rdf.rdf2go.Rdf2GoInputFormat;
+import eu.larkc.iris.storage.rdf.rdf2go.Rdf2GoOutputFormat;
 
 public class RdfScheme extends Scheme {
 

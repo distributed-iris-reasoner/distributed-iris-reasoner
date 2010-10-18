@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -12,7 +13,8 @@
 		<module>iris-api</module>
 		<module>iris-impl</module>
 		<module>iris-parser</module>
-	</modules>
+    	<module>iris-impl-distributed</module>
+  </modules>
 
 	<properties>
 		<compiler.version>1.6</compiler.version>
@@ -96,5 +98,14 @@
 			<id>sti2-archiva-snapshots</id>
 			<url>http://maven.sti2.at/archiva/repository/snapshots</url>
 		</repository>
+		 <repository>
+           <id>semweb4j-repo</id>
+           <name>Semweb4j.org maven repo</name>
+           <url>http://semweb4j.org/repo/</url>
+           <releases>
+               <enabled>true</enabled>
+           </releases>
+       </repository>  
+    
 	</repositories>
 </project>

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package eu.larkc.reasoner;
+package eu.larkc.iris.storage.rdf;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,14 +9,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
-import org.apache.log4j.Logger;
 import org.ontoware.aifbcommons.collection.ClosableIterator;
 import org.ontoware.rdf2go.ModelFactory;
 import org.ontoware.rdf2go.RDF2Go;
-import org.openrdf.rdf2go.RepositoryModel;
+import org.ontoware.rdf2go.model.Model;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author valer
@@ -24,14 +25,14 @@ import org.openrdf.rio.RDFParseException;
  */
 public class ExtractRdfTriples {
 
-	private static final Logger logger = Logger.getLogger(ExtractRdfTriples.class);
+	private static final Logger logger = LoggerFactory.getLogger(ExtractRdfTriples.class);
 	
 	public static void main(String[] args) throws RepositoryException, RDFParseException, IOException {
 		//Repository repository = new SailRepository(new MemoryStore());
 		//repository.initialize();
 		RDF2Go.register("org.openrdf.rdf2go.RepositoryModelFactory");
 		ModelFactory modelFactory = RDF2Go.getModelFactory();
-		RepositoryModel repositoryModel = (RepositoryModel) modelFactory.createModel();
+		Model repositoryModel = modelFactory.createModel();
 		//RepositoryModel repositoryModel = new RepositoryModel(repository);
 		repositoryModel.open();
 		//repository.initialize();
@@ -43,8 +44,9 @@ public class ExtractRdfTriples {
 		
 		//repConnection.commit();
 
-		repositoryModel.readFrom(new FileInputStream(new File("/home/valer/Projects/eu.larkc.reasoner/workspace/pariris/iris-impl-distributed/input/humans.rdf")), 
-						RDFFormat.RDFXML, ""); //"http://www.know-center.at/ontologies/2009/2/software-project.owl", (Resource) null);
+		//TODO: this requires an additional import, seems not needed now, 
+		//repositoryModel.readFrom(new FileInputStream(new File("/home/valer/Projects/eu.larkc.reasoner/workspace/pariris/iris-impl-distributed/input/humans.rdf")), 
+		//				RDFFormat.RDFXML, ""); //"http://www.know-center.at/ontologies/2009/2/software-project.owl", (Resource) null);
 		
 		File outputFile = new File("/home/valer/Projects/eu.larkc.reasoner/workspace/pariris/iris-impl-distributed/output/humans.txt");
 		FileOutputStream outputStream = new FileOutputStream(outputFile);

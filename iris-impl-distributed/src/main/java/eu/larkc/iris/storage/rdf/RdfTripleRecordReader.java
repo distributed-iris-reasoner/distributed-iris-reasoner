@@ -1,7 +1,7 @@
 /**
  * 
  */
-package eu.larkc.reasoner;
+package eu.larkc.iris.storage.rdf;
 
 import java.io.IOException;
 import java.io.InputStream;

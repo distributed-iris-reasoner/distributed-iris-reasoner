@@ -1,12 +1,12 @@
-package cascading.rdf;
+package eu.larkc.iris.storage.rdf;
 
 import org.ontoware.rdf2go.model.Model;
 import org.ontoware.rdf2go.model.Statement;
 import org.ontoware.rdf2go.model.node.impl.PlainLiteralImpl;
 import org.ontoware.rdf2go.model.node.impl.URIImpl;
 
-import cascading.rdf.rdf2go.Rdf2GoWritable;
 import cascading.tuple.Tuple;
+import eu.larkc.iris.storage.rdf.rdf2go.Rdf2GoWritable;
 
 public class TupleRecord implements Rdf2GoWritable {
 

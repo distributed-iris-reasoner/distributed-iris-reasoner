@@ -1,4 +1,4 @@
-package cascading.rdf.rdf2go;
+package eu.larkc.iris.storage.rdf.rdf2go;
 
 import org.ontoware.rdf2go.model.Model;
 import org.ontoware.rdf2go.model.Statement;

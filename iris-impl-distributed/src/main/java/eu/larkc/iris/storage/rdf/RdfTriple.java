@@ -1,7 +1,7 @@
 /**
  * 
  */
-package eu.larkc.reasoner;
+package eu.larkc.iris.storage.rdf;
 
 import org.apache.hadoop.io.Text;
 

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package cascading.scheme;
+package eu.larkc.iris.storage;
 
 import java.beans.ConstructorProperties;
 import java.io.IOException;
@@ -14,14 +14,16 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.TextOutputFormat;
 
-import cascading.scheme.RdfTripleScheme.Compress;
+import cascading.scheme.Scheme;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.ZipInputFormat;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import eu.larkc.reasoner.RdfTriple;
-import eu.larkc.reasoner.RdfTripleInputFormat;
+import eu.larkc.iris.storage.RdfTripleScheme.Compress;
+import eu.larkc.iris.storage.rdf.RdfTriple;
+import eu.larkc.iris.storage.rdf.RdfTripleInputFormat;
+
 
 /**
  * A TextLine is a type of {@link Scheme} for plain text files. Files are broken into
@@ -262,7 +264,7 @@ public class RdfTripleScheme extends Scheme
     {
     Tuple tuple = new Tuple();
 
-    if( sourceFields.size() == 4 )
+    if( getSourceFields().size() == 4 )
       tuple.add( key.toString() );
 
     RdfTriple rdfTriple = (RdfTriple) value;
@@ -277,7 +279,7 @@ public class RdfTripleScheme extends Scheme
   public void sink( TupleEntry tupleEntry, OutputCollector outputCollector ) throws IOException
     {
     // it's ok to use NULL here so the collector does not write anything
-    outputCollector.collect( null, tupleEntry.selectTuple( sinkFields ) );
+    outputCollector.collect( null, tupleEntry.selectTuple( getSinkFields() ) );
     }
 
   }
