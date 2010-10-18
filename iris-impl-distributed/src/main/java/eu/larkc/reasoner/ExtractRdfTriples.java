@@ -4,21 +4,19 @@
 package eu.larkc.reasoner;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
 import org.apache.log4j.Logger;
-import org.openrdf.model.Resource;
-import org.openrdf.model.Statement;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
+import org.ontoware.aifbcommons.collection.ClosableIterator;
+import org.ontoware.rdf2go.ModelFactory;
+import org.ontoware.rdf2go.RDF2Go;
+import org.openrdf.rdf2go.RepositoryModel;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.RepositoryResult;
-import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParseException;
-import org.openrdf.sail.memory.MemoryStore;
 
 /**
  * @author valer
@@ -29,21 +27,32 @@ public class ExtractRdfTriples {
 	private static final Logger logger = Logger.getLogger(ExtractRdfTriples.class);
 	
 	public static void main(String[] args) throws RepositoryException, RDFParseException, IOException {
-		Repository repository = new SailRepository(new MemoryStore());
-		repository.initialize();
+		//Repository repository = new SailRepository(new MemoryStore());
+		//repository.initialize();
+		RDF2Go.register("org.openrdf.rdf2go.RepositoryModelFactory");
+		ModelFactory modelFactory = RDF2Go.getModelFactory();
+		RepositoryModel repositoryModel = (RepositoryModel) modelFactory.createModel();
+		//RepositoryModel repositoryModel = new RepositoryModel(repository);
+		repositoryModel.open();
+		//repository.initialize();
 		
-		RepositoryConnection repConnection = repository.getConnection();
-		repConnection.add(new File("/home/valer/Projects/eu.larkc.reasoner/workspace/pariris/iris-impl-distributed/input/software-project.owl"), 
-				"http://www.know-center.at/ontologies/2009/2/software-project.owl", RDFFormat.RDFXML, (Resource) null);
+		//RepositoryConnection repConnection = repository.getConnection();
+		//repConnection.add(new File("/home/valer/Projects/eu.larkc.reasoner/workspace/pariris/iris-impl-distributed/input/humans.rdf"), 
+		//		"", //"http://www.know-center.at/ontologies/2009/2/software-project.owl", 
+		//		RDFFormat.RDFXML, (Resource) null);
 		
-		repConnection.commit();
+		//repConnection.commit();
 
-		File outputFile = new File("/home/valer/Projects/eu.larkc.reasoner/workspace/pariris/iris-impl-distributed/output/software-project.txt");
+		repositoryModel.readFrom(new FileInputStream(new File("/home/valer/Projects/eu.larkc.reasoner/workspace/pariris/iris-impl-distributed/input/humans.rdf")), 
+						RDFFormat.RDFXML, ""); //"http://www.know-center.at/ontologies/2009/2/software-project.owl", (Resource) null);
+		
+		File outputFile = new File("/home/valer/Projects/eu.larkc.reasoner/workspace/pariris/iris-impl-distributed/output/humans.txt");
 		FileOutputStream outputStream = new FileOutputStream(outputFile);
 		OutputStreamWriter osw = new OutputStreamWriter(outputStream);
 		
-		RepositoryResult<Statement> repResult = repConnection.getStatements(null, null, null, false, (Resource) null);
-		for (Statement statement : repResult.asList()) {
+		ClosableIterator<org.ontoware.rdf2go.model.Statement> repResult = repositoryModel.iterator();
+		while (repResult.hasNext()) {
+			org.ontoware.rdf2go.model.Statement statement = repResult.next();
 			logger.info(statement.getSubject() + " : " + statement.getPredicate() + " : " + statement.getObject());
 			osw.write(statement.getSubject() + "\t" + statement.getPredicate() + "\t" + statement.getObject() + "\n");
 		}

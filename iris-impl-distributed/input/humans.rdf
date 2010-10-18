@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY humans "http://larkc.eu/humans#">
+]>
+
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:h="http://larkc.eu/humans/"
+         xml:base="http://larkc.eu/humans/">
+
+  <rdf:Description rdf:about="person#gerard_butler" xml:lang="en">
+    <h:name>Gerard Butler</h:name>
+    <h:sex xml:lang="en">male</h:sex>
+  </rdf:Description>
+
+  <rdf:Description rdf:about="person#jennifer_aniston" xml:lang="en">
+    <h:name>Jennifer Aniston</h:name>
+    <h:sex xml:lang="en">female</h:sex>
+  </rdf:Description>
+
+  <rdf:Description rdf:about="person#alicia_keys" xml:lang="en">
+    <h:name>Alicia Keys</h:name>
+    <h:sex xml:lang="en">female</h:sex>
+  </rdf:Description>
+
+  <rdf:Description rdf:about="person#sean_connery" xml:lang="en">
+    <h:name>Sean Connery</h:name>
+    <h:sex xml:lang="en">male</h:sex>
+    <h:son rdf:resource="person#brian_connery" />
+  </rdf:Description>
+
+  <rdf:Description rdf:about="person#brian_connery" xml:lang="en">
+    <h:name>Brian Connery</h:name>
+    <h:sex xml:lang="en">male</h:sex>
+  </rdf:Description>
+
+  <rdf:Description rdf:about="person#stan_connery" xml:lang="en">
+    <h:name>Stan Connery</h:name>
+    <h:sex xml:lang="en">male</h:sex>
+    <h:son rdf:resource="person#gerard_butler" />
+  </rdf:Description>
+
+</rdf:RDF>

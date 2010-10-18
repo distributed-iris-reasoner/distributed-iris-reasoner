@@ -1,0 +1,42 @@
+facts:
+person('B1').
+person('B2').
+person('A1').
+person('C3').
+
+hasName('B1', 'barry').
+hasName('B2', 'barry').
+hasName('A1', 'anne').
+hasName('C3', 'charlie').
+
+atOffsite('B1').
+atOffsite('A1').
+
+atEswc('B2').
+atEswc('C3').
+
+rules:
+?X = ?Y :- person(?X), person(?Y), hasName(?X, ?N1), hasName(?Y, ?N2), ?N1 = ?N2.
+
+query :
+?- atOffsite(?X).
+
+1. Parsing
+- parser query with org.deri.iris.compiler.Parser
+- result is several queries (we assume just one if not parse exception)
+- the result query is org.deri.iris.basics.Query
+	- a query has a list of literals org.deri.iris.api.basics.ILiteral and a list of variables org.deri.iris.api.terms.IVariable
+	- a literal contains an atom org.deri.iris.api.basics.IAtom wich has a predicate org.deri.iris.api.basics.IPredicate and a tuple org.deri.iris.api.basics.ITuple e. g. literal is  atOffsite(?X)
+	- a tuple extends a list of org.deri.iris.api.terms.ITerm
+	- in our case the predicate is atOffsite and the tuple is [?X]
+
+2. Evaluation strategy
+- stratified bottom up evaluation strategy factory org.deri.iris.evaluation.stratifiedbottomup.StratifiedBottomUpEvaluationStrategyFactory creates 
+and evaluator org.deri.iris.evaluation.stratifiedbottomupStratifiedBottomUpEvaluationStrategy
+- the evaluator gets as input params the facts org.deri.iris.facts.IFacts list of rules org.deri.iris.basics.IRule the rule evaluator factory 
+org.deri.iris.evaluation.stratifiedbottomup.seminaive.SemiNaiveEvaluator and the configuration org.deri.iris.Configuration
+- from configuration object and equivalentTermsfactory attribute a and org.deri.iris.utils.equivalence.IEquivalentTerms object is created, class org.deri.iris.utils.equivalence.TermEquivalence (this class is used to compare tems to see if they are equivalent)
+- a rule equality pre processor is used on the rules and the facts, in our case the org.deri.iris.rules.IgnoreRuleHeadEquality is used which returns the rules as they are
+- stratify the rules
+- create the rule compiler (facts, equivalent terms class, configuration) org.deri.iris.rules.compiler.RuleCompiler
+

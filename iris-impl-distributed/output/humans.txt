@@ -1,0 +1,14 @@
+http://larkc.eu/humans/person#gerard_butler	http://larkc.eu/humans/name	Gerard Butler@en
+http://larkc.eu/humans/person#gerard_butler	http://larkc.eu/humans/sex	male@en
+http://larkc.eu/humans/person#jennifer_aniston	http://larkc.eu/humans/name	Jennifer Aniston@en
+http://larkc.eu/humans/person#jennifer_aniston	http://larkc.eu/humans/sex	female@en
+http://larkc.eu/humans/person#alicia_keys	http://larkc.eu/humans/name	Alicia Keys@en
+http://larkc.eu/humans/person#alicia_keys	http://larkc.eu/humans/sex	female@en
+http://larkc.eu/humans/person#sean_connery	http://larkc.eu/humans/name	Sean Connery@en
+http://larkc.eu/humans/person#sean_connery	http://larkc.eu/humans/sex	male@en
+http://larkc.eu/humans/person#sean_connery	http://larkc.eu/humans/son	http://larkc.eu/humans/person#brian_connery
+http://larkc.eu/humans/person#brian_connery	http://larkc.eu/humans/name	Brian Connery@en
+http://larkc.eu/humans/person#brian_connery	http://larkc.eu/humans/sex	male@en
+http://larkc.eu/humans/person#stan_connery	http://larkc.eu/humans/name	Stan Connery@en
+http://larkc.eu/humans/person#stan_connery	http://larkc.eu/humans/sex	male@en
+http://larkc.eu/humans/person#stan_connery	http://larkc.eu/humans/son	http://larkc.eu/humans/person#gerard_butler
