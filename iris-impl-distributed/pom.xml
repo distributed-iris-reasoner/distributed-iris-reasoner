@@ -73,9 +73,7 @@
     		<artifactId>cascading-core</artifactId>
     		<version>1.1.2</version>
     		<scope>compile</scope>
-    		<type>jar</type>
-    		<!-- scope>system</scope>
-    		<systemPath>${basedir}/lib/cascading-core-1.1.2.jar</systemPath -->
+    		<type>jar</type>    	
 		</dependency>	
 
 		<dependency>
@@ -140,9 +138,7 @@
 		<dependency>
     		<groupId>hadoop-common</groupId>
     		<artifactId>hadoop-common</artifactId>
-    		<version>0.21.0</version>
-    		<!-- scope>system</scope>
-    		<systemPath>${basedir}/lib/hadoop-common-0.21.0.jar</systemPath -->
+    		<version>0.21.0</version>    		
     		<scope>compile</scope>
     		<type>jar</type>
 		</dependency>		
@@ -178,8 +174,7 @@
     		<artifactId>hadoop-hdfs</artifactId>
     		<version>0.21.0</version>
     		<type>jar</type>
-    		<scope>compile</scope>
-    		<!-- systemPath>${basedir}/lib/hadoop-hdfs-0.21.0.jar</systemPath -->
+    		<scope>compile</scope>    		
 		</dependency>		
 
 		<dependency>
@@ -187,8 +182,7 @@
     		<artifactId>hadoop-hdfs</artifactId>
     		<version>0.21.0</version>
     		<type>jar</type>
-    		<scope>compile</scope>
-    		<!-- systemPath>${basedir}/lib/hadoop-hdfs-0.21.0.jar</systemPath -->
+    		<scope>compile</scope>    	
     		<classifier>sources</classifier>
 		</dependency>		
 		
