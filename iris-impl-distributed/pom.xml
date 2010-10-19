@@ -121,6 +121,15 @@
 		</dependency>		
 
 		<dependency>
+    		<groupId>hadoop-common</groupId>
+    		<artifactId>hadoop-common</artifactId>
+    		<version>0.21.0</version>
+    		<scope>compile</scope>
+    		<type>jar</type>
+    		<classifier>sources</classifier>
+		</dependency>		
+
+		<dependency>
     		<groupId>hadoop-mapred</groupId>
     		<artifactId>hadoop-mapred</artifactId>
     		<type>jar</type>
