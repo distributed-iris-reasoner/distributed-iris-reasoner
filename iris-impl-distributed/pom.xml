@@ -115,6 +115,14 @@
     		<scope>system</scope>
     		<systemPath>${basedir}/lib/rdf2go.api-4.7.3.jar</systemPath>
 		</dependency>		
+
+		<dependency>
+    		<groupId>rdf2go.impl.sesame23</groupId>
+    		<artifactId>rdf2go.impl.sesame23</artifactId>
+    		<version>4.7.3</version>
+    		<scope>system</scope>
+    		<systemPath>${basedir}/lib/rdf2go.impl.sesame23-4.7.3.jar</systemPath>
+		</dependency>		
 		
   </dependencies>
   <build>
