@@ -44,7 +44,6 @@ import eu.larkc.iris.storage.rdf.rdf2go.Rdf2GoConfiguration.RDF2GO_IMPL;
  */
 public class RdfTest extends ClusterTestCase {
 	
-	String inputFile = "output/humans.txt";
 	String serverURL = "http://localhost:8080/openrdf-sesame";
 	
 	private Repository myRepository = null;
@@ -100,7 +99,7 @@ public class RdfTest extends ClusterTestCase {
 		Tap source = new RdfTap(RDF2GO_IMPL.SESAME, new URL(serverURL), "humans", 
 				new RdfScheme(new Fields("value1", "value2", "value3")), SinkMode.KEEP);
 
-		Tap sink = new Lfs(new TextLine(), "output", SinkMode.REPLACE);
+		Tap sink = new Lfs(new TextLine(), "build/test/output", SinkMode.REPLACE);
 
 		Pipe copyPipe = new Each("read", new Identity());
 

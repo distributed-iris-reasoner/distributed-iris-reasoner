@@ -69,76 +69,91 @@
 		</dependency>		
 		
 		<dependency>
-    		<groupId>openrdf-sesame</groupId>
-    		<artifactId>openrdf-sesame</artifactId>
-    		<version>2.3.2</version>
-    		<scope>system</scope>
-    		<systemPath>${basedir}/lib/openrdf-sesame-2.3.2.jar</systemPath>
-		</dependency>		
-			
-		
-		<dependency>
     		<groupId>cascading-core</groupId>
     		<artifactId>cascading-core</artifactId>
     		<version>1.1.2</version>
-    		<scope>system</scope>
-    		<systemPath>${basedir}/lib/cascading-core-1.1.2.jar</systemPath>
+    		<scope>compile</scope>
+    		<type>jar</type>
+    		<!-- scope>system</scope>
+    		<systemPath>${basedir}/lib/cascading-core-1.1.2.jar</systemPath -->
 		</dependency>	
 		
 		<dependency>
     		<groupId>cascading-xml</groupId>
     		<artifactId>cascading-xml</artifactId>
     		<version>1.1.2</version>
-    		<scope>system</scope>
-    		<systemPath>${basedir}/lib/cascading-xml-1.1.2.jar</systemPath>
+    		<scope>compile</scope>
+    		<type>jar</type>
 		</dependency>	
 		
 		<dependency>
     		<groupId>cascading-test</groupId>
     		<artifactId>cascading-test</artifactId>
     		<version>1.1.2</version>
-    		<scope>system</scope>
-    		<systemPath>${basedir}/lib/cascading-test-1.1.2.jar</systemPath>
+    		<scope>compile</scope>
+    		<type>jar</type>
 		</dependency>
 
 		<dependency>
-    		<groupId>rdf2go-api</groupId>
-    		<artifactId>rdf2go-api</artifactId>
-    		<version>4.7.3</version>
-    		<scope>system</scope>
-    		<systemPath>${basedir}/lib/rdf2go.api-4.7.3.jar</systemPath>
-		</dependency>		
-
+           <groupId>org.semweb4j</groupId>
+           <artifactId>rdf2go.api</artifactId>
+           <version>4.7.3</version>
+    		<scope>compile</scope>
+    		<type>jar</type>
+       </dependency>
+       
 		<dependency>
-    		<groupId>rdf2go.impl.sesame23</groupId>
+    		<groupId>org.semweb4j</groupId>
     		<artifactId>rdf2go.impl.sesame23</artifactId>
     		<version>4.7.3</version>
-    		<scope>system</scope>
-    		<systemPath>${basedir}/lib/rdf2go.impl.sesame23-4.7.3.jar</systemPath>
+    		<scope>compile</scope>
+    		<type>jar</type>
 		</dependency>		
 		
 		<dependency>
     		<groupId>hadoop-common</groupId>
     		<artifactId>hadoop-common</artifactId>
     		<version>0.21.0</version>
-    		<scope>system</scope>
-    		<systemPath>${basedir}/lib/hadoop-common-0.21.0.jar</systemPath>
+    		<!-- scope>system</scope>
+    		<systemPath>${basedir}/lib/hadoop-common-0.21.0.jar</systemPath -->
+    		<scope>compile</scope>
+    		<type>jar</type>
 		</dependency>		
 
 		<dependency>
-    		<groupId>hadoop-hdfs</groupId>
-    		<artifactId>hadoop-hdfs</artifactId>
+    		<groupId>hadoop-mapred</groupId>
+    		<artifactId>hadoop-mapred</artifactId>
+    		<type>jar</type>
     		<version>0.21.0</version>
-    		<scope>system</scope>
-    		<systemPath>${basedir}/lib/hadoop-hdfs-0.21.0.jar</systemPath>
+    		<scope>compile</scope>
 		</dependency>		
 
 		<dependency>
     		<groupId>hadoop-mapred</groupId>
     		<artifactId>hadoop-mapred</artifactId>
     		<version>0.21.0</version>
-    		<scope>system</scope>
-    		<systemPath>${basedir}/lib/hadoop-mapred-0.21.0.jar</systemPath>
+    		<type>jar</type>
+    		<scope>compile</scope>
+    		<classifier>sources</classifier>
+		</dependency>		
+
+		<dependency>
+    		<groupId>hadoop-hdfs</groupId>
+    		<artifactId>hadoop-hdfs</artifactId>
+    		<version>0.21.0</version>
+    		<type>jar</type>
+    		<scope>compile</scope>
+    		<!-- systemPath>${basedir}/lib/hadoop-hdfs-0.21.0.jar</systemPath -->
+		</dependency>		
+
+		<dependency>
+    		<groupId>hadoop-hdfs</groupId>
+    		<artifactId>hadoop-hdfs</artifactId>
+    		<version>0.21.0</version>
+    		<type>jar</type>
+    		<scope>compile</scope>
+    		<!-- systemPath>${basedir}/lib/hadoop-hdfs-0.21.0.jar</systemPath -->
+    		<classifier>sources</classifier>
 		</dependency>		
 		
 		<dependency>
@@ -155,6 +170,21 @@
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>avro</artifactId>
+			<version>1.3.3</version>
+			<type>jar</type>
+			<classifier>sources</classifier>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf</groupId>
+			<artifactId>openrdf-sesame</artifactId>
+			<version>2.3.2</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
   </dependencies>
   <build>
 		<plugins>
@@ -166,7 +196,19 @@
 					<skipTests>true</skipTests>
 				</configuration>
 			</plugin>
+			<plugin>
+			  <groupId>org.apache.maven.plugins</groupId>
+			  <artifactId>maven-source-plugin</artifactId>
+			  <executions>
+			    <execution>
+			      <id>attach-sources</id>
+			      <goals>
+			        <goal>jar</goal>
+			      </goals>
+			    </execution>
+			  </executions>
+			</plugin>
 		</plugins>
-	</build>
+</build>
 	  
 </project>
