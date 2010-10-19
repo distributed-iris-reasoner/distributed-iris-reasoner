@@ -1,6 +1,7 @@
 package eu.larkc.iris.storage.rdf;
 
 import java.io.IOException;
+import java.net.URL;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileInputFormat;
@@ -13,7 +14,7 @@ import cascading.tap.hadoop.TapIterator;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import eu.larkc.iris.storage.rdf.rdf2go.Rdf2GoConfiguration;
-import eu.larkc.iris.storage.rdf.rdf2go.Rdf2GoConfiguration.RDF_REPOSITORY_IMPLEMENTATION;
+import eu.larkc.iris.storage.rdf.rdf2go.Rdf2GoConfiguration.RDF2GO_IMPL;
 
 public class RdfTap extends Tap {
 
@@ -22,21 +23,23 @@ public class RdfTap extends Tap {
 	 */
 	private static final long serialVersionUID = -5174403815272616996L;
 
-	String rdfRepositoryName;
+	RDF2GO_IMPL rdf2GoImpl;
+	URL serverURL;
+	String repositoryID;
 	RdfScheme rdfScheme;
 
-	public RdfTap(String rdfRepositoryName, RdfScheme scheme, SinkMode sinkMode) {
+	public RdfTap(RDF2GO_IMPL rdf2GoImpl, URL serverURL, String repositoryID, RdfScheme scheme, SinkMode sinkMode) {
 		super(scheme, sinkMode);
 
-		this.rdfRepositoryName = rdfRepositoryName;
-		// Model model = RDF2Go.getModelFactory().createModel();
-
+		this.rdf2GoImpl = rdf2GoImpl;
+		this.serverURL = serverURL;
+		this.repositoryID = repositoryID;
 		this.rdfScheme = scheme;
 	}
 
 	@Override
 	public Path getPath() {
-		return new Path("rdftap:/" + rdfRepositoryName);
+		return new Path(serverURL.toExternalForm());
 	}
 
 	@Override
@@ -75,8 +78,7 @@ public class RdfTap extends Tap {
 		// a hack for MultiInputFormat to see that there is a child format
 		FileInputFormat.setInputPaths(conf, getPath());
 
-		Rdf2GoConfiguration.configure(conf,
-				RDF_REPOSITORY_IMPLEMENTATION.SESAME);
+		Rdf2GoConfiguration.configure(conf, rdf2GoImpl, serverURL, repositoryID);
 
 		super.sourceInit(conf);
 	}
@@ -86,7 +88,7 @@ public class RdfTap extends Tap {
 		if (!isSink())
 			return;
 
-		Rdf2GoConfiguration.configure(conf, RDF_REPOSITORY_IMPLEMENTATION.SESAME);
+		Rdf2GoConfiguration.configure(conf, rdf2GoImpl, serverURL, repositoryID);
 
 		super.sinkInit(conf);
 	}

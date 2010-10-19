@@ -13,13 +13,16 @@
 package eu.larkc.iris.storage.rdf;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URL;
 
-import org.ontoware.rdf2go.ModelFactory;
-import org.ontoware.rdf2go.RDF2Go;
-import org.ontoware.rdf2go.model.Model;
+import org.openrdf.model.Resource;
+import org.openrdf.repository.Repository;
+import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.http.HTTPRepository;
 import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.RDFParseException;
 
 import cascading.ClusterTestCase;
 import cascading.flow.Flow;
@@ -34,92 +37,95 @@ import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryIterator;
-import eu.larkc.iris.storage.rdf.RdfScheme;
-import eu.larkc.iris.storage.rdf.RdfTap;
+import eu.larkc.iris.storage.rdf.rdf2go.Rdf2GoConfiguration.RDF2GO_IMPL;
 
 /**
  *
  */
 public class RdfTest extends ClusterTestCase {
+	
 	String inputFile = "output/humans.txt";
-	private Model repositoryModel = null; 
-		
+	String serverURL = "http://localhost:8080/openrdf-sesame";
+	
+	private Repository myRepository = null;
+	
 	public RdfTest() {
 		super("rdf tap test", false);
+
+		try {
+			myRepository = new HTTPRepository(serverURL, "humans");
+			myRepository.initialize();
+		} catch (RepositoryException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void setUp() throws IOException {
 		super.setUp();
 
-		/*
-		RDF2Go.register("org.openrdf.rdf2go.RepositoryModelFactory");
-		ModelFactory modelFactory = RDF2Go.getModelFactory();
-		repositoryModel = (RepositoryModel) modelFactory
-				.createModel();
-		// RepositoryModel repositoryModel = new RepositoryModel(repository);
-		repositoryModel.open();
-
-		repositoryModel.readFrom(new FileInputStream(new File(inputFile)),
-				RDFFormat.RDFXML, "");
-		*/
+		try {
+			RepositoryConnection repConnection = myRepository.getConnection();
+			repConnection.add(new File("/home/valer/Projects/eu.larkc.reasoner/workspace/pariris/iris-impl-distributed/input/humans.rdf"), 
+					"", //"http://www.know-center.at/ontologies/2009/2/software-project.owl", 
+					RDFFormat.RDFXML, (Resource) null);
+			repConnection.commit();
+		} catch (RepositoryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (RDFParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void tearDown() throws IOException {
 		super.tearDown();
-
-		//repositoryModel.close();
+		
+		try {
+			RepositoryConnection repConnection = myRepository.getConnection();
+			repConnection.remove((Resource) null, null, null, (Resource) null);
+			repConnection.commit();
+		} catch (RepositoryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void testRdf() throws IOException {
 
 		// CREATE NEW TABLE FROM SOURCE
 
-		Tap source = new Lfs(new TextLine(), inputFile);
+		Tap source = new RdfTap(RDF2GO_IMPL.SESAME, new URL(serverURL), "humans", 
+				new RdfScheme(new Fields("value1", "value2", "value3")), SinkMode.KEEP);
 
-		Pipe parsePipe = new Each("insert", new Fields("line"),
-				new RegexSplitter(new Fields("value1", "value2", "value3"), "\\t"));
-
-		Tap replaceTap = new RdfTap("name", new RdfScheme(new Fields("value1", "value2", "value3")), SinkMode.REPLACE);
-
-		Flow parseFlow = new FlowConnector(getProperties()).connect(source,
-				replaceTap, parsePipe);
-
-		parseFlow.complete();
-
-		verifySink(parseFlow, 14);
-
-		// READ DATA FROM TABLE INTO TEXT FILE
-
-		// create flow to read from hbase and save to local file
-		/*
-		Tap sink = new Lfs(new TextLine(), "build/test/jdbc", SinkMode.REPLACE);
+		Tap sink = new Lfs(new TextLine(), "output", SinkMode.REPLACE);
 
 		Pipe copyPipe = new Each("read", new Identity());
 
-		Flow copyFlow = new FlowConnector(getProperties()).connect(replaceTap,
-				sink, copyPipe);
+		Flow copyFlow = new FlowConnector(getProperties()).connect(source, sink, copyPipe);
 
 		copyFlow.complete();
 
-		verifySink(copyFlow, 13);
-		*/
-		
+		verifySink(copyFlow, 14);
+
 		// READ DATA FROM TEXT FILE AND UPDATE TABLE
-		/*
-		RdfScheme rdfScheme = new RdfScheme();
-		Tap updateTap = new RdfTap("name", rdfScheme, SinkMode.UPDATE);
+		Tap updateTap = new RdfTap(RDF2GO_IMPL.SESAME, new URL(serverURL), "ouput-humans", 
+				new RdfScheme(new Fields("value1", "value2", "value3")), SinkMode.KEEP);
+
+		Pipe parsePipe = new Each("insert", new Fields("line"),
+				new RegexSplitter(new Fields("value1", "value2", "value3"), "\\t"));
 
 		Flow updateFlow = new FlowConnector(getProperties()).connect(sink,
 				updateTap, parsePipe);
 
 		updateFlow.complete();
 
-		verifySink(updateFlow, 13);
+		verifySink(updateFlow, 14);
 
 		// READ DATA FROM TABLE INTO TEXT FILE, USING CUSTOM QUERY
-
+		/*
 		Tap sourceTap = new RdfTap("name", new RdfScheme(), SinkMode.UPDATE);
 
 		Pipe readPipe = new Each("read", new Identity());

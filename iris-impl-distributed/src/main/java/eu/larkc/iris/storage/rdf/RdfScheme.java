@@ -10,8 +10,10 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import eu.larkc.iris.storage.rdf.rdf2go.Rdf2GoConfiguration;
 import eu.larkc.iris.storage.rdf.rdf2go.Rdf2GoInputFormat;
 import eu.larkc.iris.storage.rdf.rdf2go.Rdf2GoOutputFormat;
+import eu.larkc.iris.storage.rdf.rdf2go.Rdf2GoWritable;
 
 public class RdfScheme extends Scheme {
 
@@ -27,12 +29,18 @@ public class RdfScheme extends Scheme {
 	
 	@Override
 	public void sourceInit(Tap tap, JobConf conf) throws IOException {
-		Rdf2GoInputFormat.setInput( conf, TupleRecord.class);
+		conf.setClass(Rdf2GoConfiguration.INPUT_CLASS_PROPERTY, TupleRecord.class, Rdf2GoWritable.class);
+		conf.setInputFormat(Rdf2GoInputFormat.class);
 	}
 
 	@Override
 	public void sinkInit(Tap tap, JobConf conf) throws IOException {
-		Rdf2GoOutputFormat.setOutput(conf, Rdf2GoOutputFormat.class);
+		conf.setOutputFormat(Rdf2GoOutputFormat.class);
+
+		// writing doesn't always happen in reduce
+		conf.setReduceSpeculativeExecution(false);
+		conf.setMapSpeculativeExecution(false);
+
 	}
 
 	@Override

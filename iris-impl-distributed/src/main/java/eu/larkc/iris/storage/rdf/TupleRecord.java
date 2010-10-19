@@ -2,6 +2,7 @@ package eu.larkc.iris.storage.rdf;
 
 import org.ontoware.rdf2go.model.Model;
 import org.ontoware.rdf2go.model.Statement;
+import org.ontoware.rdf2go.model.node.Resource;
 import org.ontoware.rdf2go.model.node.impl.PlainLiteralImpl;
 import org.ontoware.rdf2go.model.node.impl.URIImpl;
 
@@ -38,9 +39,13 @@ public class TupleRecord implements Rdf2GoWritable {
 	@Override
 	public void read(Statement statement) {
 		tuple = new Tuple();
-		tuple.add(statement.getSubject().asURI());
+		tuple.add(statement.getSubject().asResource());
 		tuple.add(statement.getPredicate().asURI());
-		tuple.add(statement.getObject().asLiteral());
+		if (statement.getObject() instanceof Resource) {
+			tuple.add(statement.getObject().asResource());
+		} else {
+			tuple.add(statement.getObject().asLiteral());
+		}
 	}
 
 }

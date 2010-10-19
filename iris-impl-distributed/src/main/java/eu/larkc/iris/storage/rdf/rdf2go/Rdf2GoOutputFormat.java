@@ -78,35 +78,8 @@ public class Rdf2GoOutputFormat<K extends Rdf2GoWritable, V> implements
 	/** {@inheritDoc} */
 	public RecordWriter<K, V> getRecordWriter(FileSystem filesystem,
 			JobConf job, String name, Progressable progress) throws IOException {
-		Rdf2GoConfiguration rdf2GoConf = new Rdf2GoConfiguration(job);
-		Model model = rdf2GoConf.getModel();
+		Model model = Rdf2GoConfiguration.getModel(job);
 		return new Rdf2GoRecordWriter(model);
 	}
 
-	/**
-	 * Initializes the reduce-part of the job with the appropriate output
-	 * settings
-	 * 
-	 * @param job
-	 *            The job
-	 * @param rdf2GoOutputFormatClass
-	 * @param tableName
-	 *            The table to insert data into
-	 * @param fieldNames
-	 *            The field names in the table. If unknown, supply the
-	 *            appropriate
-	 */
-	public static void setOutput(JobConf job,
-			Class<? extends Rdf2GoOutputFormat> rdf2GoOutputFormatClass) {
-		if (rdf2GoOutputFormatClass == null)
-			job.setOutputFormat(Rdf2GoOutputFormat.class);
-		else
-			job.setOutputFormat(rdf2GoOutputFormatClass);
-
-		// writing doesn't always happen in reduce
-		job.setReduceSpeculativeExecution(false);
-		job.setMapSpeculativeExecution(false);
-
-		Rdf2GoConfiguration rdf2GoConf = new Rdf2GoConfiguration(job);
-	}
 }
