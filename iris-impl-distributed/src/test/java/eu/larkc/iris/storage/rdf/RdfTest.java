@@ -66,7 +66,7 @@ public class RdfTest extends ClusterTestCase {
 
 		try {
 			RepositoryConnection repConnection = myRepository.getConnection();
-			repConnection.add(new File("/home/valer/Projects/eu.larkc.reasoner/workspace/pariris/iris-impl-distributed/input/humans.rdf"), 
+			repConnection.add(new File("/home/valer/Projects/eu.larkc.reasoner/workspace/pariris/iris-impl-distributed/src/test/resources/input/humans.rdf"), 
 					"", //"http://www.know-center.at/ontologies/2009/2/software-project.owl", 
 					RDFFormat.RDFXML, (Resource) null);
 			repConnection.commit();

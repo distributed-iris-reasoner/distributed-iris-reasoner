@@ -75,14 +75,7 @@
     		<scope>system</scope>
     		<systemPath>${basedir}/lib/openrdf-sesame-2.3.2.jar</systemPath>
 		</dependency>		
-		
-		<dependency>
-    		<groupId>hadoop-core</groupId>
-    		<artifactId>hadoop-core</artifactId>
-    		<version>0.19.2</version>
-    		<scope>system</scope>
-    		<systemPath>${basedir}/lib/hadoop-0.19.2-core.jar</systemPath>
-		</dependency>	
+			
 		
 		<dependency>
     		<groupId>cascading-core</groupId>
@@ -123,23 +116,45 @@
     		<scope>system</scope>
     		<systemPath>${basedir}/lib/rdf2go.impl.sesame23-4.7.3.jar</systemPath>
 		</dependency>		
-
+		
 		<dependency>
-    		<groupId>jackson-all</groupId>
-    		<artifactId>jackson-all</artifactId>
-    		<version>1.6.1</version>
+    		<groupId>hadoop-common</groupId>
+    		<artifactId>hadoop-common</artifactId>
+    		<version>0.21.0</version>
     		<scope>system</scope>
-    		<systemPath>${basedir}/lib/jackson-all-1.6.1.jar</systemPath>
+    		<systemPath>${basedir}/lib/hadoop-common-0.21.0.jar</systemPath>
 		</dependency>		
 
 		<dependency>
-    		<groupId>avro</groupId>
-    		<artifactId>avro</artifactId>
-    		<version>1.4.1</version>
+    		<groupId>hadoop-hdfs</groupId>
+    		<artifactId>hadoop-hdfs</artifactId>
+    		<version>0.21.0</version>
     		<scope>system</scope>
-    		<systemPath>${basedir}/lib/avro-1.4.1.jar</systemPath>
+    		<systemPath>${basedir}/lib/hadoop-hdfs-0.21.0.jar</systemPath>
+		</dependency>		
+
+		<dependency>
+    		<groupId>hadoop-mapred</groupId>
+    		<artifactId>hadoop-mapred</artifactId>
+    		<version>0.21.0</version>
+    		<scope>system</scope>
+    		<systemPath>${basedir}/lib/hadoop-mapred-0.21.0.jar</systemPath>
 		</dependency>		
 		
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>avro</artifactId>
+			<version>1.3.3</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-asl</artifactId>
+			<version>0.9.5</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
   </dependencies>
   <build>
 		<plugins>
