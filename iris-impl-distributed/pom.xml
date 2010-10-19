@@ -123,6 +123,22 @@
     		<scope>system</scope>
     		<systemPath>${basedir}/lib/rdf2go.impl.sesame23-4.7.3.jar</systemPath>
 		</dependency>		
+
+		<dependency>
+    		<groupId>jackson-all</groupId>
+    		<artifactId>jackson-all</artifactId>
+    		<version>1.6.1</version>
+    		<scope>system</scope>
+    		<systemPath>${basedir}/lib/jackson-all-1.6.1.jar</systemPath>
+		</dependency>		
+
+		<dependency>
+    		<groupId>avro</groupId>
+    		<artifactId>avro</artifactId>
+    		<version>1.4.1</version>
+    		<scope>system</scope>
+    		<systemPath>${basedir}/lib/avro-1.4.1.jar</systemPath>
+		</dependency>		
 		
   </dependencies>
   <build>
