@@ -5,11 +5,17 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 import org.apache.hadoop.mapred.InputSplit;
+import org.ontoware.rdf2go.model.Model;
 
 public class Rdf2GoInputSplit implements InputSplit {
 
-	/** Default Constructor */
+	private Model model;
+	
 	public Rdf2GoInputSplit() {
+	}
+	
+	public Rdf2GoInputSplit(Model model) {
+		this.model = model;
 	}
 
 	/** {@inheritDoc} */
@@ -18,19 +24,9 @@ public class Rdf2GoInputSplit implements InputSplit {
 		return new String[] {};
 	}
 
-	/** @return The index of the first row to select */
-	public long getStart() {
-		return 0;
-	}
-
-	/** @return The index of the last row to select */
-	public long getEnd() {
-		return 100;
-	}
-
 	/** @return The total row count in this split */
 	public long getLength() throws IOException {
-		return 100;
+		return model.size();
 	}
 
 	/** {@inheritDoc} */

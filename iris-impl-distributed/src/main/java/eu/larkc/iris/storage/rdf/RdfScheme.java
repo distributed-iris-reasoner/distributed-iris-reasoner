@@ -22,6 +22,11 @@ public class RdfScheme extends Scheme {
 	 */
 	private static final long serialVersionUID = 3622684910621818754L;
 
+	public RdfScheme() {
+		setSourceFields(Fields.ALL);
+		setSinkFields(Fields.ALL);
+	}
+	
 	public RdfScheme(Fields fields) {
 		setSourceFields(fields);
 		setSinkFields(fields);

@@ -9,7 +9,6 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.JobConfigurable;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.util.ReflectionUtils;
@@ -18,7 +17,7 @@ import org.ontoware.rdf2go.model.Model;
 import org.ontoware.rdf2go.model.Statement;
 
 public class Rdf2GoInputFormat<T extends Rdf2GoWritable> implements
-		InputFormat<LongWritable, T>, JobConfigurable {
+		InputFormat<LongWritable, T> {
 
 	private Model model;
 
@@ -58,7 +57,7 @@ public class Rdf2GoInputFormat<T extends Rdf2GoWritable> implements
 			this.split = split;
 			this.job = job;
 
-			this.iterator = model.iterator();
+			this.iterator = Rdf2GoConfiguration.getModel(job).iterator();
 		}
 
 		@Override
@@ -92,22 +91,18 @@ public class Rdf2GoInputFormat<T extends Rdf2GoWritable> implements
 
 		@Override
 		public float getProgress() throws IOException {
+			if (model == null) {
+				return 0;
+			}
 			return pos / (float) split.getLength();
 		}
 
 	}
 
-	protected Rdf2GoConfiguration rdfRepositoryConf;
-
-	@Override
-	public void configure(JobConf job) {
-		model = Rdf2GoConfiguration.getModel(job);
-	}
-
 	@Override
 	public InputSplit[] getSplits(JobConf job, int numSplits)
 			throws IOException {
-		return new InputSplit[] { new Rdf2GoInputSplit() };
+		return new InputSplit[] { new Rdf2GoInputSplit(Rdf2GoConfiguration.getModel(job)) };
 	}
 
 	@Override
