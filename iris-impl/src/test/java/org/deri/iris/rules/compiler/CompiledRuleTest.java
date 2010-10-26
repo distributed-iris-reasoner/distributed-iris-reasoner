@@ -84,7 +84,7 @@ public class CompiledRuleTest extends TestCase
 
 		IRule rule = BASIC.createRule( headLiterals, bodyLiterals );
 		
-		RuleCompiler compiler = new RuleCompiler( facts, new Configuration() );
+		IRuleCompiler compiler = new RuleCompiler( facts, new Configuration() );
 		ICompiledRule cRule = compiler.compile( rule );
 		
 		IRelation P = cRule.evaluate();
@@ -122,7 +122,7 @@ public class CompiledRuleTest extends TestCase
 		
 		long t = System.currentTimeMillis();
 
-		RuleCompiler compiler = new RuleCompiler( facts, new Configuration() );
+		IRuleCompiler compiler = new RuleCompiler( facts, new Configuration() );
 		ICompiledRule cRule = compiler.compile( rule );
 		
 		IRelation P = cRule.evaluate();
@@ -165,7 +165,7 @@ public class CompiledRuleTest extends TestCase
 
 		long t = System.currentTimeMillis();
 
-		RuleCompiler compiler = new RuleCompiler( facts, new Configuration() );
+		IRuleCompiler compiler = new RuleCompiler( facts, new Configuration() );
 		ICompiledRule cRule = compiler.compile( rule );
 		
 		IRelation P = cRule.evaluate();

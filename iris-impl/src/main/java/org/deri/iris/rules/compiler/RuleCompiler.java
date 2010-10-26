@@ -48,7 +48,7 @@ import org.deri.iris.utils.equivalence.IgnoreTermEquivalence;
  * A rule compiler for creating objects that compute new facts using
  * forward-chaining techniques.
  */
-public class RuleCompiler {
+public class RuleCompiler implements IRuleCompiler {
 
 	/**
 	 * Constructor.
@@ -73,13 +73,8 @@ public class RuleCompiler {
 		mEquivalentTerms = equivalentTerms;
 	}
 
-	/**
-	 * Compile a rule. No optimisations of any kind are attempted.
-	 * 
-	 * @param rule The rule to be compiled
-	 * @return The compiled rule, ready to be evaluated
-	 * @throws EvaluationException If the query can not be compiled for any
-	 *             reason.
+	/* (non-Javadoc)
+	 * @see org.deri.iris.rules.compiler.IRuleCompiler#compile(org.deri.iris.api.basics.IRule)
 	 */
 	public ICompiledRule compile(IRule rule) throws EvaluationException {
 		List<RuleElement> elements = compileBody(rule.getBody());

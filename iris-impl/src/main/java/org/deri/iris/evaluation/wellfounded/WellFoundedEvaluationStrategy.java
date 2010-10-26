@@ -40,6 +40,7 @@ import org.deri.iris.facts.FiniteUniverseFacts;
 import org.deri.iris.facts.IFacts;
 import org.deri.iris.rules.RuleHeadEquality;
 import org.deri.iris.rules.compiler.ICompiledRule;
+import org.deri.iris.rules.compiler.IRuleCompiler;
 import org.deri.iris.rules.compiler.RuleCompiler;
 import org.deri.iris.storage.IRelation;
 import org.deri.iris.utils.equivalence.IEquivalentTerms;
@@ -105,7 +106,7 @@ public class WellFoundedEvaluationStrategy implements IEvaluationStrategy
 		
 		List<ICompiledRule> compiledRules = new ArrayList<ICompiledRule>();
 		
-		RuleCompiler rc = new RuleCompiler( facts, mEquivalentTerms, mConfiguration );
+		IRuleCompiler rc = new RuleCompiler( facts, mEquivalentTerms, mConfiguration );
 
 		for( IRule rule : rules )
 			compiledRules.add( rc.compile( rule ) );

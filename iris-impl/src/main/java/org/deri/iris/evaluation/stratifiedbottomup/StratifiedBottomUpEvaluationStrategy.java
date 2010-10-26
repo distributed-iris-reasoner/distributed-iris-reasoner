@@ -36,6 +36,7 @@ import org.deri.iris.facts.FiniteUniverseFacts;
 import org.deri.iris.facts.IFacts;
 import org.deri.iris.rules.RuleHeadEquality;
 import org.deri.iris.rules.compiler.ICompiledRule;
+import org.deri.iris.rules.compiler.IRuleCompiler;
 import org.deri.iris.rules.compiler.RuleCompiler;
 import org.deri.iris.rules.safety.AugmentingRuleSafetyProcessor;
 import org.deri.iris.storage.IRelation;
@@ -69,7 +70,7 @@ public class StratifiedBottomUpEvaluationStrategy implements
 		// Stratify
 		List<List<IRule>> stratifiedRules = utils.stratify(safeRules);
 
-		RuleCompiler rc = new RuleCompiler(facts, mEquivalentTerms,
+		IRuleCompiler rc = new RuleCompiler(facts, mEquivalentTerms,
 				mConfiguration);
 
 		int stratumNumber = 0;
