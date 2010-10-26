@@ -15,6 +15,7 @@ package eu.larkc.iris.storage.rdf;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Properties;
 
 import org.openrdf.model.Resource;
 import org.openrdf.repository.Repository;
@@ -28,15 +29,23 @@ import cascading.ClusterTestCase;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.operation.Identity;
+import cascading.operation.aggregator.Count;
+import cascading.operation.regex.RegexSplitGenerator;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.Each;
+import cascading.pipe.Every;
+import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
+import cascading.scheme.Scheme;
 import cascading.scheme.TextLine;
+import cascading.tap.Hfs;
 import cascading.tap.Lfs;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryIterator;
+import eu.larkc.iris.functional.DistributedReasoner;
+import eu.larkc.iris.storage.RdfTripleScheme;
 import eu.larkc.iris.storage.rdf.rdf2go.Rdf2GoConfiguration.RDF2GO_IMPL;
 
 /**
@@ -123,6 +132,8 @@ public class RdfTest extends ClusterTestCase {
 
 		verifySink(updateFlow, 14);
 
+		updateFlow.writeDOT("/home/valer/flow.dot");
+		
 		// READ DATA FROM TABLE INTO TEXT FILE, USING CUSTOM QUERY
 		/*
 		Tap sourceTap = new RdfTap("name", new RdfScheme(), SinkMode.UPDATE);
@@ -138,6 +149,33 @@ public class RdfTest extends ClusterTestCase {
 		*/
 	}
 
+	public void testWordCount() throws IOException {
+		Tap sourceTap = new RdfTap(RDF2GO_IMPL.SESAME, new URL(serverURL), "ouput-humans", 
+				new RdfScheme(new Fields("subject", "predicate", "object")), SinkMode.REPLACE);
+
+		Tap sinkTap = new Hfs(new TextLine(), "build/test/output", SinkMode.REPLACE);
+
+		Pipe wordCountPipe = new Each("identity tuple", new Fields("subject", "predicate", "object"), new Identity());
+		
+		Pipe value1Pipe = new Each(wordCountPipe, new Fields("subject"), new Identity(new Fields("value")));
+		Pipe value2Pipe = new Each(wordCountPipe, new Fields("predicate"), new Identity(new Fields("value")));
+		Pipe value3Pipe = new Each(wordCountPipe , new Fields("object"), new Identity(new Fields("value")));
+		
+		wordCountPipe = new GroupBy(new Pipe[]{value1Pipe, value2Pipe, value3Pipe}, new Fields("value"));
+		wordCountPipe = new Every(wordCountPipe, new Count(new Fields("count")), new Fields("count", "value"));
+
+		Flow wordCountFlow = new FlowConnector(getProperties()).connect(sourceTap, sinkTap, wordCountPipe);
+
+		wordCountFlow.complete();
+		
+		//verifySink(updateFlow, 14);
+
+		wordCountFlow.writeDOT("/home/valer/flow.dot");
+
+		//parsedLogFlow.start();
+		//parsedLogFlow.complete();
+	}
+	
 	private void verifySink(Flow flow, int expects) throws IOException {
 		int count = 0;
 

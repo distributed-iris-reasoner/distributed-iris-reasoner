@@ -93,4 +93,18 @@ public class RdfTap extends Tap {
 		super.sinkInit(conf);
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("rdf tap:");
+		sb.append(rdf2GoImpl);
+		if (serverURL != null) {
+			sb.append("," + serverURL.toExternalForm());
+		}
+		if (repositoryID != null) {
+			sb.append("," + repositoryID);
+		}
+		return sb.toString();
+	}
+
 }
