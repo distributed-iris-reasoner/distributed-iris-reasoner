@@ -16,7 +16,6 @@ import org.deri.iris.rules.compiler.ICompiledRule;
 import org.deri.iris.storage.IRelation;
 
 import cascading.flow.Flow;
-import cascading.tap.Tap;
 
 /**
  * CascadingCompiledRule encapsulates a rule that has been translated from the IRIS internal representation to a suitable cascading workflow.
@@ -44,9 +43,10 @@ public class CascadingCompiledRule implements ICompiledRule {
 		//start returns immediately
 		mFlow.start();
 		
+		//TODO: jobconf is constructed within the rule compiler right now, which is likely not the right place.
+		//this should either happen here or in a custom evaluator implementation		
+		
 		//FIXME (fisf): check for recursion / cycles.
-		//Here some major piece of functionality needs to be added in order to handle recursion.
-		//
 		//Overall story:
 		//Naive evaluation does several passes over the rules and finishes when no new tuples are added anymore.
 		//Several passes are actually only needed if the dependency graph contains cycles.
