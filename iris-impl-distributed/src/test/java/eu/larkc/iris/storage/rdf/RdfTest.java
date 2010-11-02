@@ -106,7 +106,7 @@ public class RdfTest extends ClusterTestCase {
 		// CREATE NEW TABLE FROM SOURCE
 
 		Tap source = new RdfTap(RDF2GO_IMPL.SESAME, new URL(serverURL), "humans", 
-				new RdfScheme(new Fields("value1", "value2", "value3")), SinkMode.KEEP);
+				new RdfScheme(), SinkMode.KEEP);
 
 		Tap sink = new Lfs(new TextLine(), "build/test/output", SinkMode.REPLACE);
 
@@ -120,7 +120,7 @@ public class RdfTest extends ClusterTestCase {
 
 		// READ DATA FROM TEXT FILE AND UPDATE TABLE
 		Tap updateTap = new RdfTap(RDF2GO_IMPL.SESAME, new URL(serverURL), "ouput-humans", 
-				new RdfScheme(new Fields("value1", "value2", "value3")), SinkMode.KEEP);
+				new RdfScheme(), SinkMode.KEEP);
 
 		Pipe parsePipe = new Each("insert", new Fields("line"),
 				new RegexSplitter(new Fields("value1", "value2", "value3"), "\\t"));
@@ -151,7 +151,7 @@ public class RdfTest extends ClusterTestCase {
 
 	public void testWordCount() throws IOException {
 		Tap sourceTap = new RdfTap(RDF2GO_IMPL.SESAME, new URL(serverURL), "ouput-humans", 
-				new RdfScheme(new Fields("subject", "predicate", "object")), SinkMode.REPLACE);
+				new RdfScheme(), SinkMode.REPLACE);
 
 		Tap sinkTap = new Hfs(new TextLine(), "build/test/output", SinkMode.REPLACE);
 

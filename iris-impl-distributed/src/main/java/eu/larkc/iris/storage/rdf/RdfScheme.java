@@ -18,6 +18,16 @@ import eu.larkc.iris.storage.rdf.rdf2go.Rdf2GoInputFormat;
 import eu.larkc.iris.storage.rdf.rdf2go.Rdf2GoOutputFormat;
 import eu.larkc.iris.storage.rdf.rdf2go.Rdf2GoWritable;
 
+/**
+ * Scheme used  for the RdfTap
+ * The structure is :
+ * subject, predicate, object, objectType, namedContext...
+ * 
+ * The object type can be resource or literal
+ * 
+ * @author valer
+ *
+ */
 public class RdfScheme extends Scheme {
 
 	/**
@@ -26,14 +36,16 @@ public class RdfScheme extends Scheme {
 	private static final long serialVersionUID = 3622684910621818754L;
 
 	public RdfScheme() {
-		setSourceFields(Fields.ALL);
-		setSinkFields(Fields.ALL);
+		setSourceFields(new Fields("subject", "predicate", "object", "objectTag"));
+		setSinkFields(new Fields("subject", "predicate", "object", "objectTag"));
 	}
 	
+	/*
 	public RdfScheme(Fields fields) {
 		setSourceFields(fields);
 		setSinkFields(fields);
 	}
+	*/
 	
 	@Override
 	public void sourceInit(Tap tap, JobConf conf) throws IOException {
@@ -75,7 +87,7 @@ public class RdfScheme extends Scheme {
 				object = tuple.getString(2);
 			}
 		}
-		return new Tuple(subject, predicate, object);
+		return new Tuple(subject, predicate, object, objectTag);
 	}
 
 	@Override

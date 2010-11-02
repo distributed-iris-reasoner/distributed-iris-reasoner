@@ -30,7 +30,22 @@ public class TupleRecord implements Rdf2GoWritable {
 	public TupleRecord() {}
 	
 	public TupleRecord(Tuple tuple) {
-		this.tuple = tuple;
+		Tuple subject = null;
+		Tuple predicate = null;
+		Tuple object = null;
+		Iterator<String> iTuple = tuple.iterator();
+		for (int i = 0; i < tuple.size(); i++) {
+			switch (i) {
+				case 0: 
+					subject = new Tuple(RdfTag.subject.ordinal(), tuple.getString(i));
+				case 1:
+					predicate = new Tuple(RdfTag.predicate.ordinal(), tuple.getString(i));
+				case 2:
+					object = new Tuple(RdfTag.object.ordinal(), 
+							tuple.getString(i + 1).equals("literal") ? ObjectTag.literal : ObjectTag.resource, tuple.getString(i));
+			}
+		}
+		this.tuple = new Tuple(subject, predicate, object);
 	}
 	
 	public Tuple getTuple() {
