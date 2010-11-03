@@ -37,7 +37,7 @@ public class ReasonTest extends ProgramEvaluationTest {
 		Collection<String> expressions = new ArrayList<String>();
 
 		// Create facts.
-		File file = new File("/home/valer/Projects/eu.larkc.reasoner/workspace/pariris/iris-impl-distributed/output/humans.txt");
+		File file = new File("/home/valer/Projects/eu.larkc.reasoner/workspace/pariris/iris-impl-distributed/src/test/resources/output/humans.txt");
 		BufferedReader br = null;
 		try {
 			br = new BufferedReader(new FileReader(file));

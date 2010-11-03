@@ -1,34 +1,45 @@
-package eu.larkc.iris.storage.rdf;
+package eu.larkc.iris.storage;
 
 import java.io.IOException;
-import java.net.URL;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.JobConf;
+import org.deri.iris.api.basics.IAtom;
+import org.deri.iris.api.basics.IPredicate;
+import org.deri.iris.api.basics.ITuple;
 
-import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.TapCollector;
 import cascading.tap.hadoop.TapIterator;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
-import eu.larkc.iris.storage.rdf.rdf2go.Rdf2GoConfiguration;
-import eu.larkc.iris.storage.rdf.rdf2go.Rdf2GoConfiguration.RDF2GO_IMPL;
 
-public class RdfTap extends Tap {
+//TODO abstract the data storage implementation
+public class FactsTap extends Tap {
 
 	/**
 	 * serialVersionUID
 	 */
 	private static final long serialVersionUID = -5174403815272616996L;
 
+	/*
 	RDF2GO_IMPL rdf2GoImpl;
 	URL serverURL;
 	String repositoryID;
-	RdfScheme rdfScheme;
-
-	public RdfTap(RDF2GO_IMPL rdf2GoImpl, URL serverURL, String repositoryID, RdfScheme scheme, SinkMode sinkMode) {
+	FactsScheme rdfScheme;
+	*/
+	
+	private IPredicate predicate = null;
+	private ITuple tuple = null;
+	public FactsTap(IAtom atom) {
+		super(new FactsScheme(atom));
+		this.predicate = atom.getPredicate();
+		this.tuple = atom.getTuple();
+	}
+	
+	/*
+	public FactsTap(RDF2GO_IMPL rdf2GoImpl, URL serverURL, String repositoryID, FactsScheme scheme, SinkMode sinkMode) {
 		super(scheme, sinkMode);
 
 		this.rdf2GoImpl = rdf2GoImpl;
@@ -36,16 +47,16 @@ public class RdfTap extends Tap {
 		this.repositoryID = repositoryID;
 		this.rdfScheme = scheme;
 	}
-
+	*/
+	
 	@Override
 	public Path getPath() {
-		return new Path(serverURL.toExternalForm());
+		return new Path(predicate.getPredicateSymbol());
 	}
 
 	@Override
 	public TupleEntryIterator openForRead(JobConf conf) throws IOException {
-		return new TupleEntryIterator(getSourceFields(), new TapIterator(this,
-				conf));
+		return new TupleEntryIterator(getSourceFields(), new TapIterator(this, conf));
 	}
 
 	@Override
@@ -78,32 +89,26 @@ public class RdfTap extends Tap {
 		// a hack for MultiInputFormat to see that there is a child format
 		FileInputFormat.setInputPaths(conf, getPath());
 
-		Rdf2GoConfiguration.configure(conf, rdf2GoImpl, serverURL, repositoryID);
+		//RdfFactsConfiguration.configure(conf, rdf2GoImpl, serverURL, repositoryID);
 
 		super.sourceInit(conf);
 	}
 
 	@Override
-	public void sinkInit(JobConf conf) throws IOException {
+	public void sinkInit(JobConf jobConf) throws IOException {
 		if (!isSink())
 			return;
 
-		Rdf2GoConfiguration.configure(conf, rdf2GoImpl, serverURL, repositoryID);
+		//RdfFactsConfiguration.configure(conf, rdf2GoImpl, serverURL, repositoryID);
 
-		super.sinkInit(conf);
+		super.sinkInit(jobConf);
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("rdf tap:");
-		sb.append(rdf2GoImpl);
-		if (serverURL != null) {
-			sb.append("," + serverURL.toExternalForm());
-		}
-		if (repositoryID != null) {
-			sb.append("," + repositoryID);
-		}
+		sb.append("factstap:");
+		sb.append(predicate.getPredicateSymbol());
 		return sb.toString();
 	}
 

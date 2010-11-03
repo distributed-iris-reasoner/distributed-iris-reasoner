@@ -27,7 +27,7 @@
  * limitations under the License.
  */
 
-package eu.larkc.iris.storage.rdf.rdf2go;
+package eu.larkc.iris.storage.rdf;
 
 import java.io.IOException;
 
@@ -35,51 +35,29 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.RecordWriter;
-import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.util.Progressable;
 import org.ontoware.rdf2go.model.Model;
+
+import eu.larkc.iris.storage.AtomRecord;
+import eu.larkc.iris.storage.FactsOutputFormat;
 
 /**
  * A OutputFormat that sends the reduce output to a SQL table.
  * <p/>
- * {@link Rdf2GoOutputFormat} accepts &lt;key,value&gt; pairs, where key has a
+ * {@link RdfOutputFormat} accepts &lt;key,value&gt; pairs, where key has a
  * type extending DBWritable. Returned {@link RecordWriter} writes <b>only the
  * key</b> to the database with a batch SQL query.
  */
-public class Rdf2GoOutputFormat<K extends Rdf2GoWritable, V> implements
-		OutputFormat<K, V> {
-	private static final Log LOG = LogFactory.getLog(Rdf2GoOutputFormat.class);
-
-	/** A RecordWriter that writes the reduce output to a SQL table */
-	protected class Rdf2GoRecordWriter implements RecordWriter<K, V> {
-		private Model model;
-
-		protected Rdf2GoRecordWriter(Model model) {
-			this.model = model;
-		}
-
-		/** {@inheritDoc} */
-		public void close(Reporter reporter) throws IOException {
-		}
-
-		/** {@inheritDoc} */
-		public synchronized void write(K key, V value) throws IOException {
-			key.write(this.model);
-		}
-	}
+public class RdfOutputFormat<K extends AtomRecord, V> extends FactsOutputFormat<K, V> {
+	private static final Log LOG = LogFactory.getLog(RdfOutputFormat.class);
 
 	/** {@inheritDoc} */
-	public void checkOutputSpecs(FileSystem filesystem, JobConf job)
-			throws IOException {
-	}
-
-	/** {@inheritDoc} */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public RecordWriter<K, V> getRecordWriter(FileSystem filesystem,
 			JobConf job, String name, Progressable progress) throws IOException {
-		Model model = Rdf2GoConfiguration.getModel(job);
-		return new Rdf2GoRecordWriter(model);
+		Model model = RdfFactsConfiguration.getModel(job);
+		return new RdfRecordWriter(model);
 	}
 
 }

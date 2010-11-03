@@ -67,11 +67,6 @@
 			<version>1.5.10</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.jgrapht</groupId>
-			<artifactId>jgrapht-jdk1.5</artifactId>
-			<version>0.7.3</version>
-		</dependency>
 
 		<dependency>
 			<groupId>commons-httpclient</groupId>
@@ -181,6 +176,14 @@
 		</dependency>		
 
 		<dependency>
+    		<groupId>hadoop-mapred-test</groupId>
+    		<artifactId>hadoop-mapred-test</artifactId>
+    		<type>jar</type>
+    		<version>0.21.0</version>
+    		<scope>compile</scope>
+		</dependency>		
+
+		<dependency>
     		<groupId>hadoop-hdfs</groupId>
     		<artifactId>hadoop-hdfs</artifactId>
     		<version>0.21.0</version>
@@ -195,6 +198,31 @@
     		<type>jar</type>
     		<scope>compile</scope>    	
     		<classifier>sources</classifier>
+		</dependency>		
+
+		<dependency>
+    		<groupId>hadoop-hdfs-test</groupId>
+    		<artifactId>hadoop-hdfs-test</artifactId>
+    		<version>0.21.0</version>
+    		<type>jar</type>
+    		<scope>compile</scope>    		
+		</dependency>		
+
+		<dependency>
+    		<groupId>hadoop-hdfs-test</groupId>
+    		<artifactId>hadoop-hdfs-test</artifactId>
+    		<version>0.21.0</version>
+    		<type>jar</type>
+    		<scope>compile</scope>    	
+    		<classifier>sources</classifier>
+		</dependency>		
+
+		<dependency>
+    		<groupId>hadoop-common-test</groupId>
+    		<artifactId>hadoop-common-test</artifactId>
+    		<version>0.21.0</version>
+    		<type>jar</type>
+    		<scope>compile</scope>    		
 		</dependency>		
 		
 		<dependency>
@@ -231,6 +259,21 @@
 			<artifactId>sesame-runtime-osgi</artifactId>
 			<version>2.3.1</version>
 			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jgrapht</groupId>
+			<artifactId>jgrapht-jdk1.5</artifactId>
+			<version>0.7.3</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jgrapht</groupId>
+			<artifactId>jgrapht-jdk1.5</artifactId>
+			<version>0.7.3</version>
+			<type>jar</type>
+			<classifier>sources</classifier>
 			<scope>compile</scope>
 		</dependency>
   </dependencies>
