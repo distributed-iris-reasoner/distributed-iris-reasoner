@@ -22,6 +22,8 @@
  */
 package org.deri.iris.api.terms;
 
+import java.io.Serializable;
+
 /**
  * <p>
  * An interface which defines a term. A term is a name for an object
@@ -44,7 +46,7 @@ package org.deri.iris.api.terms;
  * @author Richard Pöttler (richard dot poettler at deri dot at)
  */
 
-public interface ITerm extends Comparable<ITerm>{
+public interface ITerm extends Comparable<ITerm>, Serializable {
 
 	/**
 	 * Checks whether the term is ground (a term with no variables).

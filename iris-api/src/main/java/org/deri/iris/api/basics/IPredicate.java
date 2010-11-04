@@ -22,6 +22,8 @@
  */
 package org.deri.iris.api.basics;
 
+import java.io.Serializable;
+
 /**
  * <p>
  * A predicate is either a relation or the boolean-valued function that amounts
@@ -40,7 +42,7 @@ package org.deri.iris.api.basics;
  * @version $Revision: 1.7 $
  */
 
-public interface IPredicate extends Comparable<IPredicate> {
+public interface IPredicate extends Comparable<IPredicate>, Serializable {
 	/**
 	 * <p>
 	 * Returns the predicate symbol. <p/>

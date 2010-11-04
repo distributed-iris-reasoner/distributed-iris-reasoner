@@ -22,6 +22,7 @@
  */
 package org.deri.iris.api.basics;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -43,7 +44,7 @@ import org.deri.iris.api.terms.IVariable;
  * @version $Revision: 1.14 $
  */
 
-public interface ITuple extends List<ITerm>, Comparable<ITuple> {
+public interface ITuple extends List<ITerm>, Comparable<ITuple>, Serializable {
 
 	/**
 	 * Checks whether this tuple contains only ground terms.

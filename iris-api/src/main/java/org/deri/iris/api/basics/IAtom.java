@@ -22,6 +22,8 @@
  */
 package org.deri.iris.api.basics;
 
+import java.io.Serializable;
+
 /**
  * <p>
  * An atom (an atomic formula) is a formula that has no subformulas. Atom
@@ -41,7 +43,7 @@ package org.deri.iris.api.basics;
  * @author Richard Pöttler, richard dot poettler at deri dot org
  * @version $Revision: 1.6 $
  */
-public interface IAtom extends Comparable<IAtom> {
+public interface IAtom extends Comparable<IAtom>, Serializable {
 
 	/**
 	 * <p>
