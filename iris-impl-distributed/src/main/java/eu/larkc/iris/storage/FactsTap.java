@@ -1,3 +1,19 @@
+/*
+ * Copyright 2010 Softgress - http://www.softgress.com/
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package eu.larkc.iris.storage;
 
 import java.io.IOException;
@@ -6,8 +22,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.deri.iris.api.basics.IAtom;
-import org.deri.iris.api.basics.IPredicate;
-import org.deri.iris.api.basics.ITuple;
 
 import cascading.tap.Tap;
 import cascading.tap.hadoop.TapCollector;
@@ -15,43 +29,44 @@ import cascading.tap.hadoop.TapIterator;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 
-//TODO abstract the data storage implementation
+/**
+ * Cascading tap for accesing/writing iris style atoms from different datasources
+ * 
+ * @history
+ * @author valer
+ *
+ */
 public class FactsTap extends Tap {
-
+	
 	/**
 	 * serialVersionUID
 	 */
 	private static final long serialVersionUID = -5174403815272616996L;
-
-	/*
-	RDF2GO_IMPL rdf2GoImpl;
-	URL serverURL;
-	String repositoryID;
-	FactsScheme rdfScheme;
-	*/
 	
-	private IPredicate predicate = null;
-	private ITuple tuple = null;
-	public FactsTap(IAtom atom) {
+	private String factsConfigurationClass = null;
+	private IAtom atom = null;
+	private String storageId;
+	
+	FactsTap(String factsConfigurationClass, String storageId, IAtom atom) {
 		super(new FactsScheme(atom));
-		this.predicate = atom.getPredicate();
-		this.tuple = atom.getTuple();
+		this.factsConfigurationClass = factsConfigurationClass;
+		this.atom = atom;
+		this.storageId = storageId;
 	}
-	
-	/*
-	public FactsTap(RDF2GO_IMPL rdf2GoImpl, URL serverURL, String repositoryID, FactsScheme scheme, SinkMode sinkMode) {
-		super(scheme, sinkMode);
 
-		this.rdf2GoImpl = rdf2GoImpl;
-		this.serverURL = serverURL;
-		this.repositoryID = repositoryID;
-		this.rdfScheme = scheme;
+	FactsTap(String factsConfigurationClass, String storageId) {
+		super(new FactsScheme());
+		this.factsConfigurationClass = factsConfigurationClass;
+		this.storageId = storageId;
 	}
-	*/
-	
+
 	@Override
 	public Path getPath() {
-		return new Path(predicate.getPredicateSymbol());
+		if (atom != null) {
+			return new Path(storageId + "/" + atom.getPredicate().getPredicateSymbol());
+		} else {
+			return new Path(storageId);
+		}
 	}
 
 	@Override
@@ -85,19 +100,29 @@ public class FactsTap extends Tap {
 	}
 
 	@Override
-	public void sourceInit(JobConf conf) throws IOException {
+	public void sourceInit(JobConf jobConf) throws IOException {
 		// a hack for MultiInputFormat to see that there is a child format
-		FileInputFormat.setInputPaths(conf, getPath());
+		FileInputFormat.setInputPaths(jobConf, getPath());
 
+		jobConf.set(IFactsConfiguration.FACTS_CONFIGURATION_CLASS, factsConfigurationClass);
+		
+		IFactsConfiguration factsConfiguration = FactsConfigurationFactory.getFactsConfiguration(jobConf);
+		factsConfiguration.setStorageId(jobConf, storageId);
+		
 		//RdfFactsConfiguration.configure(conf, rdf2GoImpl, serverURL, repositoryID);
 
-		super.sourceInit(conf);
+		super.sourceInit(jobConf);
 	}
 
 	@Override
 	public void sinkInit(JobConf jobConf) throws IOException {
 		if (!isSink())
 			return;
+
+		jobConf.set(IFactsConfiguration.FACTS_CONFIGURATION_CLASS, factsConfigurationClass);
+		
+		IFactsConfiguration factsConfiguration = FactsConfigurationFactory.getFactsConfiguration(jobConf);
+		factsConfiguration.setStorageId(jobConf, storageId);
 
 		//RdfFactsConfiguration.configure(conf, rdf2GoImpl, serverURL, repositoryID);
 
@@ -107,8 +132,12 @@ public class FactsTap extends Tap {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("factstap:");
-		sb.append(predicate.getPredicateSymbol());
+		sb.append("facts[");
+		sb.append((storageId == null ? "" : ("store:" + storageId)));
+		if (atom != null) {
+			sb.append(", " + "predicate:" + atom.getPredicate().getPredicateSymbol());
+		}
+		sb.append("]");
 		return sb.toString();
 	}
 

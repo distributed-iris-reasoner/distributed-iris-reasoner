@@ -1,3 +1,19 @@
+/*
+ * Copyright 2010 Softgress - http://www.softgress.com/
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package eu.larkc.iris.storage;
 
 import java.io.IOException;
@@ -9,6 +25,7 @@ import org.deri.iris.api.basics.ITuple;
 
 import cascading.scheme.Scheme;
 import cascading.tap.Tap;
+import cascading.tap.TapException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -29,17 +46,15 @@ public class FactsScheme extends Scheme {
 	 */
 	private static final long serialVersionUID = 3622684910621818754L;
 
-	private IFactsConfiguration factsConfiguration;
+	private IAtom atom = null;
 	
-	public IFactsConfiguration getFactsConfiguration(JobConf jobConf) {
-		if (factsConfiguration == null) {
-			factsConfiguration = FactsConfigurationFactory.createFactsConfiguration();
-			factsConfiguration.configureInput(jobConf);
-		}
-		return factsConfiguration;
+	IFactsConfiguration factsConfiguration = null;
+	
+	public FactsScheme() {	
 	}
 	
 	public FactsScheme(IAtom atom) {
+		this.atom = atom;
 		ITuple tuple = atom.getTuple();
 		Fields sourceFields = new Fields();
 		for (int i = 0; i < tuple.size(); i++) {
@@ -52,15 +67,18 @@ public class FactsScheme extends Scheme {
 	}
 	
 	@Override
-	public void sourceInit(Tap tap, JobConf conf) throws IOException {
-		factsConfiguration = FactsConfigurationFactory.createFactsConfiguration();
-		factsConfiguration.configureInput(conf);
+	public void sourceInit(Tap tap, JobConf jobConf) throws IOException {
+		factsConfiguration = FactsConfigurationFactory.getFactsConfiguration(jobConf);
+		factsConfiguration.configureInput(jobConf);
 	}
 
 	@Override
-	public void sinkInit(Tap tap, JobConf conf) throws IOException {
-		factsConfiguration = FactsConfigurationFactory.createFactsConfiguration();
-		factsConfiguration.configureOutput(conf);
+	public void sinkInit(Tap tap, JobConf jobConf) throws IOException {
+	    if( atom != null )
+	        throw new TapException( "cannot sink to this Scheme" );
+
+		factsConfiguration = FactsConfigurationFactory.getFactsConfiguration(jobConf);
+		factsConfiguration.configureOutput(jobConf);
 	}
 
 	@Override
