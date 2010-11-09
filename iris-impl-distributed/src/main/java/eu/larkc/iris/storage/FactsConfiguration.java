@@ -40,15 +40,27 @@ public abstract class FactsConfiguration implements IFactsConfiguration {
 	public FactsConfiguration() {}
 
 	@Override
-	public void setStorageId(JobConf jobConf, String storageId) {
+	public void setSourceStorageId(JobConf jobConf, String storageId) {
 		if (storageId != null) {
-			jobConf.set(IFactsConfiguration.STORAGE_ID_PROPERTY, storageId);
+			jobConf.set(IFactsConfiguration.SOURCE_STORAGE_ID_PROPERTY, storageId);
 		}
 	}
 
 	@Override
-	public String getStorageId(JobConf jobConf) {
-		return jobConf.get(IFactsConfiguration.STORAGE_ID_PROPERTY, "default");
+	public String getSourceStorageId(JobConf jobConf) {
+		return jobConf.get(IFactsConfiguration.SOURCE_STORAGE_ID_PROPERTY, "default");
+	}
+
+	@Override
+	public void setSinkStorageId(JobConf jobConf, String storageId) {
+		if (storageId != null) {
+			jobConf.set(IFactsConfiguration.SINK_STORAGE_ID_PROPERTY, storageId);
+		}
+	}
+
+	@Override
+	public String getSinkStorageId(JobConf jobConf) {
+		return jobConf.get(IFactsConfiguration.SINK_STORAGE_ID_PROPERTY, "default");
 	}
 
 	@Override

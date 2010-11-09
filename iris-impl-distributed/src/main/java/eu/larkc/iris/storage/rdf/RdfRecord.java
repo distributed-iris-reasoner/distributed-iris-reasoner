@@ -45,6 +45,7 @@ public class RdfRecord extends AtomRecord {
 		Literal object = new PlainLiteralImpl(((String) tuple.get(2)).replace("'", ""));
 		Statement statement = model.createStatement(subject, new URIImpl((String) tuple.get(0)), object);
 		model.addStatement(statement);
+		model.commit();
 	}
 
 	@Override

@@ -26,4 +26,6 @@ public interface FactsStorage {
 
 	public IAtom next();
 	
+	public String getPredicateFilter();
+	
 }

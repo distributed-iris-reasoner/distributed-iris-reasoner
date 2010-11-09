@@ -45,7 +45,7 @@ public class RdfOutputFormat<K extends AtomRecord, V> extends FactsOutputFormat<
 	public RecordWriter<K, V> getRecordWriter(FileSystem filesystem,
 			JobConf job, String name, Progressable progress) throws IOException {
 		RdfFactsConfiguration rdfFactsConfiguration = (RdfFactsConfiguration) FactsConfigurationFactory.getFactsConfiguration(job);
-		Model model = rdfFactsConfiguration.getModel(job);
+		Model model = rdfFactsConfiguration.getModel(job, false);
 		return new RdfRecordWriter(model);
 	}
 

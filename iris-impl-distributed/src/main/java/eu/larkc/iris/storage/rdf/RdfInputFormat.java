@@ -37,7 +37,7 @@ public class RdfInputFormat<T extends AtomRecord> extends FactsInputFormat<T> {
 	public InputSplit[] getSplits(JobConf job, int numSplits)
 			throws IOException {
 		RdfFactsConfiguration rdfFactsConfiguration = (RdfFactsConfiguration) FactsConfigurationFactory.getFactsConfiguration(job);
-		return new InputSplit[] { new RdfInputSplit(rdfFactsConfiguration.getModel(job)) };
+		return new InputSplit[] { new RdfInputSplit(rdfFactsConfiguration.getModel(job, true)) };
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })

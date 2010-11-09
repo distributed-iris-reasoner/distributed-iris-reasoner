@@ -85,7 +85,7 @@ public class FactsScheme extends Scheme {
 	public Tuple source(Object key, Object value) {
 		Fields sourceFields = getSourceFields();
 		Tuple tuple = ((AtomRecord) value).getTuple();
-		assert sourceFields.size() == tuple.size();
+		//assert sourceFields.size() == tuple.size();
 		return tuple;
 	}
 

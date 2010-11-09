@@ -38,14 +38,22 @@ public interface IFactsConfiguration extends Serializable {
 
 	public static final String FACTS_CONFIGURATION_CLASS = "facts.configuration.class";
 	
+	public static final String PREDICATE_FILTER = "facts.predicate.filter";
+	
 	/** Class name implementing RdfRepositoryWritable which will hold input tuples */
 	public static final String INPUT_CLASS_PROPERTY = "mapred.facts.input.class";
 
-	public static final String STORAGE_ID_PROPERTY = "mapred.facts.storage.id";
+	public static final String SOURCE_STORAGE_ID_PROPERTY = "mapred.facts.source.storage.id";
 	
-	public void setStorageId(JobConf jobConf, String storageId);
+	public static final String SINK_STORAGE_ID_PROPERTY = "mapred.facts.sink.storage.id";
 	
-	public String getStorageId(JobConf jobConf);
+	public void setSourceStorageId(JobConf jobConf, String storageId);
+	
+	public String getSourceStorageId(JobConf jobConf);
+
+	public void setSinkStorageId(JobConf jobConf, String storageId);
+	
+	public String getSinkStorageId(JobConf jobConf);
 	
 	public void setStorageProperties(Properties properties);
 	

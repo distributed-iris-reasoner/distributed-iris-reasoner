@@ -22,6 +22,7 @@ import org.apache.hadoop.mapred.JobConf;
 import eu.larkc.iris.storage.AtomRecord;
 import eu.larkc.iris.storage.FactsConfigurationFactory;
 import eu.larkc.iris.storage.FactsRecordReader;
+import eu.larkc.iris.storage.IFactsConfiguration;
 
 public class RdfFactsRecordReader<LongWritable, T extends AtomRecord> extends FactsRecordReader<T> {
 	
@@ -30,6 +31,7 @@ public class RdfFactsRecordReader<LongWritable, T extends AtomRecord> extends Fa
 		
 		rdfStorage = new RdfStorage();
 		RdfFactsConfiguration rdfFactsConfiguration = (RdfFactsConfiguration) FactsConfigurationFactory.getFactsConfiguration(job);
-		rdfStorage.setModel(rdfFactsConfiguration.getModel(job));
+		rdfStorage.setModel(rdfFactsConfiguration.getModel(job, true));
+		rdfStorage.setPredicateFilter(job.get(IFactsConfiguration.PREDICATE_FILTER));
 	}
 }

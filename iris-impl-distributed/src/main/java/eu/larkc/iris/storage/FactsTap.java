@@ -24,6 +24,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.deri.iris.api.basics.IAtom;
 
 import cascading.tap.Tap;
+import cascading.tap.TapException;
 import cascading.tap.hadoop.TapCollector;
 import cascading.tap.hadoop.TapIterator;
 import cascading.tuple.TupleEntryCollector;
@@ -100,14 +101,27 @@ public class FactsTap extends Tap {
 	}
 
 	@Override
-	public void sourceInit(JobConf jobConf) throws IOException {
+	public boolean isSink() {
+		return atom == null;
+	}
+
+	@Override
+	public boolean isSource() {
+		return true;
+	}
+
+	@Override
+	public void sourceInit(JobConf jobConf) throws IOException {		
 		// a hack for MultiInputFormat to see that there is a child format
 		FileInputFormat.setInputPaths(jobConf, getPath());
 
 		jobConf.set(IFactsConfiguration.FACTS_CONFIGURATION_CLASS, factsConfigurationClass);
+		if (isSource() && atom != null) {
+			jobConf.set(IFactsConfiguration.PREDICATE_FILTER, atom.getPredicate().getPredicateSymbol());
+		}
 		
 		IFactsConfiguration factsConfiguration = FactsConfigurationFactory.getFactsConfiguration(jobConf);
-		factsConfiguration.setStorageId(jobConf, storageId);
+		factsConfiguration.setSourceStorageId(jobConf, storageId);
 		
 		//RdfFactsConfiguration.configure(conf, rdf2GoImpl, serverURL, repositoryID);
 
@@ -122,7 +136,7 @@ public class FactsTap extends Tap {
 		jobConf.set(IFactsConfiguration.FACTS_CONFIGURATION_CLASS, factsConfigurationClass);
 		
 		IFactsConfiguration factsConfiguration = FactsConfigurationFactory.getFactsConfiguration(jobConf);
-		factsConfiguration.setStorageId(jobConf, storageId);
+		factsConfiguration.setSinkStorageId(jobConf, storageId);
 
 		//RdfFactsConfiguration.configure(conf, rdf2GoImpl, serverURL, repositoryID);
 

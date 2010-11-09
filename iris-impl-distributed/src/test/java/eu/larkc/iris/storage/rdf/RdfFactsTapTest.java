@@ -21,6 +21,7 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
+import org.apache.hadoop.mapred.JobConf;
 import org.deri.iris.api.basics.IAtom;
 import org.deri.iris.api.basics.IPredicate;
 import org.deri.iris.api.basics.ITuple;
@@ -41,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
+import cascading.flow.MultiMapReducePlanner;
 import cascading.operation.Identity;
 import cascading.operation.text.FieldJoiner;
 import cascading.pipe.Each;
@@ -58,11 +60,28 @@ import eu.larkc.iris.storage.FactsTap;
  */
 public class RdfFactsTapTest extends TestCase {
 	
-	private static final Logger logger = LoggerFactory.getLogger(RdfFactsTapTest.class);
+	private static final Logger log = LoggerFactory.getLogger(RdfFactsTapTest.class);
+	
+	transient private static Map<Object, Object> properties = new HashMap<Object, Object>();
+	transient private static JobConf jobConf;
+	
+	int numMapTasks = 4;
+	int numReduceTasks = 1;
+
+	private String logger;
 	
 	public RdfFactsTapTest() {
 		super("Facts Tap Tests");
 
+		this.logger = System.getProperty( "log4j.logger" );
+	}
+
+	public static void main(String[] args) {
+		
+	}
+	
+	public Map<Object, Object> getProperties() {
+		return new HashMap<Object, Object>(properties);
 	}
 
 	private Model createStorage(String storageId) {
@@ -70,7 +89,7 @@ public class RdfFactsTapTest extends TestCase {
 		try {
 			repository.initialize();
 		} catch (RepositoryException e) {
-			logger.error("error initializing repository" ,e);
+			log.error("error initializing repository" ,e);
 			throw new RuntimeException("error initializing repository" ,e);
 		}
 		Model model = new RepositoryModel(repository);
@@ -84,6 +103,22 @@ public class RdfFactsTapTest extends TestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 
+		jobConf = new JobConf();
+
+		jobConf.setNumMapTasks(numMapTasks);
+		jobConf.setNumReduceTasks(numReduceTasks);
+
+		if (log != null)
+			properties.put("log4j.logger", logger);
+
+		Flow.setJobPollingInterval(properties, 500); // should speed up tests
+
+		//jobConf.setJarByClass(FactsTap.class);
+		//properties.put("cascading.flowconnector.appjar.path", "jar.jar");
+		jobConf.setJar("./target/iris-impl-distributed-0.7.2.jar");
+		MultiMapReducePlanner.setJobConf( properties, jobConf );
+		
+		
 		FactsFactory.PROPERTIES = "/facts-configuration-test.properties";
 		
 		FactsConfigurationFactory.STORAGE_PROPERTIES = "/facts-storage-configuration-test.properties";
@@ -93,8 +128,14 @@ public class RdfFactsTapTest extends TestCase {
 		Statement statement = new StatementImpl(new URIImpl("http://larkc.eu/humans"), new URIImpl("http://larkc.eu/humans/person#gerard_butler"), 
 				new URIImpl("http://larkc.eu/humans/name"), new PlainLiteralImpl("Gerard Butler"));
 		model.addStatement(statement);
+
+		statement = new StatementImpl(new URIImpl("http://larkc.eu/humans"), new URIImpl("http://larkc.eu/humans/person#gerard_butler"), 
+				new URIImpl("http://larkc.eu/humans/hasName"), new PlainLiteralImpl("Gerard Butler"));
+		model.addStatement(statement);
+
+		model.commit();
 		
-		model.commit();		
+		createStorage("humans_out");
 	}
 
 	@Override
@@ -135,7 +176,7 @@ public class RdfFactsTapTest extends TestCase {
 		Pipe sourcePipe = new Pipe("source");
 		Pipe identity = new Each(sourcePipe, new Fields("X", "Y", "Z"), new FieldJoiner(new Fields("F"), ";"));
 		
-		Flow aFlow = new FlowConnector().connect(sources, sink, identity);
+		Flow aFlow = new FlowConnector(getProperties()).connect(sources, sink, identity);
 		aFlow.complete();
 		
 		verifySink(aFlow, 1);
@@ -150,7 +191,8 @@ public class RdfFactsTapTest extends TestCase {
 		FactsFactory humansFactsFactory = FactsFactory.getInstance("humans");
 		FactsTap nameFactsTap = humansFactsFactory.getFacts(atom);
 		
-		Tap sink = humansFactsFactory.getFacts();
+		FactsFactory humansOutFactsFactory = FactsFactory.getInstance("humans_out");
+		Tap sink = humansOutFactsFactory.getFacts();
 
 		Map<String, Tap> sources = new HashMap<String, Tap>();
 		sources.put("source", nameFactsTap);
@@ -158,7 +200,7 @@ public class RdfFactsTapTest extends TestCase {
 		Pipe sourcePipe = new Pipe("source");
 		Pipe identity = new Each(sourcePipe, new Fields("X", "Y", "Z"), new Identity(new Fields("X", "Y", "Z")));
 		
-		Flow aFlow = new FlowConnector().connect(sources, sink, identity);
+		Flow aFlow = new FlowConnector(getProperties()).connect(sources, sink, identity);
 		aFlow.complete();
 		
 		verifySink(aFlow, 1);
