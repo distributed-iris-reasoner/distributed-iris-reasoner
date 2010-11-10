@@ -1,7 +1,7 @@
 /**
  * 
  */
-package eu.lark.iris.rules.compiler;
+package eu.larkc.iris.rules.compiler;
 
 import junit.framework.TestCase;
 
