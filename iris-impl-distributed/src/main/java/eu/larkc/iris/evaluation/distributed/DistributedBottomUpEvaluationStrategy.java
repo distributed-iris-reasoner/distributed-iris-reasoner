@@ -89,7 +89,12 @@ public class DistributedBottomUpEvaluationStrategy implements
 		// this requires 1.) Wrapping up e.g. a sparql query in a IQuery implementation, and 2.) accessing the external store hidden behind
 		// an IFacts implementation
 		
-		throw new NotImplementedException("Query answering not yet delegated to external store");		
+		initBottomUpEvaluation(mRules);
+		
+		return null;
+		
+		
+		//throw new NotImplementedException("Query answering not yet delegated to external store");		
 		
 		//TODO: Unwrap query, convert to suitable format, execute over external store, process answers
 		

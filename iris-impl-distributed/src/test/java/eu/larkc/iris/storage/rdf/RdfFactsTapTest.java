@@ -115,7 +115,7 @@ public class RdfFactsTapTest extends TestCase {
 
 		//jobConf.setJarByClass(FactsTap.class);
 		//properties.put("cascading.flowconnector.appjar.path", "jar.jar");
-		jobConf.setJar("./target/iris-impl-distributed-0.7.2.jar");
+		//jobConf.setJar("./target/iris-impl-distributed-0.7.2.jar");
 		MultiMapReducePlanner.setJobConf( properties, jobConf );
 		
 		
@@ -132,7 +132,7 @@ public class RdfFactsTapTest extends TestCase {
 		statement = new StatementImpl(new URIImpl("http://larkc.eu/humans"), new URIImpl("http://larkc.eu/humans/person#gerard_butler"), 
 				new URIImpl("http://larkc.eu/humans/hasName"), new PlainLiteralImpl("Gerard Butler"));
 		model.addStatement(statement);
-
+	
 		model.commit();
 		
 		createStorage("humans_out");
@@ -167,7 +167,7 @@ public class RdfFactsTapTest extends TestCase {
 		FactsFactory humansFactsFactory = FactsFactory.getInstance("humans");
 		FactsTap nameFactsTap = humansFactsFactory.getFacts(atom);
 		
-		String output = "/home/valer/Projects/eu.larkc.reasoner/workspace/pariris/iris-impl-distributed/build/test/output/";
+		String output = "./build/test/output/";
 		Tap sink = new Hfs( new Fields("F"), output , true );
 
 		Map<String, Tap> sources = new HashMap<String, Tap>();

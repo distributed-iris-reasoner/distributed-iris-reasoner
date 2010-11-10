@@ -31,6 +31,7 @@ import org.openrdf.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.larkc.iris.evaluation.distributed.ProgramEvaluationTest;
 import eu.larkc.iris.storage.FactsConfigurationFactory;
 import eu.larkc.iris.storage.FactsFactory;
 import eu.larkc.iris.storage.rdf.RdfFactsConfiguration;
@@ -41,7 +42,7 @@ import eu.larkc.iris.storage.rdf.RdfFactsConfiguration;
  * @history Nov 09, 2010, vroman, implement a first version
  * @author Florian Fischer
  */
-public class InitAndStartupTest extends org.deri.iris.evaluation.ProgramEvaluationTest {
+public class InitAndStartupTest extends ProgramEvaluationTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(InitAndStartupTest.class);
 
@@ -71,7 +72,7 @@ public class InitAndStartupTest extends org.deri.iris.evaluation.ProgramEvaluati
 	}
 
 	@Override
-	protected void createFacts() {
+	protected  void createFacts() {
 		FactsFactory.PROPERTIES = "/facts-configuration-test.properties";
 		
 		FactsConfigurationFactory.STORAGE_PROPERTIES = "/facts-storage-configuration-test.properties";
@@ -87,7 +88,7 @@ public class InitAndStartupTest extends org.deri.iris.evaluation.ProgramEvaluati
 		statement = new StatementImpl(null, new URIImpl("http://larkc.eu/1"), 
 				new URIImpl("http://larkc.eu/s"), new URIImpl("http://larkc.eu/3"));
 		model.addStatement(statement);
-		
+				
 		model.commit();
 	}
 
