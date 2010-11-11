@@ -1,3 +1,33 @@
+FACTS TAP - HOW IT WORKS
+========================
+
+The facts tap is designed to connect to different storages and provide data to be used by a flow running a map/reduce algorithm on Hadoop.
+
+Facts tap can behave as sources and also as sinks. When used as a source, the tap is created based on an input atom. 
+The atom is an interface derived from Iris, and actually it is a literal of a rule. 
+
+Fact taps are created using a factory eu.larkc.iris.storage.FactsFactory
+A factory is created for a storage and all the taps created with that factory are using that storage
+
+The facts tap are configured through two property files :
+- facts-configuration.properties
+- facts-storage-configuration.properties
+
+facts-configuration.properties
+------------------------------
+Here, one can define which class is used to configure the facts tap.
+The configuration class is used to tell cascading which classes to use when reading and writing data to storages.
+e.g.
+facts.configuration.class=eu.larkc.iris.storage.rdf.RdfFactsConfiguration
+
+facts-storage-configuration.properties
+--------------------------------------
+Contains the storages which can be used to create facts factories.
+Here is an example of a storage :
+
+humans.rdf2go.adapter=SESAME
+humans.repository.type=MEMORY
+
 
 Run tests
 =========
