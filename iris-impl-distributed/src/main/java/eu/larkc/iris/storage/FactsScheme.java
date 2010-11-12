@@ -18,6 +18,8 @@ package eu.larkc.iris.storage;
 
 import java.io.IOException;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.deri.iris.api.basics.IAtom;
@@ -31,14 +33,14 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 /**
- * Scheme used with a facts tap
- * the source fields are the variable names of the atom's tuple
+ * Scheme used with a facts tap the source fields are the variable names of the
+ * atom's tuple
  * 
  * @history 03.11.2010, creation
  * @author Valer Roman
- *
+ * 
  */
-//TODO separate the implementation specific for rdf storages
+// TODO separate the implementation specific for rdf storages
 public class FactsScheme extends Scheme {
 
 	/**
@@ -47,37 +49,63 @@ public class FactsScheme extends Scheme {
 	private static final long serialVersionUID = 3622684910621818754L;
 
 	private IAtom atom = null;
-	
+
 	IFactsConfiguration factsConfiguration = null;
-	
-	public FactsScheme() {	
+
+	public FactsScheme() {
 	}
-	
+
 	public FactsScheme(IAtom atom) {
 		this.atom = atom;
 		ITuple tuple = atom.getTuple();
 		Fields sourceFields = new Fields();
 		for (int i = 0; i < tuple.size(); i++) {
 			Object value = tuple.get(i).getValue();
-			//TODO check which types can the value have. also decide what field name should we give for constants
+			// TODO check which types can the value have. also decide what field
+			// name should we give for constants
 			sourceFields = sourceFields.append(new Fields((String) value));
 		}
 		setSourceFields(sourceFields);
-		setSinkFields(sourceFields); //TODO the sink fields I guess will be the variables of the head of the rule
+		setSinkFields(sourceFields); // TODO the sink fields I guess will be the
+										// variables of the head of the rule
 	}
-	
+
+//
+//	@Override
+//	public boolean equals(Object obj) {
+//		if (obj == null) {
+//			return false;
+//		}
+//		if (obj == this) {
+//			return true;
+//		}
+//		if (obj.getClass() != getClass()) {
+//			return false;
+//		}
+//		FactsScheme rhs = (FactsScheme) obj;
+//		return new EqualsBuilder().appendSuper(super.equals(obj)).append(
+//				atom, rhs.atom).isEquals();
+//	}
+//
+//	@Override
+//	public int hashCode() {
+//		return new HashCodeBuilder().appendSuper(super.hashCode()).append(atom.hashCode()).toHashCode();	
+//	}
+
 	@Override
 	public void sourceInit(Tap tap, JobConf jobConf) throws IOException {
-		factsConfiguration = FactsConfigurationFactory.getFactsConfiguration(jobConf);
+		factsConfiguration = FactsConfigurationFactory
+				.getFactsConfiguration(jobConf);
 		factsConfiguration.configureInput(jobConf);
 	}
 
 	@Override
 	public void sinkInit(Tap tap, JobConf jobConf) throws IOException {
-	    if( atom != null )
-	        throw new TapException( "cannot sink to this Scheme" );
+		if (atom != null)
+			throw new TapException("cannot sink to this Scheme");
 
-		factsConfiguration = FactsConfigurationFactory.getFactsConfiguration(jobConf);
+		factsConfiguration = FactsConfigurationFactory
+				.getFactsConfiguration(jobConf);
 		factsConfiguration.configureOutput(jobConf);
 	}
 
@@ -85,7 +113,7 @@ public class FactsScheme extends Scheme {
 	public Tuple source(Object key, Object value) {
 		Fields sourceFields = getSourceFields();
 		Tuple tuple = ((AtomRecord) value).getTuple();
-		//assert sourceFields.size() == tuple.size();
+		// assert sourceFields.size() == tuple.size();
 		return tuple;
 	}
 
@@ -94,7 +122,8 @@ public class FactsScheme extends Scheme {
 			throws IOException {
 		Tuple result = tupleEntry.selectTuple(getSinkFields());
 		assert factsConfiguration != null;
-		outputCollector.collect(factsConfiguration.newRecordInstance(result), null);
+		outputCollector.collect(factsConfiguration.newRecordInstance(result),
+				null);
 	}
 
 }

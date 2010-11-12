@@ -6,9 +6,11 @@ package eu.larkc.iris.rules.compiler;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.deri.iris.Configuration;
@@ -25,14 +27,17 @@ import org.deri.iris.api.terms.IVariable;
 import org.deri.iris.facts.IFacts;
 import org.deri.iris.rules.compiler.ICompiledRule;
 import org.deri.iris.rules.compiler.IRuleCompiler;
+import org.deri.iris.rules.compiler.Utils;
 import org.deri.iris.storage.IRelation;
 import org.deri.iris.utils.TermMatchingAndSubstitution;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.operation.Identity;
+import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
+import cascading.pipe.cogroup.InnerJoin;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
 import cascading.tap.Tap;
@@ -75,12 +80,16 @@ public class CascadingRuleCompiler implements IRuleCompiler {
 
 		List<ILiteral> body = rule.getBody();
 		Pipe bodyPipe = compileBody(body);
-		
-		//TODO: here we could filter/do projection for the rule head. this is not too important for now
-		//for that purpose we need 1.) take a look at the variables in the head, 2.) determine the indices they have after the body has been compiled
-		//for now (debugging, testing) we return the complete result
-		//bodyPipe = new Each( bodyPipe, new Fields(1, 2, 3), new Identity(), Fields.RESULTS );		
-		
+
+		// TODO: here we could filter/do projection for the rule head. this is
+		// not too important for now
+		// for that purpose we need 1.) take a look at the variables in the
+		// head, 2.) determine the indices they have after the body has been
+		// compiled
+		// for now (debugging, testing) we return the complete result
+		// bodyPipe = new Each( bodyPipe, new Fields(1, 2, 3), new Identity(),
+		// Fields.RESULTS );
+
 		Flow compiledCascadingRule = attachTaps(bodyPipe, rule);
 
 		IPredicate headPredicate = rule.getHead().get(0).getAtom()
@@ -119,7 +128,7 @@ public class CascadingRuleCompiler implements IRuleCompiler {
 			assert literal.isPositive() == true : "No negation supported.";
 
 			IAtom atom = literal.getAtom(); // get predicate and tuple
-											// (variables and constants)
+			// (variables and constants)
 			if (atom instanceof IBuiltinAtom) {
 				processBuiltin((IBuiltinAtom) atom);
 			} else {
@@ -141,11 +150,113 @@ public class CascadingRuleCompiler implements IRuleCompiler {
 		}
 
 		result = setupJoins(subGoals);
-	
+
 		return result;
 	}
 
+	/**
+	 * Optimization: When joining two streams via a CoGroup Pipe, attempt to place the largest of the streams 
+	 * in the left most argument to the CoGroup. Joining multiple streams requires some accumulation 
+	 * of values before the join operator can begin, but the left most stream will not be accumulated. 
+	 * This should improve the performance of most joins.
+	 * 
+	 * @param subGoals
+	 * @return
+	 */
 	protected Pipe setupJoins(Map<IAtom, Pipe> subGoals) {
+
+		List<IVariable> previousVariables = null;
+		Pipe previousPipe = null;
+
+		Set<Entry<IAtom, Pipe>> entries = subGoals.entrySet();
+		Iterator<Entry<IAtom, Pipe>> it = entries.iterator();
+		
+		//first element
+		if(it.hasNext()) {
+			Entry<IAtom, Pipe> firstEntry = it.next();
+			IAtom atom = firstEntry.getKey();
+			List<IVariable> variables = TermMatchingAndSubstitution.getVariables(atom.getTuple(), true);
+			previousVariables = variables;
+			previousPipe = firstEntry.getValue();
+		} else {
+			throw new IllegalArgumentException("Cannot setup joins with no subgoals.");
+		}
+		
+		//main loop
+		while(it.hasNext()) {
+			Entry<IAtom, Pipe> entry = it.next();
+			
+			IAtom atom = entry.getKey();
+			Pipe pipe = entry.getValue();
+			List<IVariable> variables = TermMatchingAndSubstitution
+					.getVariables(atom.getTuple(), true);
+
+			// computation of indices, see old IRIS code
+			List<Integer> join1 = new ArrayList<Integer>();
+			List<Integer> join2 = new ArrayList<Integer>();
+
+			for (int i1 = 0; i1 < previousVariables.size(); ++i1) {
+				IVariable var1 = previousVariables.get(i1);
+
+				for (int i2 = 0; i2 < variables.size(); ++i2) {
+					IVariable var2 = variables.get(i2);
+
+					if (var1.equals(var2)) {
+						join1.add(i1);
+						join2.add(i2);
+
+						// variables unique
+						break;
+					}
+				}
+			}
+
+			Integer[] joinIndicesPreviousElement = new Integer[join1.size()];
+			joinIndicesPreviousElement = join1.toArray(joinIndicesPreviousElement);
+			
+			Integer[] joinIndicesThisElement = new Integer[join2.size()];
+			joinIndicesThisElement= join2.toArray(joinIndicesThisElement);
+			
+			//cascading		
+			Fields lhsFields = new Fields(joinIndicesPreviousElement);
+			Fields rhsFields = new Fields(joinIndicesThisElement);
+			Pipe join = new CoGroup( previousPipe, lhsFields, pipe, rhsFields, new InnerJoin() );
+			previousPipe = join;	
+			
+			// Now find the indices of variables that are not used in the
+			// join
+			List<Integer> remainder1 = new ArrayList<Integer>();
+			List<Integer> remainder2 = new ArrayList<Integer>();
+
+			for (int i1 = 0; i1 < previousVariables.size(); ++i1) {
+				if (!join1.contains(i1))
+					remainder1.add(i1);
+			}
+
+			for (int i2 = 0; i2 < variables.size(); ++i2) {
+				if (!join2.contains(i2))
+					remainder2.add(i2);
+			}
+
+			int[] remainderIndicesPreviousElement = Utils
+					.integerListToArray(remainder1);
+			int[] remainderIndicesThisElement = Utils
+					.integerListToArray(remainder2);
+
+			// Lastly, build the list of output variables
+			ArrayList<IVariable> newPreviousVariables = new ArrayList<IVariable>();
+
+			for (int i : joinIndicesPreviousElement)
+				newPreviousVariables.add(previousVariables.get(i));
+			for (int i : remainderIndicesPreviousElement)
+				newPreviousVariables.add(previousVariables.get(i));
+			for (int i : remainderIndicesThisElement)
+				newPreviousVariables.add(variables.get(i));		
+			
+			previousVariables = newPreviousVariables;
+		}
+		
+
 		// iterate over all subgoals
 		// for each subgoal keep track of its output variables
 		// for each subgoal after the first one, inspect all previous variables
@@ -153,8 +264,8 @@ public class CascadingRuleCompiler implements IRuleCompiler {
 		// construct CoGroup
 		// rename fields if required
 
-		//TODO: fix index computation
-		return null;
+		// TODO: fix index computation
+		return previousPipe;
 	}
 
 	/**
@@ -254,9 +365,8 @@ public class CascadingRuleCompiler implements IRuleCompiler {
 
 		IAtom headAtom = head.get(0).getAtom();
 		Tap headSink = mFacts.getFacts(headAtom);
+		//Tap headSink = mFacts.getFacts();
 		
-		//Rule 
-
 		// matching is done by names, we use the original rule's string as
 		// identifier for the flow, the head/last operation is the tail of the
 		// assembly
