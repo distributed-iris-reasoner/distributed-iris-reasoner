@@ -70,27 +70,35 @@ public class FactsScheme extends Scheme {
 										// variables of the head of the rule
 	}
 
-//
-//	@Override
-//	public boolean equals(Object obj) {
-//		if (obj == null) {
-//			return false;
-//		}
-//		if (obj == this) {
-//			return true;
-//		}
-//		if (obj.getClass() != getClass()) {
-//			return false;
-//		}
-//		FactsScheme rhs = (FactsScheme) obj;
-//		return new EqualsBuilder().appendSuper(super.equals(obj)).append(
-//				atom, rhs.atom).isEquals();
-//	}
-//
-//	@Override
-//	public int hashCode() {
-//		return new HashCodeBuilder().appendSuper(super.hashCode()).append(atom.hashCode()).toHashCode();	
-//	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (obj == this) {
+			return true;
+		}
+		if (obj.getClass() != getClass()) {
+			return false;
+		}
+		if (atom != null) {
+			FactsScheme rhs = (FactsScheme) obj;
+			return new EqualsBuilder().appendSuper(super.equals(obj)).append(
+					atom, rhs.atom).isEquals();
+		} else {
+			return super.equals(obj);
+		}
+	}
+
+	@Override
+	public int hashCode() {
+		if (atom != null) {
+			return new HashCodeBuilder().appendSuper(super.hashCode()).append(atom.hashCode()).toHashCode();
+		} else {
+			return super.hashCode();
+		}
+	}
 
 	@Override
 	public void sourceInit(Tap tap, JobConf jobConf) throws IOException {
