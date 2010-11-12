@@ -364,8 +364,8 @@ public class CascadingRuleCompiler implements IRuleCompiler {
 		}
 
 		IAtom headAtom = head.get(0).getAtom();
-		Tap headSink = mFacts.getFacts(headAtom);
-		//Tap headSink = mFacts.getFacts();
+		//Tap headSink = mFacts.getFacts(headAtom);
+		Tap headSink = mFacts.getFacts();
 		
 		// matching is done by names, we use the original rule's string as
 		// identifier for the flow, the head/last operation is the tail of the
