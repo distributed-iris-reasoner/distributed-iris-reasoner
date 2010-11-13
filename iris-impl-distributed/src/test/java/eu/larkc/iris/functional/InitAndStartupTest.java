@@ -97,8 +97,9 @@ public class InitAndStartupTest extends ProgramEvaluationTest {
 		Collection<String> expressions = new ArrayList<String>();
 
 		// Create rules.
-		expressions
-				.add("p( ?X, ?Y ) :- q( ?X, ?Y ), r( ?Y, ?Z ), s( ?X, ?Z ).");
+		expressions.add("p( ?X, ?Y ) :- q( ?X, ?Y ), r( ?Y, ?Z ).");
+		//later arbitrary joins
+		//expressions.add("p( ?X, ?Y ) :- q( ?X, ?Y ), r( ?Y, ?Z ), s( ?X, ?Z ).");
 
 		return expressions;
 	}

@@ -65,7 +65,8 @@ public class FactsTap extends Tap {
 	public Path getPath() {
 		if (atom != null) {
 			return new Path(storageId + "/" + atom.getPredicate().getPredicateSymbol());
-		} else {
+		} 		
+		else {
 			return new Path(storageId);
 		}
 	}
@@ -102,7 +103,8 @@ public class FactsTap extends Tap {
 
 	@Override
 	public boolean isSink() {
-		return atom == null;
+		//return atom == null;
+		return true;
 	}
 
 	@Override

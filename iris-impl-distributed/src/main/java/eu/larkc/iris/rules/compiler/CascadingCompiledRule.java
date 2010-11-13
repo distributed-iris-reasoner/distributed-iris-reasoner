@@ -40,7 +40,10 @@ public class CascadingCompiledRule implements ICompiledRule {
 	@Override
 	public IRelation evaluate() throws EvaluationException {
 		
-		//start returns immediately
+		//start returns immediately		
+		if(mFlow == null) {
+			throw new IllegalArgumentException("Flow must not be null");
+		}
 		mFlow.start();
 		
 		//TODO: jobconf is constructed within the rule compiler right now, which is likely not the right place.
