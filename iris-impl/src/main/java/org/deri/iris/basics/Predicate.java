@@ -57,7 +57,7 @@ public class Predicate implements IPredicate {
 	}
 
 	public String getPredicateSymbol() {
-		return symbol;
+		return "http://larkc.eu/" + symbol;
 	}
 
 	public int getArity() {
