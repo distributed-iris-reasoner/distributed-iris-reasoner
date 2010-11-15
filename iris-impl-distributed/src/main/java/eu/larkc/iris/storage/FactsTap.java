@@ -24,7 +24,6 @@ import org.apache.hadoop.mapred.JobConf;
 import org.deri.iris.api.basics.IAtom;
 
 import cascading.tap.Tap;
-import cascading.tap.TapException;
 import cascading.tap.hadoop.TapCollector;
 import cascading.tap.hadoop.TapIterator;
 import cascading.tuple.TupleEntryCollector;
@@ -49,7 +48,11 @@ public class FactsTap extends Tap {
 	private String storageId;
 	
 	FactsTap(String factsConfigurationClass, String storageId, IAtom atom) {
-		super(new FactsScheme(atom));
+		this(factsConfigurationClass, storageId, null, atom);
+	}
+	
+	FactsTap(String factsConfigurationClass, String storageId, FieldsVariablesMapping fieldsVariablesMapping, IAtom atom) {
+		super(new FactsScheme(fieldsVariablesMapping, atom));
 		this.factsConfigurationClass = factsConfigurationClass;
 		this.atom = atom;
 		this.storageId = storageId;

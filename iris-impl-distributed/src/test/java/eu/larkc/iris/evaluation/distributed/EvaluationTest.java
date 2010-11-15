@@ -55,6 +55,8 @@ public abstract class EvaluationTest extends TestCase {
 		defaultConfiguration = new Configuration();
 		defaultConfiguration.evaluationStrategyFactory = new DistributedBottomUpEvaluationStrategyFactory(new NaiveEvaluatorFactory());
 		
+		createFacts();
+		
 		// Create the rules.
 		rules = createRules();
 

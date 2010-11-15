@@ -24,6 +24,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.deri.iris.api.basics.IAtom;
 import org.deri.iris.api.basics.ITuple;
+import org.deri.iris.api.terms.IVariable;
 
 import cascading.scheme.Scheme;
 import cascading.tap.Tap;
@@ -49,24 +50,30 @@ public class FactsScheme extends Scheme {
 	private static final long serialVersionUID = 3622684910621818754L;
 
 	private IAtom atom = null;
-
+	
 	IFactsConfiguration factsConfiguration = null;
 
 	public FactsScheme() {
 	}
 
-	public FactsScheme(IAtom atom) {
+	public FactsScheme(FieldsVariablesMapping fieldsVariablesMapping, IAtom atom) {
 		this.atom = atom;
 		ITuple tuple = atom.getTuple();
 		Fields sourceFields = new Fields();
-		for (int i = 0; i < tuple.size(); i++) {
-			Object value = tuple.get(i).getValue();
+		sourceFields = sourceFields.append(new Fields((String) atom.getPredicate().getPredicateSymbol()));
+		for (IVariable variable : tuple.getAllVariables()) {
+			String field = null;
+			if (fieldsVariablesMapping != null) {
+				field = fieldsVariablesMapping.getField(atom, variable);
+			} else {
+				field = variable.getValue();
+			}
 			// TODO check which types can the value have. also decide what field
 			// name should we give for constants
-			sourceFields = sourceFields.append(new Fields((String) value));
+			sourceFields = sourceFields.append(new Fields(field));
 		}
 		setSourceFields(sourceFields);
-		setSinkFields(sourceFields); // TODO the sink fields I guess will be the
+		//setSinkFields(sourceFields); // TODO the sink fields I guess will be the
 										// variables of the head of the rule
 	}
 

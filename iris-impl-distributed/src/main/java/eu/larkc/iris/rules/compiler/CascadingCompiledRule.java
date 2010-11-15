@@ -44,7 +44,7 @@ public class CascadingCompiledRule implements ICompiledRule {
 		if(mFlow == null) {
 			throw new IllegalArgumentException("Flow must not be null");
 		}
-		mFlow.start();
+		mFlow.complete();
 		
 		//TODO: jobconf is constructed within the rule compiler right now, which is likely not the right place.
 		//this should either happen here or in a custom evaluator implementation		

@@ -54,6 +54,7 @@ import cascading.tuple.TupleEntryIterator;
 import eu.larkc.iris.storage.FactsConfigurationFactory;
 import eu.larkc.iris.storage.FactsFactory;
 import eu.larkc.iris.storage.FactsTap;
+import eu.larkc.iris.storage.FieldsVariablesMapping;
 
 /**
  * Tests for The Facts Tap
@@ -118,7 +119,6 @@ public class RdfFactsTapTest extends TestCase {
 		//jobConf.setJar("./target/iris-impl-distributed-0.7.2.jar");
 		MultiMapReducePlanner.setJobConf( properties, jobConf );
 		
-		
 		FactsFactory.PROPERTIES = "/facts-configuration-test.properties";
 		
 		FactsConfigurationFactory.STORAGE_PROPERTIES = "/facts-storage-configuration-test.properties";
@@ -159,9 +159,9 @@ public class RdfFactsTapTest extends TestCase {
 	}
 
 	public void testSource() throws IOException {
-		IPredicate predicate = BasicFactory.getInstance().createPredicate("http://larkc.eu/humans/name", 3);
+		IPredicate predicate = BasicFactory.getInstance().createPredicate("humans/name", 2);
 		ITuple tuple = BasicFactory.getInstance().createTuple(TermFactory.getInstance().createVariable("X"), 
-				TermFactory.getInstance().createVariable("Y"), TermFactory.getInstance().createVariable("Z"));
+				TermFactory.getInstance().createVariable("Y"));
 		IAtom atom = BasicFactory.getInstance().createAtom(predicate, tuple);
 		
 		FactsFactory humansFactsFactory = FactsFactory.getInstance("humans");
@@ -174,7 +174,7 @@ public class RdfFactsTapTest extends TestCase {
 		sources.put("source", nameFactsTap);
 
 		Pipe sourcePipe = new Pipe("source");
-		Pipe identity = new Each(sourcePipe, new Fields("X", "Y", "Z"), new FieldJoiner(new Fields("F"), ";"));
+		Pipe identity = new Each(sourcePipe, new Fields("http://larkc.eu/humans/name", "X", "Y"), new FieldJoiner(new Fields("F"), ";"));
 		
 		Flow aFlow = new FlowConnector(getProperties()).connect(sources, sink, identity);
 		aFlow.complete();
@@ -183,9 +183,9 @@ public class RdfFactsTapTest extends TestCase {
 	}
 
 	public void testSink() throws IOException {
-		IPredicate predicate = BasicFactory.getInstance().createPredicate("http://larkc.eu/humans/name", 3);
+		IPredicate predicate = BasicFactory.getInstance().createPredicate("humans/name", 2);
 		ITuple tuple = BasicFactory.getInstance().createTuple(TermFactory.getInstance().createVariable("X"), 
-				TermFactory.getInstance().createVariable("Y"), TermFactory.getInstance().createVariable("Z"));
+				TermFactory.getInstance().createVariable("Y"));
 		IAtom atom = BasicFactory.getInstance().createAtom(predicate, tuple);
 		
 		FactsFactory humansFactsFactory = FactsFactory.getInstance("humans");
@@ -198,7 +198,7 @@ public class RdfFactsTapTest extends TestCase {
 		sources.put("source", nameFactsTap);
 
 		Pipe sourcePipe = new Pipe("source");
-		Pipe identity = new Each(sourcePipe, new Fields("X", "Y", "Z"), new Identity(new Fields("X", "Y", "Z")));
+		Pipe identity = new Each(sourcePipe, new Fields("http://larkc.eu/humans/name", "X", "Y"), new Identity(new Fields("http://larkc.eu/humans/name", "X", "Y")));
 		
 		Flow aFlow = new FlowConnector(getProperties()).connect(sources, sink, identity);
 		aFlow.complete();

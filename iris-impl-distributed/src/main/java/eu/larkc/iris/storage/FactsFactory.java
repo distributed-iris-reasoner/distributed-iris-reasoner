@@ -69,8 +69,12 @@ public class FactsFactory {
 	}
 	
 	public FactsTap getFacts(IAtom atom) {
+		return getFacts(null, atom);
+	}
+	
+	public FactsTap getFacts(FieldsVariablesMapping fieldsVariablesMapping, IAtom atom) {
 		String factsConfigurationClass = properties.getProperty(IFactsConfiguration.FACTS_CONFIGURATION_CLASS);
-		return new FactsTap(factsConfigurationClass, storageId, atom);
+		return new FactsTap(factsConfigurationClass, storageId, fieldsVariablesMapping, atom);
 	}
 
 	public FactsTap getFacts() {

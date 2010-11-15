@@ -51,7 +51,7 @@
 -->
 
     <root>
-        <priority value="INFO" />
+        <priority value="EBUG" />
         <appender-ref ref="STDOUT" />
         <!-- appender-ref ref="FILE" / -->
     </root>
