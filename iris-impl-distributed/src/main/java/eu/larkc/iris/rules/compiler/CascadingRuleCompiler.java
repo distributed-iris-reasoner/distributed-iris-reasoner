@@ -559,7 +559,7 @@ public class CascadingRuleCompiler implements IRuleCompiler {
 					sources, headSink, rulePipe);
 		
 		if(flow != null) {
-			//flow.writeDOT(rulePipe.getName() + ".dot");
+			flow.writeDOT("flow.dot");
 		}
 
 		return flow;
