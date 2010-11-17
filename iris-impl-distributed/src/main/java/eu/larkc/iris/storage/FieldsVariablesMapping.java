@@ -17,7 +17,7 @@ import org.deri.iris.api.terms.IVariable;
 public class FieldsVariablesMapping {
 
 	private Map<IAtom, Map<IVariable, String>> atoms = new HashMap<IAtom, Map<IVariable, String>>();
-	private Map<String, String> fields = new HashMap<String, String>();
+	private Map<String, IVariable> fields = new HashMap<String, IVariable>();
 	
 	public void loadAtom(IAtom atom) {
 		if (atoms.containsKey(atom)) {
@@ -29,7 +29,7 @@ public class FieldsVariablesMapping {
 			while (field == null || fields.containsKey(field)) {
 				field = variable.getValue() + String.valueOf(random.nextInt(9999));
 			}
-			fields.put(field, variable.getValue());
+			fields.put(field, variable);
 			if (!atoms.containsKey(atom)) {
 				atoms.put(atom, new HashMap<IVariable, String>());
 			}
@@ -41,7 +41,7 @@ public class FieldsVariablesMapping {
 		return atoms.get(atom).get(variable);
 	}
 	
-	public String getVariable(String field) {
+	public IVariable getVariable(String field) {
 		return fields.get(field);
 	}
 }

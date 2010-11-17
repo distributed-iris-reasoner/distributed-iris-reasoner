@@ -54,6 +54,11 @@ import eu.larkc.iris.storage.FieldsVariablesMapping;
  */
 public class CascadingRuleCompiler implements IRuleCompiler {
 
+	/*
+	 * Field name used for head predicate
+	 */
+	private static final String HEAD_PREDICATE_FIELD = "HPF";
+	
 	/**
 	 * Sets up a CascadingRuleCompiler with a specific configuration, taking
 	 * relevant datasources for rule execution into account.
@@ -155,39 +160,60 @@ public class CascadingRuleCompiler implements IRuleCompiler {
 		return result;
 	}
 	
+	/*
+	 * From two atoms return the field names correesponding with the common variables
+	 */
+	private Map<String, String> getCommonFields(FieldsVariablesMapping fieldsVariablesMapping, IAtom atom1, IAtom atom2) {
+		List<IVariable> previousVariables = TermMatchingAndSubstitution.getVariables(atom1.getTuple(), true);
+		List<IVariable> variables = TermMatchingAndSubstitution.getVariables(atom2.getTuple(), true);
+		Map<String, String> equalityFields = new HashMap<String, String>();
+		for (IVariable previousVariable : previousVariables) {
+			for (IVariable variable : variables) {
+				if (previousVariable.equals(variable)) {
+					equalityFields.put(fieldsVariablesMapping.getField(atom2, variable), 
+							fieldsVariablesMapping.getField(atom1, previousVariable));
+				}
+			}
+		}
+		return equalityFields;
+	}
+	
+	/**
+	 * Build a join between all the literals of the rule
+	 * 
+	 * @param fieldsVariablesMapping
+	 * @param lhsJoin
+	 * @param subgoalsIterator
+	 * @return
+	 */
 	public PipeFielded buildJoin(FieldsVariablesMapping fieldsVariablesMapping, PipeFielded lhsJoin, Iterator<Entry<IAtom, Pipe>> subgoalsIterator) {
+		//if not subgoals left return the last join
 		if (!subgoalsIterator.hasNext()) {
 			return lhsJoin;
 		}
 		Entry<IAtom, Pipe> subgoal = subgoalsIterator.next();
 		IAtom atom = subgoal.getKey();
 		Pipe pipe = subgoal.getValue();
+		List<IVariable> variables = TermMatchingAndSubstitution.getVariables(atom.getTuple(), true);
 		
+		//first call, create pipe for the first subgoal, nothing to join
 		if (lhsJoin == null) {
 			PipeFielded pipeFielded = new PipeFielded(fieldsVariablesMapping, pipe, atom);
 			return buildJoin(fieldsVariablesMapping, pipeFielded, subgoalsIterator);
 		}
 		
 		IAtom previousAtom = lhsJoin.getAtom();
-		List<IVariable> previousVariables = TermMatchingAndSubstitution.getVariables(previousAtom.getTuple(), true);
-		List<IVariable> variables = TermMatchingAndSubstitution.getVariables(atom.getTuple(), true);
-		Map<String, String> equalityFields = new HashMap<String, String>();
-		for (IVariable previousVariable : previousVariables) {
-			for (IVariable variable : variables) {
-				if (previousVariable.equals(variable)) {
-					equalityFields.put(fieldsVariablesMapping.getField(atom, variable), 
-							fieldsVariablesMapping.getField(previousAtom, previousVariable));
-				}
-			}
-		}
+		Map<String, String> commonFields = getCommonFields(fieldsVariablesMapping, previousAtom, atom);
 
+		//compose the group fields for the left pipe and the right pipe
 		Fields lhsFields = new Fields();
 		Fields rhsFields = new Fields();
-		for (Entry<String, String> equalityEntry : equalityFields.entrySet()) {
-			rhsFields = rhsFields.append(new Fields(equalityEntry.getKey()));
-			lhsFields = lhsFields.append(new Fields(equalityEntry.getValue()));
+		for (Entry<String, String> commonFieldEntry : commonFields.entrySet()) {
+			rhsFields = rhsFields.append(new Fields(commonFieldEntry.getKey()));
+			lhsFields = lhsFields.append(new Fields(commonFieldEntry.getValue()));
 		}
 
+		//compose the output fields list
 		List<String> outputFieldsList = lhsJoin.getFields();
 		outputFieldsList.add(atom.getPredicate().getPredicateSymbol());
 		for (IVariable variable : variables) {
@@ -199,6 +225,7 @@ public class CascadingRuleCompiler implements IRuleCompiler {
 			outputFields = outputFields.append(new Fields(field));
 		}
 
+		//join the previous join's pipe with the pipe for this literal
 		Pipe join = new CoGroup(lhsJoin.getPipe(), lhsFields, pipe, rhsFields, outputFields, new InnerJoin());
 		PipeFielded pipeFielded = new PipeFielded(fieldsVariablesMapping, join, atom, outputFieldsList);
 		return buildJoin(fieldsVariablesMapping, pipeFielded, subgoalsIterator);
@@ -236,189 +263,6 @@ public class CascadingRuleCompiler implements IRuleCompiler {
 		}
 
 		return buildJoin(fieldsVariablesMapping, null, subGoals.entrySet().iterator());
-		
-		/*
-		Pipe join = null;
-		Entry<IAtom, Pipe> previousSubgoal = null;
-		Fields prevOutputFields = new Fields();
-		for (Entry<IAtom, Pipe> subgoal : subGoals.entrySet()) {
-			IAtom atom = subgoal.getKey();
-			Pipe pipe = subgoal.getValue();
-			
-			List<IVariable> variables = TermMatchingAndSubstitution.getVariables(atom.getTuple(), true);
-			
-			if (previousSubgoal != null) {
-				IAtom previousAtom = previousSubgoal.getKey();
-				Pipe previousPipe = previousSubgoal.getValue();
-				List<IVariable> previousVariables = TermMatchingAndSubstitution.getVariables(previousAtom.getTuple(), true);
-				Map<String, String> equalityFields = new HashMap<String, String>();
-				List<String> outputFields = new ArrayList<String>();
-				for (IVariable previousVariable : previousVariables) {
-					for (IVariable variable : variables) {
-						if (previousVariable.equals(variable)) {
-							equalityFields.put(fieldsVariablesMapping.getField(previousAtom, previousVariable), 
-									fieldsVariablesMapping.getField(atom, variable));
-						}
-					}
-				}
-				Fields lhsFields = new Fields();
-				Fields rhsFields = new Fields();
-				for (Entry<String, String> equalityEntry : equalityFields.entrySet()) {
-					lhsFields = lhsFields.append(new Fields(equalityEntry.getKey()));
-					rhsFields = rhsFields.append(new Fields(equalityEntry.getValue()));
-				}
-				Fields outputFields = new Fields();
-				if (prevOutputFields.size() == 0) {
-					for (IVariable variable : previousVariables) {
-						outputFields = outputFields.append(new Fields(fieldsVariablesMapping.getField(previousAtom, variable)));
-					}
-					for (IVariable variable : variables) {
-						if (variable)
-						outputFields = outputFields.append(new Fields(fieldsVariablesMapping.getField(previousAtom, variable)));
-					}
-				}
-				join = new CoGroup(previousPipe, lhsFields, pipe, rhsFields, new InnerJoin());
-			}
-			
-			previousSubgoal = subgoal;
-		}
-		return join;
-		*/
-		
-		/*
-		List<IVariable> previousVariables = null;
-		Pipe previousPipe = null;
-
-		Set<Entry<IAtom, Pipe>> entries = subGoals.entrySet();
-		Iterator<Entry<IAtom, Pipe>> it = entries.iterator();
-
-		// first element
-		if (it.hasNext()) {
-			Entry<IAtom, Pipe> firstEntry = it.next();
-			IAtom atom = firstEntry.getKey();
-			List<IVariable> variables = TermMatchingAndSubstitution
-					.getVariables(atom.getTuple(), true);
-			previousVariables = variables;
-			previousPipe = firstEntry.getValue();
-			// debugging, this can be removed through the flowplanner for
-			// production use
-			previousPipe = new Each(previousPipe, DebugLevel.VERBOSE,
-					new Debug());
-		}
-
-		// main loop
-		while (it.hasNext()) {
-			Entry<IAtom, Pipe> entry = it.next();
-
-			IAtom atom = entry.getKey();
-			Pipe pipe = entry.getValue();
-			// debugging, this can be removed through the flowplanner for
-			// production use
-			pipe = new Each(pipe, DebugLevel.VERBOSE, new Debug());
-
-			List<IVariable> variables = TermMatchingAndSubstitution
-					.getVariables(atom.getTuple(), true);
-
-			// computation of indices, see old IRIS code
-			List<Integer> join1 = new ArrayList<Integer>();
-			List<Integer> join2 = new ArrayList<Integer>();
-
-			for (int i1 = 0; i1 < previousVariables.size(); ++i1) {
-				IVariable var1 = previousVariables.get(i1);
-
-				for (int i2 = 0; i2 < variables.size(); ++i2) {
-					IVariable var2 = variables.get(i2);
-
-					if (var1.equals(var2)) {
-						join1.add(i1 + 1);
-						join2.add(i2 + 1);
-
-						// variables unique
-						break;
-					}
-				}
-			}
-
-			Integer[] joinIndicesPreviousElement = new Integer[join1.size()];
-			joinIndicesPreviousElement = join1
-					.toArray(joinIndicesPreviousElement);
-
-			Integer[] joinIndicesThisElement = new Integer[join2.size()];
-			joinIndicesThisElement = join2.toArray(joinIndicesThisElement);
-
-			// TODO: There should be an optimization later on, in case no real
-			// join is required.
-			// This is the most obvious point of optimization now and needs to
-			// be tested.
-
-			// cascading
-			Fields lhsFields = new Fields(joinIndicesPreviousElement);
-			Fields rhsFields = new Fields(joinIndicesThisElement);
-
-			//renaming of variables - cascading does not allow duplicate fieldnames
-			//for now we only append 1...N
-			//practically we only work with indices and do not care about field names anyway
-			String[] vars = new String[1 + previousVariables.size() + 1 + variables.size()];
-			int k = 1;
-			
-			vars[0] = "http://larkc.eu/q";
-			for(IVariable var : variables) {
-				//actually it would be more descriptive if the suffix that we use here would
-				//e.g. be the name of the predicate
-				vars[k] = variables.get(k - 1).getValue() + "1";
-				k++;
-			}
-			vars[k++] = "http://larkc.eu/r";
-			int offset = k;
-			for(IVariable var : previousVariables) {
-				vars[k] = previousVariables.get(k -offset).getValue() + "2";
-				k++;
-			}
-			
-			Fields declared = new Fields(vars );
-			Pipe join = new CoGroup( previousPipe, lhsFields, pipe, rhsFields, declared, new InnerJoin() );
-			
-			// debugging, this can be removed through the flowplanner for
-			// production use
-			join = new Each(join, DebugLevel.VERBOSE, new Debug(true));
-
-			previousPipe = join;
-
-			// Now find the indices of variables that are not used in the
-			// join
-			List<Integer> remainder1 = new ArrayList<Integer>();
-			List<Integer> remainder2 = new ArrayList<Integer>();
-
-			for (int i1 = 0; i1 < previousVariables.size(); ++i1) {
-				if (!join1.contains(i1))
-					remainder1.add(i1);
-			}
-
-			for (int i2 = 0; i2 < variables.size(); ++i2) {
-				if (!join2.contains(i2))
-					remainder2.add(i2);
-			}
-
-			int[] remainderIndicesPreviousElement = Utils
-					.integerListToArray(remainder1);
-			int[] remainderIndicesThisElement = Utils
-					.integerListToArray(remainder2);
-
-			// Lastly, build the list of output variables
-			ArrayList<IVariable> newPreviousVariables = new ArrayList<IVariable>();
-
-			for (int i : joinIndicesPreviousElement)
-				newPreviousVariables.add(previousVariables.get(i));
-			for (int i : remainderIndicesPreviousElement)
-				newPreviousVariables.add(previousVariables.get(i));
-			for (int i : remainderIndicesThisElement)
-				newPreviousVariables.add(variables.get(i));
-
-			previousVariables = newPreviousVariables;
-		}
-
-		return previousPipe;
-		*/
 	}
 
 	/**
@@ -530,14 +374,14 @@ public class CascadingRuleCompiler implements IRuleCompiler {
 		
 		//rulePipe = new Each( rulePipe, new Fields(1, 2, 3), new Identity(), Fields.RESULTS );
 			
-		rulePipe = new Each( rulePipe, new Insert( new Fields("HEAD_PREDICATE"), head.get(0).getAtom().getPredicate().getPredicateSymbol()), Fields.ALL );
+		rulePipe = new Each( rulePipe, new Insert( new Fields(HEAD_PREDICATE_FIELD), head.get(0).getAtom().getPredicate().getPredicateSymbol()), Fields.ALL );
 		
 		List<IVariable> variables = TermMatchingAndSubstitution.getVariables(head.get(0).getAtom().getTuple(), true);		
 		List<String> headFieldsList = new ArrayList<String>();
-		headFieldsList.add("HEAD_PREDICATE");
+		headFieldsList.add(HEAD_PREDICATE_FIELD);
 		for (IVariable variable : variables) {
 			for (String field : rulePipeFielded.getFields()) {
-				if (field.startsWith(variable.getValue())) {
+				if (variable.equals(fieldsVariablesMapping.getVariable(field))) {
 					headFieldsList.add(field);
 					break;
 				}
