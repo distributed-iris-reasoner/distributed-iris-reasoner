@@ -15,6 +15,7 @@
  */
 package eu.larkc.iris.evaluation.distributed;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,7 +65,7 @@ public abstract class EvaluationTest extends TestCase {
 		queries = createQueries();
 	}
 
-	protected abstract void createFacts();
+	protected abstract void createFacts() throws IOException;
 
 	protected abstract List<IRule> createRules();
 

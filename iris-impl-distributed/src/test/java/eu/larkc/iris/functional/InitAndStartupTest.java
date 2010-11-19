@@ -114,7 +114,8 @@ public class InitAndStartupTest extends ProgramEvaluationTest {
 	}
 
 	@Override
-	protected  void createFacts() {
+	protected  void createFacts() throws IOException {
+		/*
 		Statement statement = new StatementImpl(null, new URIImpl("http://larkc.eu/1"), 
 				new URIImpl("http://larkc.eu/q"), new URIImpl("http://larkc.eu/2"));
 		model.addStatement(statement);
@@ -124,7 +125,10 @@ public class InitAndStartupTest extends ProgramEvaluationTest {
 		statement = new StatementImpl(null, new URIImpl("http://larkc.eu/1"), 
 				new URIImpl("http://larkc.eu/s"), new URIImpl("http://larkc.eu/3"));
 		model.addStatement(statement);
-				
+		*/
+		
+		model.readFrom(this.getClass().getResourceAsStream("/input/default.rdf"));
+		
 		model.commit();
 	}
 
@@ -144,7 +148,7 @@ public class InitAndStartupTest extends ProgramEvaluationTest {
 		IRelation relation = evaluate("?- p(?X, ?Y).");
 		
 		ClosableIterator<Statement> iterator = model.findStatements(new TriplePatternImpl((ResourceOrVariable) null, 
-				new URIImpl("http://larkc.eu/p"), (NodeOrVariable) null));
+				new URIImpl("http://larkc.eu/default/p"), (NodeOrVariable) null));
 		assertTrue("no data", iterator.hasNext());
 		Statement statement = iterator.next();
 		logger.info("result : " + statement);

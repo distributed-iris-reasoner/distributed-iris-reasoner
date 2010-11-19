@@ -15,6 +15,7 @@
  */
 package eu.larkc.iris.storage.rdf;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -122,17 +123,11 @@ public class RdfFactsTapTest extends TestCase {
 		FactsFactory.PROPERTIES = "/facts-configuration-test.properties";
 		
 		FactsConfigurationFactory.STORAGE_PROPERTIES = "/facts-storage-configuration-test.properties";
-		
-		Model model = createStorage("humans");
-				
-		Statement statement = new StatementImpl(new URIImpl("http://larkc.eu/humans"), new URIImpl("http://larkc.eu/humans/person#gerard_butler"), 
-				new URIImpl("http://larkc.eu/humans/name"), new PlainLiteralImpl("Gerard Butler"));
-		model.addStatement(statement);
 
-		statement = new StatementImpl(new URIImpl("http://larkc.eu/humans"), new URIImpl("http://larkc.eu/humans/person#gerard_butler"), 
-				new URIImpl("http://larkc.eu/humans/hasName"), new PlainLiteralImpl("Gerard Butler"));
-		model.addStatement(statement);
-	
+		Model model = createStorage("humans");
+
+		model.readFrom(this.getClass().getResourceAsStream("/input/humans.rdf"));
+		
 		model.commit();
 		
 		createStorage("humans_out");
@@ -179,7 +174,7 @@ public class RdfFactsTapTest extends TestCase {
 		Flow aFlow = new FlowConnector(getProperties()).connect(sources, sink, identity);
 		aFlow.complete();
 		
-		verifySink(aFlow, 1);
+		verifySink(aFlow, 6);
 	}
 
 	public void testSink() throws IOException {
@@ -203,7 +198,7 @@ public class RdfFactsTapTest extends TestCase {
 		Flow aFlow = new FlowConnector(getProperties()).connect(sources, sink, identity);
 		aFlow.complete();
 		
-		verifySink(aFlow, 1);
+		verifySink(aFlow, 6);
 	}
 
 }
