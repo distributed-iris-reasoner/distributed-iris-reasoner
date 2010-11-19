@@ -27,7 +27,7 @@ public abstract class FactsInputFormat<T extends AtomRecord> implements
 	public static class NullAtomWritable extends AtomRecord {
 
 		@Override
-		public void read(FactsStorage storage, IAtom atom) {
+		public void read(IAtom atom) {
 		}
 
 		@Override

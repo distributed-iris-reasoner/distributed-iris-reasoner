@@ -19,7 +19,7 @@ package eu.larkc.iris.storage.rdf;
 import org.deri.iris.api.basics.IAtom;
 import org.ontoware.rdf2go.model.Model;
 import org.ontoware.rdf2go.model.Statement;
-import org.ontoware.rdf2go.model.node.Literal;
+import org.ontoware.rdf2go.model.node.Node;
 import org.ontoware.rdf2go.model.node.Resource;
 import org.ontoware.rdf2go.model.node.impl.PlainLiteralImpl;
 import org.ontoware.rdf2go.model.node.impl.URIImpl;
@@ -40,16 +40,21 @@ public class RdfRecord extends AtomRecord {
 	public void write(FactsStorage storage) {
 		RdfStorage rdfStorage = (RdfStorage) storage;
 		Model model = rdfStorage.getModel();
-		Resource subject = new URIImpl(((String) tuple.get(1)).replace("'", ""));
-		//TODO check wether literal or resource
-		Literal object = new PlainLiteralImpl(((String) tuple.get(2)).replace("'", ""));
+		Resource subject = new URIImpl((String) tuple.get(1));
+		String objectTuple = ((String) tuple.get(2));
+		Node object = null;
+		if (objectTuple.startsWith("'") && objectTuple.endsWith("'")) {
+			object = new PlainLiteralImpl(objectTuple.replace("'", ""));
+		} else {
+			object = new URIImpl(objectTuple);
+		}
 		Statement statement = model.createStatement(subject, new URIImpl((String) tuple.get(0)), object);
 		model.addStatement(statement);
 		model.commit();
 	}
 
 	@Override
-	public void read(FactsStorage storage, IAtom atom) {
+	public void read(IAtom atom) {
 		RdfAtom rdfAtom = (RdfAtom) atom;
 		tuple = new Tuple();
 		tuple.add(rdfAtom.getPredicate().toString());

@@ -7,8 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.deri.iris.api.basics.IAtom;
-import org.deri.iris.api.terms.IVariable;
-import org.deri.iris.utils.TermMatchingAndSubstitution;
+import org.deri.iris.api.terms.ITerm;
 
 import cascading.pipe.Pipe;
 import eu.larkc.iris.storage.FieldsVariablesMapping;
@@ -36,11 +35,11 @@ public class PipeFielded {
 	}
 
 	private List<String> fieldsFromAtom(FieldsVariablesMapping fieldsVariablesMapping, IAtom atom) {
-		List<IVariable> variables = TermMatchingAndSubstitution.getVariables(atom.getTuple(), true);
 		List<String> alhsFields = new ArrayList<String>();
 		alhsFields.add(atom.getPredicate().getPredicateSymbol());
-		for (IVariable variable : variables) {
-			String field = fieldsVariablesMapping.getField(atom, variable);
+		for (int i = 0; i < atom.getTuple().size(); i++) {
+			ITerm term = atom.getTuple().get(i);
+			String field = fieldsVariablesMapping.getField(atom, term);
 			alhsFields.add(field);
 		}
 		return alhsFields;

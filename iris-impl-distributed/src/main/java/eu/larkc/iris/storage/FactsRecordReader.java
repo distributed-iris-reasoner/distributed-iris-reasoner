@@ -48,7 +48,7 @@ public class FactsRecordReader<T extends AtomRecord> implements RecordReader<Lon
 		if (atom == null) {
 			return false;
 		}
-		value.read(rdfStorage, atom);
+		value.read(atom);
 		pos++;
 		return true;
 	}

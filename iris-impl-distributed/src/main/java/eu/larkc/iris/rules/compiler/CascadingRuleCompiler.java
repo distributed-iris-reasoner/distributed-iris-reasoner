@@ -194,7 +194,6 @@ public class CascadingRuleCompiler implements IRuleCompiler {
 		Entry<IAtom, Pipe> subgoal = subgoalsIterator.next();
 		IAtom atom = subgoal.getKey();
 		Pipe pipe = subgoal.getValue();
-		List<IVariable> variables = TermMatchingAndSubstitution.getVariables(atom.getTuple(), true);
 		
 		//first call, create pipe for the first subgoal, nothing to join
 		if (lhsJoin == null) {
@@ -216,8 +215,9 @@ public class CascadingRuleCompiler implements IRuleCompiler {
 		//compose the output fields list
 		List<String> outputFieldsList = lhsJoin.getFields();
 		outputFieldsList.add(atom.getPredicate().getPredicateSymbol());
-		for (IVariable variable : variables) {
-			String field = fieldsVariablesMapping.getField(atom, variable);
+		for (int i = 0; i < atom.getTuple().size(); i++) {
+			ITerm term = atom.getTuple().get(i);
+			String field = fieldsVariablesMapping.getField(atom, term);
 			outputFieldsList.add(field);
 		}
 		Fields outputFields = new Fields();
@@ -282,7 +282,7 @@ public class CascadingRuleCompiler implements IRuleCompiler {
 
 			// not a variable, we filter the tuples
 			if (term.isGround()) {
-				constantTerms.put(i, term.getValue());
+				constantTerms.put(i + 1, term.getValue()); //added one because of the predicate field
 			}
 		}
 

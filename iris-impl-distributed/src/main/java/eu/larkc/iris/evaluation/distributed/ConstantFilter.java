@@ -3,7 +3,6 @@
  */
 package eu.larkc.iris.evaluation.distributed;
 
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -20,7 +19,13 @@ import cascading.tuple.TupleEntry;
  * @history Nov 1, 2010, fisf, creation
  * @author Florian Fischer
  */
+@SuppressWarnings("rawtypes")
 public class ConstantFilter extends BaseOperation implements Filter {
+
+	/**
+	 * serialVersionUID
+	 */
+	private static final long serialVersionUID = -2355263716242780692L;
 
 	/**
 	 * @param expectedConstants Constants in a subgoal.

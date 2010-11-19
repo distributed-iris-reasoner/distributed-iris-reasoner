@@ -154,7 +154,7 @@ public class RdfFactsTapTest extends TestCase {
 	}
 
 	public void testSource() throws IOException {
-		IPredicate predicate = BasicFactory.getInstance().createPredicate("humans/name", 2);
+		IPredicate predicate = BasicFactory.getInstance().createPredicate("name", 2);
 		ITuple tuple = BasicFactory.getInstance().createTuple(TermFactory.getInstance().createVariable("X"), 
 				TermFactory.getInstance().createVariable("Y"));
 		IAtom atom = BasicFactory.getInstance().createAtom(predicate, tuple);
@@ -169,7 +169,7 @@ public class RdfFactsTapTest extends TestCase {
 		sources.put("source", nameFactsTap);
 
 		Pipe sourcePipe = new Pipe("source");
-		Pipe identity = new Each(sourcePipe, new Fields("http://larkc.eu/humans/name", "X", "Y"), new FieldJoiner(new Fields("F"), ";"));
+		Pipe identity = new Each(sourcePipe, new Fields("http://larkc.eu/default/name", "X", "Y"), new FieldJoiner(new Fields("F"), ";"));
 		
 		Flow aFlow = new FlowConnector(getProperties()).connect(sources, sink, identity);
 		aFlow.complete();
@@ -178,7 +178,7 @@ public class RdfFactsTapTest extends TestCase {
 	}
 
 	public void testSink() throws IOException {
-		IPredicate predicate = BasicFactory.getInstance().createPredicate("humans/name", 2);
+		IPredicate predicate = BasicFactory.getInstance().createPredicate("name", 2);
 		ITuple tuple = BasicFactory.getInstance().createTuple(TermFactory.getInstance().createVariable("X"), 
 				TermFactory.getInstance().createVariable("Y"));
 		IAtom atom = BasicFactory.getInstance().createAtom(predicate, tuple);
@@ -193,7 +193,7 @@ public class RdfFactsTapTest extends TestCase {
 		sources.put("source", nameFactsTap);
 
 		Pipe sourcePipe = new Pipe("source");
-		Pipe identity = new Each(sourcePipe, new Fields("http://larkc.eu/humans/name", "X", "Y"), new Identity(new Fields("http://larkc.eu/humans/name", "X", "Y")));
+		Pipe identity = new Each(sourcePipe, new Fields("http://larkc.eu/default/name", "X", "Y"), new Identity(new Fields("http://larkc.eu/default/name", "X", "Y")));
 		
 		Flow aFlow = new FlowConnector(getProperties()).connect(sources, sink, identity);
 		aFlow.complete();

@@ -32,7 +32,7 @@ public abstract class AtomRecord {
 	
 	public abstract void write(FactsStorage storage);
 	
-	public abstract void read(FactsStorage storage, IAtom atom);
+	public abstract void read(IAtom atom);
 
 	public Tuple getTuple() {
 		return tuple;

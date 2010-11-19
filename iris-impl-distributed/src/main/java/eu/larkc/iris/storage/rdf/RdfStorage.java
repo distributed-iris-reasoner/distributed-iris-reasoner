@@ -18,14 +18,18 @@ package eu.larkc.iris.storage.rdf;
 
 import org.deri.iris.api.basics.IAtom;
 import org.deri.iris.api.factory.IBasicFactory;
+import org.deri.iris.api.factory.IConcreteFactory;
 import org.deri.iris.api.factory.ITermFactory;
+import org.deri.iris.api.terms.ITerm;
 import org.deri.iris.basics.BasicFactory;
 import org.deri.iris.terms.TermFactory;
+import org.deri.iris.terms.concrete.ConcreteFactory;
 import org.ontoware.aifbcommons.collection.ClosableIterator;
 import org.ontoware.rdf2go.model.Model;
 import org.ontoware.rdf2go.model.Statement;
 import org.ontoware.rdf2go.model.impl.TriplePatternImpl;
 import org.ontoware.rdf2go.model.node.NodeOrVariable;
+import org.ontoware.rdf2go.model.node.Resource;
 import org.ontoware.rdf2go.model.node.ResourceOrVariable;
 import org.ontoware.rdf2go.model.node.impl.URIImpl;
 
@@ -57,8 +61,15 @@ public class RdfStorage implements FactsStorage {
 		Statement statement = iterator.next();
 		ITermFactory termFactory = TermFactory.getInstance();
 		IBasicFactory basicFactory = BasicFactory.getInstance();
+		IConcreteFactory concreteFactory = ConcreteFactory.getInstance();
+		ITerm object = null;
+		if (statement.getObject() instanceof Resource) {
+			object = concreteFactory.createIri(statement.getObject().toString());
+		} else {
+			object = termFactory.createString(statement.getObject().toString());
+		}
 		RdfAtom rdfAtom = new RdfAtom(basicFactory.createPredicate(statement.getPredicate().toString(), 2), 
-				termFactory.createString(statement.getSubject().toString()), termFactory.createString(statement.getObject().toString()));
+				concreteFactory.createIri(statement.getSubject().toString()), object);
 		return rdfAtom;
 	}
 

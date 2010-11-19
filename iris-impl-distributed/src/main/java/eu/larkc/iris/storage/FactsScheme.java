@@ -24,6 +24,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.deri.iris.api.basics.IAtom;
 import org.deri.iris.api.basics.ITuple;
+import org.deri.iris.api.terms.ITerm;
 import org.deri.iris.api.terms.IVariable;
 
 import cascading.scheme.Scheme;
@@ -61,12 +62,18 @@ public class FactsScheme extends Scheme {
 		ITuple tuple = atom.getTuple();
 		Fields sourceFields = new Fields();
 		sourceFields = sourceFields.append(new Fields((String) atom.getPredicate().getPredicateSymbol()));
-		for (IVariable variable : tuple.getAllVariables()) {
+		for (int i = 0; i < tuple.size(); i++) {
+			ITerm term = tuple.get(i);
 			String field = null;
 			if (fieldsVariablesMapping != null) {
-				field = fieldsVariablesMapping.getField(atom, variable);
+				field = fieldsVariablesMapping.getField(atom, term);
 			} else {
-				field = variable.getValue();
+				//when no field variable mapping is not give (normally this should not happen in real distributed iris usage)
+				if (term instanceof IVariable) {
+					field = ((IVariable) term).getValue();
+				} else {
+					field ="CNST";
+				}
 			}
 			// TODO check which types can the value have. also decide what field
 			// name should we give for constants
