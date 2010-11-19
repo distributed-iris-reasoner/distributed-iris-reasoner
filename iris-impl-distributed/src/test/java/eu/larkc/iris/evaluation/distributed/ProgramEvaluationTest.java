@@ -24,8 +24,6 @@ import org.deri.iris.api.basics.IRule;
 import org.deri.iris.api.terms.IVariable;
 import org.deri.iris.compiler.Parser;
 import org.deri.iris.compiler.ParserException;
-import org.deri.iris.facts.Facts;
-import org.deri.iris.facts.IFacts;
 import org.deri.iris.storage.IRelation;
 
 /**
