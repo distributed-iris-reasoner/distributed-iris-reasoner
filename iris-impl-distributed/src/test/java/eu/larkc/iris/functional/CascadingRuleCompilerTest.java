@@ -34,23 +34,16 @@ import eu.larkc.iris.CascadingTest;
 
 /**
  * 
- * @history Oct 26, 2010, fisf, creation
- * @history Nov 09, 2010, vroman, implement a first version
- * @author Florian Fischer
+ * @history Nov 19, 2010, vroman, creation
+ * @author vroman
  */
-public class InitAndStartupTest extends CascadingTest {
+public class CascadingRuleCompilerTest extends CascadingTest {
 
-	private static final Logger logger = LoggerFactory.getLogger(InitAndStartupTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(CascadingRuleCompilerTest.class);
 
-	//p( ?X, ?Y ) :- q( ?X, ?Y ), r( ?Y, ?Z ), s( ?X, ?Z ).
-	//q( 1, 2 ).
-	//r( 2, 3 ).
-	//s( 1, 3 ).
-	//?- p(?X, ?Y).
-	
 	private Model model = createStorage("default");
 	
-	public InitAndStartupTest(String name) {
+	public CascadingRuleCompilerTest(String name) {
 		super(name);
 	}
 	
@@ -65,15 +58,12 @@ public class InitAndStartupTest extends CascadingTest {
 	protected Collection<String> createExpressions() {
 		Collection<String> expressions = new ArrayList<String>();
 
-		// Create rules.
-		//expressions.add("p( ?X, ?Y ) :- q( ?X, ?Y ), r( ?Y, ?Z ).");
-		//later arbitrary joins
-		expressions.add("p( ?X, ?Y ) :- q( ?X, ?Y ), r( ?Y, ?Z ), s( ?X, ?Z ).");
+		expressions.add("p( ?X, ?Y ) :- q( ?X, ?Y ), r( ?Y, ?Z ).");
 
 		return expressions;
 	}
 
-	public void testEvaluation() throws Exception {
+	public void testAvoidOldInferencedData() throws Exception {
 		IRelation relation = evaluate("?- p(?X, ?Y).");
 		
 		ClosableIterator<Statement> iterator = model.findStatements(new TriplePatternImpl((ResourceOrVariable) null, 

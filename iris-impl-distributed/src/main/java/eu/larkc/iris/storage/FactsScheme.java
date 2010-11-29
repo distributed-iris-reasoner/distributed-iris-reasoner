@@ -144,8 +144,7 @@ public class FactsScheme extends Scheme {
 			throws IOException {
 		Tuple result = tupleEntry.selectTuple(getSinkFields());
 		assert factsConfiguration != null;
-		outputCollector.collect(factsConfiguration.newRecordInstance(result),
-				null);
+		outputCollector.collect(factsConfiguration.newRecordInstance(result), null);
 	}
 
 }

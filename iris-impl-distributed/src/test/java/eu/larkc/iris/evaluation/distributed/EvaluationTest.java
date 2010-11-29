@@ -21,14 +21,14 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.deri.iris.Configuration;
 import org.deri.iris.api.basics.IQuery;
 import org.deri.iris.api.basics.IRule;
 import org.deri.iris.api.terms.IVariable;
 import org.deri.iris.evaluation.IEvaluationStrategy;
-import org.deri.iris.evaluation.stratifiedbottomup.naive.NaiveEvaluatorFactory;
-import org.deri.iris.facts.IFacts;
 import org.deri.iris.storage.IRelation;
+
+import eu.larkc.iris.evaluation.bottomup.DistributedBottomUpEvaluationStrategyFactory;
+import eu.larkc.iris.evaluation.bottomup.naive.DistributedNaiveEvaluatorFactory;
 
 /**
  * 
@@ -40,7 +40,7 @@ public abstract class EvaluationTest extends TestCase {
 
 	protected List<IQuery> queries;
 
-	protected Configuration defaultConfiguration;
+	protected eu.larkc.iris.Configuration defaultConfiguration;
 
 	private long duration;
 
@@ -53,8 +53,8 @@ public abstract class EvaluationTest extends TestCase {
 		// rules.
 
 		// Create the default configuration.
-		defaultConfiguration = new Configuration();
-		defaultConfiguration.evaluationStrategyFactory = new DistributedBottomUpEvaluationStrategyFactory(new NaiveEvaluatorFactory());
+		defaultConfiguration = new eu.larkc.iris.Configuration();
+		defaultConfiguration.evaluationStrategyFactory = new DistributedBottomUpEvaluationStrategyFactory(new DistributedNaiveEvaluatorFactory());
 		
 		createFacts();
 		
@@ -76,7 +76,7 @@ public abstract class EvaluationTest extends TestCase {
 		return evaluate(query, new ArrayList<IVariable>(), defaultConfiguration);
 	}
 
-	protected IRelation evaluate(IQuery query, Configuration configuration)
+	protected IRelation evaluate(IQuery query, eu.larkc.iris.Configuration configuration)
 			throws Exception {
 		return evaluate(query, new ArrayList<IVariable>(), configuration);
 	}
@@ -88,12 +88,12 @@ public abstract class EvaluationTest extends TestCase {
 	}
 
 	protected IRelation evaluate(IQuery query, List<IVariable> outputVariables,
-			Configuration configuration) throws Exception {
+			eu.larkc.iris.Configuration configuration) throws Exception {
 		// Create strategy using factory.
 		long begin = System.currentTimeMillis();
 		//FIXME create a factory for the distributed environment without the facts parameter
 		IEvaluationStrategy strategy = configuration.evaluationStrategyFactory
-				.createEvaluator(null, rules, configuration); 
+				.createEvaluator(rules, configuration); 
 
 		IRelation relation = strategy.evaluateQuery(query, outputVariables);
 

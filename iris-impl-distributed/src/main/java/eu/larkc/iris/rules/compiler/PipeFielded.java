@@ -16,18 +16,15 @@ import eu.larkc.iris.storage.FieldsVariablesMapping;
 public class PipeFielded {
 
 	private Pipe pipe;
-	private IAtom atom;
 	private FieldsList fields;
 	
 	public PipeFielded(FieldsVariablesMapping fieldsVariablesMapping, Pipe pipe, IAtom atom) {
 		this.pipe = pipe;
-		this.atom = atom;
 		this.fields = fieldsFromAtom(fieldsVariablesMapping, atom);
 	}
 
-	public PipeFielded(FieldsVariablesMapping fieldsVariablesMapping, Pipe pipe, IAtom atom, FieldsList fields) {
+	public PipeFielded(FieldsVariablesMapping fieldsVariablesMapping, Pipe pipe, FieldsList fields) {
 		this.pipe = pipe;
-		this.atom = atom;
 		this.fields = fields;
 	}
 
@@ -40,10 +37,6 @@ public class PipeFielded {
 			alhsFields.add(field);
 		}
 		return alhsFields;
-	}
-
-	public IAtom getAtom() {
-		return atom;
 	}
 
 	public Pipe getPipe() {

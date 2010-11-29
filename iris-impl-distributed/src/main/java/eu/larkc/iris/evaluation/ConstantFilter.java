@@ -1,7 +1,7 @@
 /**
  * 
  */
-package eu.larkc.iris.evaluation.distributed;
+package eu.larkc.iris.evaluation;
 
 import java.util.Map;
 import java.util.Set;

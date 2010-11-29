@@ -47,19 +47,26 @@ public class FactsTap extends Tap {
 	private IAtom atom = null;
 	private String storageId;
 	
+	private FactsScheme factsScheme = null;
+	
 	FactsTap(String factsConfigurationClass, String storageId, IAtom atom) {
 		this(factsConfigurationClass, storageId, null, atom);
 	}
 	
+	private FactsTap(FactsScheme scheme) {
+		super(scheme);
+		factsScheme = scheme;
+	}
+	
 	FactsTap(String factsConfigurationClass, String storageId, FieldsVariablesMapping fieldsVariablesMapping, IAtom atom) {
-		super(new FactsScheme(fieldsVariablesMapping, atom));
+		this(new FactsScheme(fieldsVariablesMapping, atom));
 		this.factsConfigurationClass = factsConfigurationClass;
 		this.atom = atom;
 		this.storageId = storageId;
 	}
 
 	FactsTap(String factsConfigurationClass, String storageId) {
-		super(new FactsScheme());
+		this(new FactsScheme());
 		this.factsConfigurationClass = factsConfigurationClass;
 		this.storageId = storageId;
 	}
@@ -106,8 +113,7 @@ public class FactsTap extends Tap {
 
 	@Override
 	public boolean isSink() {
-		//return atom == null;
-		return true;
+		return atom == null;
 	}
 
 	@Override
@@ -160,4 +166,10 @@ public class FactsTap extends Tap {
 		return sb.toString();
 	}
 
+	public boolean hasNewInferences() {
+		if (!isSink()) {
+			return false;
+		}
+		return false;
+	}
 }

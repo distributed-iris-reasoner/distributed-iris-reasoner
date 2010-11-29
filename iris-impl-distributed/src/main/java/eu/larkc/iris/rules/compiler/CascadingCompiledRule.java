@@ -3,19 +3,15 @@
  */
 package eu.larkc.iris.rules.compiler;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.lang.NotImplementedException;
 import org.deri.iris.Configuration;
 import org.deri.iris.EvaluationException;
 import org.deri.iris.api.basics.IPredicate;
-import org.deri.iris.api.terms.IVariable;
 import org.deri.iris.facts.IFacts;
-import org.deri.iris.rules.compiler.ICompiledRule;
 import org.deri.iris.storage.IRelation;
 
 import cascading.flow.Flow;
+import eu.larkc.iris.storage.FactsTap;
 
 /**
  * CascadingCompiledRule encapsulates a rule that has been translated from the IRIS internal representation to a suitable cascading workflow.
@@ -25,7 +21,7 @@ import cascading.flow.Flow;
  * @history Oct 3, 2010, fisf, creation
  * @author Florian Fischer
  */
-public class CascadingCompiledRule implements ICompiledRule {
+public class CascadingCompiledRule implements IDistributedCompiledRule {
 
 	
 	public CascadingCompiledRule(IPredicate headPredicate, Flow flow, Configuration configuration){
@@ -33,12 +29,13 @@ public class CascadingCompiledRule implements ICompiledRule {
 		this.mFlow = flow;
 		this.mConfiguration = configuration;
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.deri.iris.rules.compiler.ICompiledRule#evaluate()
+
+	/*
+	 * (non-Javadoc)
+	 * @see eu.larkc.iris.rules.compiler.IDistributedCompiledRule#evaluate()
 	 */
 	@Override
-	public IRelation evaluate() throws EvaluationException {
+	public boolean evaluate() throws EvaluationException {
 		
 		//start returns immediately		
 		if(mFlow == null) {
@@ -57,25 +54,18 @@ public class CascadingCompiledRule implements ICompiledRule {
 		//Naive evaluation will terminate when evaluate returns null.
 		//Until recursion is supported this code will work fine, then a more complex solution is needed.
 		
-		return null;
+		return ((FactsTap) mFlow.getSink()).hasNewInferences();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.deri.iris.rules.compiler.ICompiledRule#evaluateIteratively(org.deri.iris.facts.IFacts)
+	/*
+	 * (non-Javadoc)
+	 * @see eu.larkc.iris.rules.compiler.IDistributedCompiledRule#evaluateIteratively(org.deri.iris.facts.IFacts)
 	 */
 	@Override
 	public IRelation evaluateIteratively(IFacts deltas)
 			throws EvaluationException {
 		// TODO (fisf) implement later
 		throw new NotImplementedException("Semi-naive evaluation is not implemented yet.");
-	}
-
-	/* (non-Javadoc)
-	 * @see org.deri.iris.rules.compiler.ICompiledRule#getVariablesBindings()
-	 */
-	@Override
-	public List<IVariable> getVariablesBindings() {
-		return new ArrayList<IVariable>(); //extension is only required if the rule represents a query
 	}
 
 	/* (non-Javadoc)

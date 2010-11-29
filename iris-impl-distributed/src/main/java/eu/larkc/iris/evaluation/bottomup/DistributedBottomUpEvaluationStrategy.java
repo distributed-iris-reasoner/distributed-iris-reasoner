@@ -1,12 +1,11 @@
 /**
  * 
  */
-package eu.larkc.iris.evaluation.distributed;
+package eu.larkc.iris.evaluation.bottomup;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.deri.iris.Configuration;
 import org.deri.iris.EvaluationException;
 import org.deri.iris.ProgramNotStratifiedException;
@@ -16,23 +15,12 @@ import org.deri.iris.api.basics.IRule;
 import org.deri.iris.api.terms.IVariable;
 import org.deri.iris.evaluation.IEvaluationStrategy;
 import org.deri.iris.evaluation.stratifiedbottomup.EvaluationUtilities;
-import org.deri.iris.evaluation.stratifiedbottomup.IRuleEvaluator;
-import org.deri.iris.evaluation.stratifiedbottomup.IRuleEvaluatorFactory;
-import org.deri.iris.evaluation.stratifiedbottomup.StratifiedBottomUpEvaluationStrategyFactory;
 import org.deri.iris.evaluation.stratifiedbottomup.naive.NaiveEvaluator;
-import org.deri.iris.facts.FiniteUniverseFacts;
-import org.deri.iris.facts.IFacts;
-import org.deri.iris.rules.compiler.ICompiledRule;
-import org.deri.iris.rules.compiler.IRuleCompiler;
-import org.deri.iris.rules.compiler.RuleCompiler;
-import org.deri.iris.rules.optimisation.JoinConditionOptimiser;
-import org.deri.iris.rules.optimisation.ReOrderLiteralsOptimiser;
-import org.deri.iris.rules.optimisation.RemoveDuplicateLiteralOptimiser;
-import org.deri.iris.rules.optimisation.ReplaceVariablesWithConstantsOptimiser;
-import org.deri.iris.rules.safety.AugmentingRuleSafetyProcessor;
 import org.deri.iris.storage.IRelation;
 
 import eu.larkc.iris.rules.compiler.CascadingRuleCompiler;
+import eu.larkc.iris.rules.compiler.IDistributedCompiledRule;
+import eu.larkc.iris.rules.compiler.IDistributedRuleCompiler;
 
 /**
  * For now we can choose the standard interface of IEvaluation Strategy as
@@ -59,13 +47,11 @@ public class DistributedBottomUpEvaluationStrategy implements
 	 * @param facts
 	 */
 	public DistributedBottomUpEvaluationStrategy(Configuration configuration,
-			IRuleEvaluatorFactory ruleEvaluatorFactory, List<IRule> rules,
-			IFacts facts) {
+			IDistributedRuleEvaluatorFactory ruleEvaluatorFactory, List<IRule> rules) {
 		
 		this.mRuleEvaluatorFactory = ruleEvaluatorFactory;
 		this.mConfiguration = configuration;
 		this.mRules = rules;
-		this.mFacts = facts;	
 	}
 
 	/*
@@ -122,9 +108,9 @@ public class DistributedBottomUpEvaluationStrategy implements
 		List<List<IRule>> stratifiedRules = utils.stratify(safeRules);
 
 		// compile to cascading
-		IRuleCompiler rc = new CascadingRuleCompiler(mConfiguration, mFacts);
+		IDistributedRuleCompiler rc = new CascadingRuleCompiler(mConfiguration);
 
-		IRuleEvaluator evaluator = mRuleEvaluatorFactory.createEvaluator();
+		IDistributedRuleEvaluator evaluator = mRuleEvaluatorFactory.createEvaluator();
 		// A naive evaluator should work here, otherwise a new factory simply
 		// needs to be passed in
 		assert evaluator instanceof NaiveEvaluator : "Only naiveEvaluator for now";
@@ -139,7 +125,7 @@ public class DistributedBottomUpEvaluationStrategy implements
 			List<IRule> optimisedRules = utils
 					.applyRuleOptimisers(reorderedRules);
 
-			List<ICompiledRule> compiledRules = new ArrayList<ICompiledRule>();
+			List<IDistributedCompiledRule> compiledRules = new ArrayList<IDistributedCompiledRule>();
 
 			// TODO (fisf, optimization): essentially each rule is compiled
 			// independently and than evaluated by the naive evaluator
@@ -151,24 +137,18 @@ public class DistributedBottomUpEvaluationStrategy implements
 			// argument
 			// This would basically combine the different flows to a cascade.
 			for (IRule rule : optimisedRules) {
-				ICompiledRule compiledRule = rc.compile(rule);
+				IDistributedCompiledRule compiledRule = rc.compile(rule);
 				compiledRules.add(compiledRule);
 			}
 
-			evaluator.evaluateRules(compiledRules, mFacts, mConfiguration);
+			evaluator.evaluateRules(compiledRules, mConfiguration);
 		}
 	}
 
-	protected final IRuleEvaluatorFactory mRuleEvaluatorFactory;
+	protected final IDistributedRuleEvaluatorFactory mRuleEvaluatorFactory;
 
 	protected final List<IRule> mRules;
 
 	protected final Configuration mConfiguration;
 	
-	/**
-	 * We only keep that around as a wrapper around some external store in order to delegate the query to it.
-	 * See FactsWithExternalData.
-	 */
-	protected final IFacts mFacts;
-
 }

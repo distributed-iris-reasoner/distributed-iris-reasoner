@@ -36,6 +36,7 @@ public abstract class FactsConfiguration implements IFactsConfiguration {
 	private static final long serialVersionUID = 778519424591973524L;
 
 	protected Properties storageProperties = null;
+	public boolean newInferences;
 	
 	public FactsConfiguration() {}
 
@@ -82,6 +83,5 @@ public abstract class FactsConfiguration implements IFactsConfiguration {
 		jobConf.setReduceSpeculativeExecution(false);
 		jobConf.setMapSpeculativeExecution(false);
 	}
-
 
 }

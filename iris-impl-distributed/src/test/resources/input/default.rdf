@@ -21,4 +21,20 @@
 	<d:s rdf:resource="3" />
   </rdf:Description>
 
+  <rdf:Description rdf:about="1">
+	<d:p rdf:resource="2" />
+  </rdf:Description>
+
+  <rdf:Description rdf:about="4">
+    <d:q rdf:resource="5" />
+  </rdf:Description>
+
+  <rdf:Description rdf:about="5">
+    <d:r rdf:resource="6" />
+  </rdf:Description>
+
+  <rdf:Description rdf:about="4">
+	<d:s rdf:resource="6" />
+  </rdf:Description>
+
 </rdf:RDF>

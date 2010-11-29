@@ -26,9 +26,6 @@ import org.deri.iris.api.builtins.IBuiltinAtom;
 import org.deri.iris.api.terms.IConstructedTerm;
 import org.deri.iris.api.terms.ITerm;
 import org.deri.iris.api.terms.IVariable;
-import org.deri.iris.facts.IFacts;
-import org.deri.iris.rules.compiler.ICompiledRule;
-import org.deri.iris.rules.compiler.IRuleCompiler;
 import org.deri.iris.utils.TermMatchingAndSubstitution;
 
 import cascading.flow.Flow;
@@ -36,13 +33,15 @@ import cascading.flow.FlowConnector;
 import cascading.operation.DebugLevel;
 import cascading.operation.Identity;
 import cascading.operation.Insert;
+import cascading.operation.filter.FilterNotNull;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
 import cascading.pipe.cogroup.InnerJoin;
+import cascading.pipe.cogroup.LeftJoin;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
-import eu.larkc.iris.evaluation.distributed.ConstantFilter;
+import eu.larkc.iris.evaluation.ConstantFilter;
 import eu.larkc.iris.storage.FactsFactory;
 import eu.larkc.iris.storage.FieldsVariablesMapping;
 
@@ -54,7 +53,7 @@ import eu.larkc.iris.storage.FieldsVariablesMapping;
  * @history Oct 1, 2010, fisf, creation
  * @author Florian Fischer
  */
-public class CascadingRuleCompiler implements IRuleCompiler {
+public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 
 	/*
 	 * Field name used for head predicate
@@ -68,7 +67,7 @@ public class CascadingRuleCompiler implements IRuleCompiler {
 	 * @param configuration
 	 * @param facts
 	 */
-	public CascadingRuleCompiler(Configuration configuration, IFacts facts) {
+	public CascadingRuleCompiler(Configuration configuration) {
 		// this.mFacts = facts;
 		this.mConfiguration = configuration;
 	}
@@ -82,23 +81,24 @@ public class CascadingRuleCompiler implements IRuleCompiler {
 	 * @return
 	 * @throws EvaluationException
 	 */
-	public ICompiledRule compile(IRule rule) throws EvaluationException {
+	public IDistributedCompiledRule compile(IRule rule) throws EvaluationException {
 
 		FieldsVariablesMapping fieldsVariableMapping = new FieldsVariablesMapping();
 
 		List<ILiteral> body = rule.getBody();
 		IAtom head = rule.getHead().get(0).getAtom();
+		fieldsVariableMapping.loadAtom(head); //load also the heads fields, to do the left outer join
 		PipeFielded bodyPipe = compileBody(fieldsVariableMapping, head, body);
 		
 		// tell the planner remove all Debug operations
 		Properties properties = new Properties();
 		FlowConnector.setDebugLevel(properties, DebugLevel.NONE);
 
-		Flow compiledCascadingRule = attachTaps(fieldsVariableMapping, bodyPipe, rule);
+		Flow compiledCascadingRuleFlow = attachTaps(fieldsVariableMapping, bodyPipe, rule);
 
 		IPredicate headPredicate = head.getPredicate();
 
-		return new CascadingCompiledRule(headPredicate, compiledCascadingRule,
+		return new CascadingCompiledRule(headPredicate, compiledCascadingRuleFlow,
 				mConfiguration);
 	}
 
@@ -141,12 +141,12 @@ public class CascadingRuleCompiler implements IRuleCompiler {
 				processBuiltin((IBuiltinAtom) atom);
 			} else {
 				// construct pipe assembly, one pipe per atom
-				IPredicate predicate = atom.getPredicate();
+				//IPredicate predicate = atom.getPredicate();
 
 				// IRelation relation = mFacts.get(predicate);
 				// ITuple viewCriteria = atom.getTuple();
 
-				Pipe pipe = new Pipe(predicate.getPredicateSymbol());
+				Pipe pipe = new Pipe(atom.toString());
 				ITuple tuple = atom.getTuple();
 				// filter for constants
 				pipe = filterConstants(pipe, tuple);
@@ -161,25 +161,10 @@ public class CascadingRuleCompiler implements IRuleCompiler {
 
 		return result;
 	}
-	
+		
 	/*
-	 * From two atoms return the field names correesponding with the common variables
+	 * Remove unwanted fields from the join output fields (predicates, diuplicated variables)
 	 */
-	private Map<String, String> getCommonFields(FieldsVariablesMapping fieldsVariablesMapping, IAtom atom1, IAtom atom2) {
-		List<IVariable> previousVariables = TermMatchingAndSubstitution.getVariables(atom1.getTuple(), true);
-		List<IVariable> variables = TermMatchingAndSubstitution.getVariables(atom2.getTuple(), true);
-		Map<String, String> equalityFields = new HashMap<String, String>();
-		for (IVariable previousVariable : previousVariables) {
-			for (IVariable variable : variables) {
-				if (previousVariable.equals(variable)) {
-					equalityFields.put(fieldsVariablesMapping.getField(atom2, variable), 
-							fieldsVariablesMapping.getField(atom1, previousVariable));
-				}
-			}
-		}
-		return equalityFields;
-	}
-	
 	private FieldsList fieldsToKeep(FieldsVariablesMapping fieldsVariablesMapping, FieldsList outputFields) {
 		FieldsList keepFieldsList = new FieldsList();
 		Set<ITerm> fieldTerms = new HashSet<ITerm>();
@@ -197,6 +182,9 @@ public class CascadingRuleCompiler implements IRuleCompiler {
 		return keepFieldsList;
 	}
 	
+	/*
+	 * Creates the output fields of the join based on the left join's fields and the new atom to be joined fields
+	 */
 	private FieldsList composeOutputFields(FieldsVariablesMapping fieldsVariablesMapping, FieldsList initialFields, IAtom atom) {
 		FieldsList outputFieldsList = new FieldsList(initialFields);
 		outputFieldsList.add(atom.getPredicate().getPredicateSymbol());
@@ -208,6 +196,26 @@ public class CascadingRuleCompiler implements IRuleCompiler {
 		return outputFieldsList;
 	}
 	
+	private Pipe eliminateOldInferencedData(FieldsVariablesMapping fieldsVariablesMapping, IAtom head, PipeFielded lhsJoin) {
+		if (lhsJoin == null) {
+			return null;
+		}
+		// check whether all head's variable fields are in the stream, do the outer join if so
+		FieldsList headFieldsList = identifyHeadVariableFields(fieldsVariablesMapping, head, lhsJoin.getFields());
+		Pipe leftJoin = null;
+		if (headFieldsList != null) {
+			AtomsCommonFields headCommonFields = new AtomsCommonFields(fieldsVariablesMapping, lhsJoin.getFields(), head);
+			Fields lhsFields = headCommonFields.getLhsFields().getFields();
+			Fields rhsFields = headCommonFields.getRhsFields().getFields();
+			Pipe headPipe = new Pipe(head.toString()); //FIXME (val) the pipe name should be identified by tuples variables also
+			leftJoin = new CoGroup(lhsJoin.getPipe(), lhsFields, headPipe, rhsFields, new LeftJoin());
+			leftJoin = new Each( leftJoin, rhsFields, new FilterNotNull());	// outgoing -> "keepField"
+			leftJoin = new Each( leftJoin, lhsJoin.getFields().getFields(), new Identity());	// outgoing -> "keepField"
+		}
+		return leftJoin;
+		//
+	}
+	
 	/**
 	 * Build a join between all the literals of the rule
 	 * 
@@ -216,9 +224,19 @@ public class CascadingRuleCompiler implements IRuleCompiler {
 	 * @param subgoalsIterator
 	 * @return
 	 */
-	public PipeFielded buildJoin(FieldsVariablesMapping fieldsVariablesMapping, IAtom head, PipeFielded lhsJoin, Iterator<Entry<IAtom, Pipe>> subgoalsIterator) {
+	public PipeFielded buildJoin(FieldsVariablesMapping fieldsVariablesMapping, IAtom head, boolean leftJoinApplied, PipeFielded lhsJoin, 
+			Iterator<Entry<IAtom, Pipe>> subgoalsIterator) {
+		Pipe leftJoin = null;
+		if (!leftJoinApplied) {
+			leftJoin = eliminateOldInferencedData(fieldsVariablesMapping, head, lhsJoin);
+			leftJoinApplied = leftJoin != null;
+		}
+		
 		//if not subgoals left return the last join
 		if (!subgoalsIterator.hasNext()) {
+			if (leftJoin != null) {
+				return new PipeFielded(fieldsVariablesMapping, leftJoin, lhsJoin.getFields());
+			}
 			return lhsJoin;
 		}
 		Entry<IAtom, Pipe> subgoal = subgoalsIterator.next();
@@ -228,38 +246,25 @@ public class CascadingRuleCompiler implements IRuleCompiler {
 		//first call, create pipe for the first subgoal, nothing to join
 		if (lhsJoin == null) {
 			PipeFielded pipeFielded = new PipeFielded(fieldsVariablesMapping, pipe, atom);
-			return buildJoin(fieldsVariablesMapping, head, pipeFielded, subgoalsIterator);
+			return buildJoin(fieldsVariablesMapping, head, leftJoinApplied, pipeFielded, subgoalsIterator);
 		}
-		
-		// check whether all head's variable fields are in the stream, do the outer join if so
-		FieldsList headFieldsList = identifyHeadVariableFields(fieldsVariablesMapping, head, lhsJoin.getFields());
-		if (headFieldsList != null) {
-			
-		}
-		//
-		
-		IAtom previousAtom = lhsJoin.getAtom();
-		Map<String, String> commonFields = getCommonFields(fieldsVariablesMapping, previousAtom, atom);
 
-		//compose the group fields for the left pipe and the right pipe
-		Fields lhsFields = new Fields();
-		Fields rhsFields = new Fields();
-		for (Entry<String, String> commonFieldEntry : commonFields.entrySet()) {
-			rhsFields = rhsFields.append(new Fields(commonFieldEntry.getKey()));
-			lhsFields = lhsFields.append(new Fields(commonFieldEntry.getValue()));
-		}
+		AtomsCommonFields atomsCommonFields = new AtomsCommonFields(fieldsVariablesMapping, lhsJoin.getFields(), atom);
 
 		//compose the output fields list
 		FieldsList outputFieldsList = composeOutputFields(fieldsVariablesMapping, lhsJoin.getFields(), atom);
 		
 		//join the previous join's pipe with the pipe for this literal
-		Pipe join = new CoGroup(lhsJoin.getPipe(), lhsFields, pipe, rhsFields, outputFieldsList.getFields(), new InnerJoin());
+		Fields lhsFields = atomsCommonFields.getLhsFields().getFields();
+		Fields rhsFields = atomsCommonFields.getRhsFields().getFields();
+		Pipe lhsPipe = (leftJoin == null) ? lhsJoin.getPipe() : leftJoin;
+		Pipe join = new CoGroup(lhsPipe, lhsFields, pipe, rhsFields, outputFieldsList.getFields(), new InnerJoin());
 		
 		FieldsList keepFieldsList = fieldsToKeep(fieldsVariablesMapping, outputFieldsList);
 		join = new Each( join, keepFieldsList.getFields(), new Identity());	// outgoing -> "keepField"
 		
-		PipeFielded pipeFielded = new PipeFielded(fieldsVariablesMapping, join, atom, keepFieldsList);
-		return buildJoin(fieldsVariablesMapping, head, pipeFielded, subgoalsIterator);
+		PipeFielded pipeFielded = new PipeFielded(fieldsVariablesMapping, join, keepFieldsList);
+		return buildJoin(fieldsVariablesMapping, head, leftJoinApplied, pipeFielded, subgoalsIterator);
 	}
 	
 	/**
@@ -293,7 +298,7 @@ public class CascadingRuleCompiler implements IRuleCompiler {
 				"Cannot setup joins with no subgoals.");			
 		}
 
-		return buildJoin(fieldsVariablesMapping, head, null, subGoals.entrySet().iterator());
+		return buildJoin(fieldsVariablesMapping, head, false, null, subGoals.entrySet().iterator());
 	}
 
 	/**
@@ -374,7 +379,7 @@ public class CascadingRuleCompiler implements IRuleCompiler {
 		for (ILiteral literal : lits) {
 			IAtom atom = literal.getAtom();
 			Tap tap = mFacts.getFacts(fieldsVariablesMapping, atom);
-			sources.put(atom.getPredicate().getPredicateSymbol(), tap);
+			sources.put(atom.toString(), tap);
 		}
 
 		List<ILiteral> head = originalRule.getHead();
@@ -406,7 +411,9 @@ public class CascadingRuleCompiler implements IRuleCompiler {
 		//rulePipe = new Each( rulePipe, new Fields(1, 2, 3), new Identity(), Fields.RESULTS );
 		
 		IAtom headAtom = head.get(0).getAtom();
-		
+		Tap headTap = mFacts.getFacts(fieldsVariablesMapping, headAtom);
+		sources.put(headAtom.toString(), headTap);
+
 		rulePipe = new Each( rulePipe, new Insert( new Fields(HEAD_PREDICATE_FIELD), headAtom.getPredicate().getPredicateSymbol()), Fields.ALL );
 		
 		FieldsList headFieldsList = identifyHeadVariableFields(fieldsVariablesMapping, headAtom, rulePipeFielded.getFields());
