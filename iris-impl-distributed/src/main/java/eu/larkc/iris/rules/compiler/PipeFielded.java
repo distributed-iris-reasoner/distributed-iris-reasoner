@@ -3,9 +3,6 @@
  */
 package eu.larkc.iris.rules.compiler;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.deri.iris.api.basics.IAtom;
 import org.deri.iris.api.terms.ITerm;
 
@@ -20,7 +17,7 @@ public class PipeFielded {
 
 	private Pipe pipe;
 	private IAtom atom;
-	private List<String> fields;
+	private FieldsList fields;
 	
 	public PipeFielded(FieldsVariablesMapping fieldsVariablesMapping, Pipe pipe, IAtom atom) {
 		this.pipe = pipe;
@@ -28,14 +25,14 @@ public class PipeFielded {
 		this.fields = fieldsFromAtom(fieldsVariablesMapping, atom);
 	}
 
-	public PipeFielded(FieldsVariablesMapping fieldsVariablesMapping, Pipe pipe, IAtom atom, List<String> fields) {
+	public PipeFielded(FieldsVariablesMapping fieldsVariablesMapping, Pipe pipe, IAtom atom, FieldsList fields) {
 		this.pipe = pipe;
 		this.atom = atom;
 		this.fields = fields;
 	}
 
-	private List<String> fieldsFromAtom(FieldsVariablesMapping fieldsVariablesMapping, IAtom atom) {
-		List<String> alhsFields = new ArrayList<String>();
+	private FieldsList fieldsFromAtom(FieldsVariablesMapping fieldsVariablesMapping, IAtom atom) {
+		FieldsList alhsFields = new FieldsList();
 		alhsFields.add(atom.getPredicate().getPredicateSymbol());
 		for (int i = 0; i < atom.getTuple().size(); i++) {
 			ITerm term = atom.getTuple().get(i);
@@ -53,7 +50,7 @@ public class PipeFielded {
 		return pipe;
 	}
 
-	public List<String> getFields() {
+	public FieldsList getFields() {
 		return fields;
 	}
 	
