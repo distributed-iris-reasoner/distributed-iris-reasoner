@@ -6,11 +6,13 @@ package eu.larkc.iris.rules.compiler;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.deri.iris.Configuration;
@@ -227,7 +229,29 @@ public class CascadingRuleCompiler implements IRuleCompiler {
 
 		//join the previous join's pipe with the pipe for this literal
 		Pipe join = new CoGroup(lhsJoin.getPipe(), lhsFields, pipe, rhsFields, outputFields, new InnerJoin());
-		PipeFielded pipeFielded = new PipeFielded(fieldsVariablesMapping, join, atom, outputFieldsList);
+		
+		
+		List<String> keepFieldsList = new ArrayList<String>();
+		Set<ITerm> fieldTerms = new HashSet<ITerm>();
+		for (String field : outputFieldsList) {
+			ITerm term = fieldsVariablesMapping.getVariable(field);
+			if (term == null) {
+				continue;
+			}
+			if (fieldTerms.contains(term)) {
+				continue;
+			}
+			fieldTerms.add(term);
+			keepFieldsList.add(field);
+		}
+		Fields keepFields = new Fields();
+		for (String field : keepFieldsList) {
+			keepFields = keepFields.append(new Fields(field));
+		}
+		join = new Each( join, keepFields, new Identity());	// outgoing -> "keepField"
+		
+		
+		PipeFielded pipeFielded = new PipeFielded(fieldsVariablesMapping, join, atom, keepFieldsList);
 		return buildJoin(fieldsVariablesMapping, pipeFielded, subgoalsIterator);
 	}
 	
