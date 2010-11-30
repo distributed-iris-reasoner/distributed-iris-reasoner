@@ -41,7 +41,14 @@ public class RdfRecord extends AtomRecord {
 		RdfStorage rdfStorage = (RdfStorage) storage;
 		Model model = rdfStorage.getModel();
 		Resource subject = new URIImpl((String) tuple.get(1));
-		String objectTuple = ((String) tuple.get(2));
+		Class[] types = tuple.getTypes();
+		String objectTuple = null;
+		if (types[2].isAssignableFrom(String.class)) {
+			objectTuple = ((String) tuple.get(2));
+		} else {
+			objectTuple = "'" + ((String) tuple.get(2).toString()) + "'";
+		}
+		
 		Node object = null;
 		if (objectTuple.startsWith("'") && objectTuple.endsWith("'")) {
 			object = new PlainLiteralImpl(objectTuple.replace("'", ""));

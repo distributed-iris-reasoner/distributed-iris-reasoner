@@ -50,14 +50,17 @@ public class FactsScheme extends Scheme {
 	 */
 	private static final long serialVersionUID = 3622684910621818754L;
 
+	private String storageId;
 	private IAtom atom = null;
 	
 	IFactsConfiguration factsConfiguration = null;
 
-	public FactsScheme() {
+	public FactsScheme(String storageId) {
+		this.storageId = storageId;
 	}
 
-	public FactsScheme(FieldsVariablesMapping fieldsVariablesMapping, IAtom atom) {
+	public FactsScheme(String storageId, FieldsVariablesMapping fieldsVariablesMapping, IAtom atom) {
+		this(storageId);
 		this.atom = atom;
 		ITuple tuple = atom.getTuple();
 		Fields sourceFields = new Fields();
@@ -99,16 +102,19 @@ public class FactsScheme extends Scheme {
 		if (atom != null) {
 			FactsScheme rhs = (FactsScheme) obj;
 			return new EqualsBuilder().appendSuper(super.equals(obj)).append(
+					storageId, rhs.storageId).append(
 					atom, rhs.atom).isEquals();
 		} else {
-			return super.equals(obj);
+			FactsScheme rhs = (FactsScheme) obj;
+			return new EqualsBuilder().appendSuper(super.equals(obj)).append(
+					storageId, rhs.storageId).isEquals();
 		}
 	}
 
 	@Override
 	public int hashCode() {
 		if (atom != null) {
-			return new HashCodeBuilder().appendSuper(super.hashCode()).append(atom.hashCode()).toHashCode();
+			return new HashCodeBuilder().appendSuper(super.hashCode()).append(storageId.hashCode()).append(atom.hashCode()).toHashCode();
 		} else {
 			return super.hashCode();
 		}

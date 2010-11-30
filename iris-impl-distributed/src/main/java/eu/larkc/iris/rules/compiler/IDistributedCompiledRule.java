@@ -21,7 +21,7 @@ import org.deri.iris.facts.IFacts;
 import org.deri.iris.storage.IRelation;
 
 /**
- * @author vroman
+ * @author valer.roman@softgress.com
  *
  */
 public interface IDistributedCompiledRule {

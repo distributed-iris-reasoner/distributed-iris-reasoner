@@ -1,5 +1,17 @@
-/**
+/*
+ * Copyright 2010 Softgress - http://www.softgress.com/
  * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package eu.larkc.iris.rules.compiler;
 
@@ -28,7 +40,6 @@ import org.deri.iris.api.terms.ITerm;
 import org.deri.iris.api.terms.IVariable;
 import org.deri.iris.utils.TermMatchingAndSubstitution;
 
-import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.operation.DebugLevel;
 import cascading.operation.Identity;
@@ -94,11 +105,11 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		Properties properties = new Properties();
 		FlowConnector.setDebugLevel(properties, DebugLevel.NONE);
 
-		Flow compiledCascadingRuleFlow = attachTaps(fieldsVariableMapping, bodyPipe, rule);
+		FlowAssembly compiledCascadingRuleFlowAssembly = attachTaps(fieldsVariableMapping, bodyPipe, rule);
 
 		IPredicate headPredicate = head.getPredicate();
 
-		return new CascadingCompiledRule(headPredicate, compiledCascadingRuleFlow,
+		return new CascadingCompiledRule(headPredicate, compiledCascadingRuleFlowAssembly,
 				mConfiguration);
 	}
 
@@ -369,7 +380,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 * @param originalRule
 	 * @return
 	 */
-	protected Flow attachTaps(FieldsVariablesMapping fieldsVariablesMapping, PipeFielded rulePipeFielded, IRule originalRule) {
+	protected FlowAssembly attachTaps(FieldsVariablesMapping fieldsVariablesMapping, PipeFielded rulePipeFielded, IRule originalRule) {
 
 		Pipe rulePipe = rulePipeFielded.getPipe();
 		
@@ -414,27 +425,30 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		Tap headTap = mFacts.getFacts(fieldsVariablesMapping, headAtom);
 		sources.put(headAtom.toString(), headTap);
 
-		rulePipe = new Each( rulePipe, new Insert( new Fields(HEAD_PREDICATE_FIELD), headAtom.getPredicate().getPredicateSymbol()), Fields.ALL );
+		Pipe resultPipe = new Pipe("resultTail", rulePipe);
+		resultPipe = new Each( resultPipe, new Insert( new Fields(HEAD_PREDICATE_FIELD), headAtom.getPredicate().getPredicateSymbol()), Fields.ALL );
 		
 		FieldsList headFieldsList = identifyHeadVariableFields(fieldsVariablesMapping, headAtom, rulePipeFielded.getFields());
 		headFieldsList.add(0, HEAD_PREDICATE_FIELD);
 		Fields headFields = headFieldsList.getFields();
 
-		rulePipe = new Each( rulePipe, headFields, new Identity(headFields));
+		resultPipe = new Each( resultPipe, headFields, new Identity(headFields));
 
 		//this should go by ordinal
 		//IAtom headAtom = head.get(0).getAtom();
 		//Tap headSink = mFacts.getFacts(headAtom);
 		Tap headSink = mFacts.getFacts();
-		
-		Flow flow = new FlowConnector().connect(originalRule.toString(),
-					sources, headSink, rulePipe);
+				
+		/*
+		Flow flow = new FlowConnector().connect(flowName, sources, sinks, resultPipe, countPipe);
 		
 		if(flow != null) {
 			flow.writeDOT("flow.dot");
 		}
-
-		return flow;
+		*/
+		
+		FlowAssembly flowAssembly = new FlowAssembly(sources, headSink, resultPipe);
+		return flowAssembly;
 	}
 
 	/*

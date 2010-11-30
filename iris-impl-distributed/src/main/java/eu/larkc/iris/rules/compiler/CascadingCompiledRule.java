@@ -1,7 +1,21 @@
-/**
+/*
+ * Copyright 2010 Softgress - http://www.softgress.com/
  * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package eu.larkc.iris.rules.compiler;
+
+import java.io.IOException;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.deri.iris.Configuration;
@@ -11,7 +25,8 @@ import org.deri.iris.facts.IFacts;
 import org.deri.iris.storage.IRelation;
 
 import cascading.flow.Flow;
-import eu.larkc.iris.storage.FactsTap;
+import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntryIterator;
 
 /**
  * CascadingCompiledRule encapsulates a rule that has been translated from the IRIS internal representation to a suitable cascading workflow.
@@ -24,9 +39,9 @@ import eu.larkc.iris.storage.FactsTap;
 public class CascadingCompiledRule implements IDistributedCompiledRule {
 
 	
-	public CascadingCompiledRule(IPredicate headPredicate, Flow flow, Configuration configuration){
+	public CascadingCompiledRule(IPredicate headPredicate, FlowAssembly flowAssembly, Configuration configuration){
 		this.mHeadPredicate = headPredicate;
-		this.mFlow = flow;
+		this.mFlowAssembly = flowAssembly;
 		this.mConfiguration = configuration;
 	}
 
@@ -38,10 +53,12 @@ public class CascadingCompiledRule implements IDistributedCompiledRule {
 	public boolean evaluate() throws EvaluationException {
 		
 		//start returns immediately		
-		if(mFlow == null) {
-			throw new IllegalArgumentException("Flow must not be null");
+		if(mFlowAssembly == null) {
+			throw new IllegalArgumentException("Flow assembly must not be null");
 		}
-		mFlow.complete();
+		String flowName = "http://eu.larkc/flow/" + System.currentTimeMillis();
+		Flow flow = mFlowAssembly.createFlow(flowName);
+		flow.complete();
 		
 		//TODO: jobconf is constructed within the rule compiler right now, which is likely not the right place.
 		//this should either happen here or in a custom evaluator implementation		
@@ -54,7 +71,25 @@ public class CascadingCompiledRule implements IDistributedCompiledRule {
 		//Naive evaluation will terminate when evaluate returns null.
 		//Until recursion is supported this code will work fine, then a more complex solution is needed.
 		
-		return ((FactsTap) mFlow.getSink()).hasNewInferences();
+		boolean hasNewInferences = false;
+		try {
+			TupleEntryIterator iterator = flow.openSink("countTail");
+			while (iterator.hasNext()) {
+				Tuple tuple = iterator.next().getTuple();
+				String predicate = tuple.getString(0);
+				String subject = tuple.getString(1);
+				String object = tuple.getString(2);
+				if (predicate.equals("http://eu.larkc/delta") && subject.equals(flowName)) {
+					if (Integer.valueOf(object.replace("'", "")) > 0) {
+						hasNewInferences = true;
+					}
+				}
+			}
+		} catch (IOException e) {
+			throw new EvaluationException("unable to open delta tail");
+		}
+		
+		return hasNewInferences;
 	}
 
 	/*
@@ -87,6 +122,6 @@ public class CascadingCompiledRule implements IDistributedCompiledRule {
 	/**
 	 * The internal representation as a cascading flow of this rule.
 	 */
-	private final Flow mFlow;
+	private final FlowAssembly mFlowAssembly;
 
 }

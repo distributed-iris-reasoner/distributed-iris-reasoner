@@ -59,14 +59,14 @@ public class FactsTap extends Tap {
 	}
 	
 	FactsTap(String factsConfigurationClass, String storageId, FieldsVariablesMapping fieldsVariablesMapping, IAtom atom) {
-		this(new FactsScheme(fieldsVariablesMapping, atom));
+		this(new FactsScheme(storageId, fieldsVariablesMapping, atom));
 		this.factsConfigurationClass = factsConfigurationClass;
 		this.atom = atom;
 		this.storageId = storageId;
 	}
 
 	FactsTap(String factsConfigurationClass, String storageId) {
-		this(new FactsScheme());
+		this(new FactsScheme(storageId));
 		this.factsConfigurationClass = factsConfigurationClass;
 		this.storageId = storageId;
 	}
@@ -172,4 +172,5 @@ public class FactsTap extends Tap {
 		}
 		return false;
 	}
+
 }

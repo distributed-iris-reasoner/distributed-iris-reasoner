@@ -18,8 +18,6 @@ package eu.larkc.iris.storage.rdf;
 
 import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordWriter;
@@ -37,8 +35,9 @@ import eu.larkc.iris.storage.FactsOutputFormat;
  * type extending DBWritable. Returned {@link RecordWriter} writes <b>only the
  * key</b> to the database with a batch SQL query.
  */
+@SuppressWarnings("deprecation")
 public class RdfOutputFormat<K extends AtomRecord, V> extends FactsOutputFormat<K, V> {
-	private static final Log LOG = LogFactory.getLog(RdfOutputFormat.class);
+	//private static final Log LOG = LogFactory.getLog(RdfOutputFormat.class);
 
 	/** {@inheritDoc} */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
