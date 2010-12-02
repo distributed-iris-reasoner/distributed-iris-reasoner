@@ -19,21 +19,12 @@
 
 package eu.larkc.iris.rules.compiler;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
-import cascading.operation.Identity;
-import cascading.operation.Insert;
-import cascading.operation.aggregator.Count;
-import cascading.pipe.Each;
-import cascading.pipe.Every;
-import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
-import cascading.tuple.Fields;
-import eu.larkc.iris.storage.FactsFactory;
 
 /**
  * @author valer.roman@softgress.com
@@ -41,33 +32,20 @@ import eu.larkc.iris.storage.FactsFactory;
  */
 public class FlowAssembly {
 
-	private static final String DELTA_PREDICATE_FIELD = "DELTA";
-	private static final String FLOW_ID_SUBJECT_FIELD = "FLOW_ID";
 
 	private Map<String, Tap> sources;
-	private Tap resultSink;
-	private Pipe resultPipe;
+	private Map<String, Tap> sinks;
+	private Pipe[] pipes;
 	
-	public FlowAssembly (Map<String, Tap> sources, Tap resultSink, Pipe resultPipe) {
+	public FlowAssembly (Map<String, Tap> sources, Map<String, Tap> sinks, Pipe... pipes) {
 		this.sources = sources;
-		this.resultSink = resultSink;
-		this.resultPipe = resultPipe;
+		this.sinks = sinks;
+		this.pipes = pipes;
 	}
 	
 	public Flow createFlow(String flowName) {
-		Pipe countPipe = new Pipe("countTail", resultPipe);
-		countPipe = new GroupBy(countPipe);
-		countPipe = new Every(countPipe, new Count(new Fields("count")));
-		countPipe = new Each( countPipe, new Insert( new Fields(DELTA_PREDICATE_FIELD), "http://eu.larkc/delta"), Fields.ALL );
-		countPipe = new Each( countPipe, new Insert( new Fields(FLOW_ID_SUBJECT_FIELD), flowName), Fields.ALL );
-		countPipe = new Each( countPipe, new Fields(DELTA_PREDICATE_FIELD, FLOW_ID_SUBJECT_FIELD, "count"), new Identity());
-		Tap countSink = FactsFactory.getInstance("delta").getFacts();
-		
-		Map<String, Tap> sinks = new HashMap<String, Tap>();
-		sinks.put(resultPipe.getName(), resultSink);
-		sinks.put(countPipe.getName(), countSink);
 
-		Flow flow = new FlowConnector().connect(flowName, sources, sinks, resultPipe, countPipe);
+		Flow flow = new FlowConnector().connect(flowName, sources, sinks, pipes);
 		
 		if(flow != null) {
 			flow.writeDOT("flow.dot");

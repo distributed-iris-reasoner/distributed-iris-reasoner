@@ -17,12 +17,12 @@ package eu.larkc.iris.evaluation.bottomup;
 
 import java.util.List;
 
-import org.deri.iris.Configuration;
 import org.deri.iris.EvaluationException;
 import org.deri.iris.api.basics.IRule;
 import org.deri.iris.evaluation.IEvaluationStrategy;
 
 import eu.larkc.iris.evaluation.IDistributedEvaluationStrategyFactory;
+import eu.larkc.iris.storage.FactsFactory;
 
 
 /**
@@ -40,10 +40,10 @@ public class DistributedBottomUpEvaluationStrategyFactory implements
 	 * @see org.deri.iris.evaluation.IEvaluationStrategyFactory#createEvaluator(org.deri.iris.facts.IFacts, java.util.List, org.deri.iris.Configuration)
 	 */
 	@Override
-	public IEvaluationStrategy createEvaluator(List<IRule> rules,
-			Configuration configuration) throws EvaluationException {
+	public IEvaluationStrategy createEvaluator(FactsFactory facts, List<IRule> rules,
+			eu.larkc.iris.Configuration configuration) throws EvaluationException {
 		
-		return new DistributedBottomUpEvaluationStrategy(configuration, mRuleEvaluatorFactory, rules);		
+		return new DistributedBottomUpEvaluationStrategy(facts, configuration, mRuleEvaluatorFactory, rules);		
 	}
 	
 	private final IDistributedRuleEvaluatorFactory mRuleEvaluatorFactory;

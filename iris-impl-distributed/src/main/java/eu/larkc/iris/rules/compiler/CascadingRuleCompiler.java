@@ -44,12 +44,16 @@ import cascading.flow.FlowConnector;
 import cascading.operation.DebugLevel;
 import cascading.operation.Identity;
 import cascading.operation.Insert;
+import cascading.operation.aggregator.Count;
 import cascading.operation.filter.FilterNotNull;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
+import cascading.pipe.Every;
+import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.cogroup.InnerJoin;
 import cascading.pipe.cogroup.LeftJoin;
+import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import eu.larkc.iris.evaluation.ConstantFilter;
@@ -70,7 +74,9 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 * Field name used for head predicate
 	 */
 	private static final String HEAD_PREDICATE_FIELD = "HPF";
-	
+
+	private static final String DELTA_FIELD = "DELTA";
+
 	/**
 	 * Sets up a CascadingRuleCompiler with a specific configuration, taking
 	 * relevant datasources for rule execution into account.
@@ -78,8 +84,8 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 * @param configuration
 	 * @param facts
 	 */
-	public CascadingRuleCompiler(Configuration configuration) {
-		// this.mFacts = facts;
+	public CascadingRuleCompiler(eu.larkc.iris.Configuration configuration, FactsFactory facts) {
+		this.mFacts = facts;
 		this.mConfiguration = configuration;
 	}
 
@@ -385,6 +391,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		Pipe rulePipe = rulePipeFielded.getPipe();
 		
 		Map<String, Tap> sources = new HashMap<String, Tap>();
+		Map<String, Tap> sinks = new HashMap<String, Tap>();
 		
 		List<ILiteral> lits = originalRule.getBody();
 		for (ILiteral literal : lits) {
@@ -438,7 +445,16 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		//IAtom headAtom = head.get(0).getAtom();
 		//Tap headSink = mFacts.getFacts(headAtom);
 		Tap headSink = mFacts.getFacts();
-				
+		
+		Pipe countPipe = new Pipe(mConfiguration.DELTA_TAIL_NAME, rulePipe);
+		countPipe = new GroupBy(countPipe);
+		countPipe = new Every(countPipe, new Count(new Fields(DELTA_FIELD)));
+		countPipe = new Each( countPipe, new Fields(DELTA_FIELD), new Identity());
+		Tap countSink = new Hfs(new Fields(DELTA_FIELD), mConfiguration.DELTA_TAIL_HFS_PATH, true);
+		
+		sinks.put(resultPipe.getName(), headSink);
+		sinks.put(countPipe.getName(), countSink);
+
 		/*
 		Flow flow = new FlowConnector().connect(flowName, sources, sinks, resultPipe, countPipe);
 		
@@ -447,7 +463,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		}
 		*/
 		
-		FlowAssembly flowAssembly = new FlowAssembly(sources, headSink, resultPipe);
+		FlowAssembly flowAssembly = new FlowAssembly(sources, sinks, resultPipe, countPipe);
 		return flowAssembly;
 	}
 
@@ -478,10 +494,10 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 * This keeps encapsulates the access to external datasources and results in
 	 * corresponding Cascading Taps.
 	 */
-	private final FactsFactory mFacts = FactsFactory.getInstance("default");
+	private final FactsFactory mFacts;
 
 	/**
 	 * Central configuration object
 	 */
-	private final Configuration mConfiguration;
+	private final eu.larkc.iris.Configuration mConfiguration;
 }

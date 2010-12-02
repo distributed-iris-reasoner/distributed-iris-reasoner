@@ -17,22 +17,26 @@ package eu.larkc.iris.evaluation.bottomup;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
-import org.deri.iris.Configuration;
 import org.deri.iris.EvaluationException;
 import org.deri.iris.ProgramNotStratifiedException;
 import org.deri.iris.RuleUnsafeException;
+import org.deri.iris.api.basics.ILiteral;
 import org.deri.iris.api.basics.IQuery;
 import org.deri.iris.api.basics.IRule;
 import org.deri.iris.api.terms.IVariable;
 import org.deri.iris.evaluation.IEvaluationStrategy;
 import org.deri.iris.evaluation.stratifiedbottomup.EvaluationUtilities;
-import org.deri.iris.evaluation.stratifiedbottomup.naive.NaiveEvaluator;
 import org.deri.iris.storage.IRelation;
 
+import eu.larkc.iris.evaluation.PredicateCounts;
+import eu.larkc.iris.evaluation.bottomup.naive.DistributedNaiveEvaluator;
 import eu.larkc.iris.rules.compiler.CascadingRuleCompiler;
 import eu.larkc.iris.rules.compiler.IDistributedCompiledRule;
 import eu.larkc.iris.rules.compiler.IDistributedRuleCompiler;
+import eu.larkc.iris.storage.FactsFactory;
+import eu.larkc.iris.storage.FactsTap;
 
 /**
  * For now we can choose the standard interface of IEvaluation Strategy as
@@ -58,9 +62,9 @@ public class DistributedBottomUpEvaluationStrategy implements
 	 * @param rules
 	 * @param facts
 	 */
-	public DistributedBottomUpEvaluationStrategy(Configuration configuration,
+	public DistributedBottomUpEvaluationStrategy(FactsFactory facts, eu.larkc.iris.Configuration configuration,
 			IDistributedRuleEvaluatorFactory ruleEvaluatorFactory, List<IRule> rules) {
-		
+		this.mFacts = facts;
 		this.mRuleEvaluatorFactory = ruleEvaluatorFactory;
 		this.mConfiguration = configuration;
 		this.mRules = rules;
@@ -120,15 +124,26 @@ public class DistributedBottomUpEvaluationStrategy implements
 		List<List<IRule>> stratifiedRules = utils.stratify(safeRules);
 
 		// compile to cascading
-		IDistributedRuleCompiler rc = new CascadingRuleCompiler(mConfiguration);
+		IDistributedRuleCompiler rc = new CascadingRuleCompiler(mConfiguration, mFacts);
 
 		IDistributedRuleEvaluator evaluator = mRuleEvaluatorFactory.createEvaluator();
 		// A naive evaluator should work here, otherwise a new factory simply
 		// needs to be passed in
-		assert evaluator instanceof NaiveEvaluator : "Only naiveEvaluator for now";
+		assert evaluator instanceof DistributedNaiveEvaluator : "Only naiveEvaluator for now";
 
+		PredicateCounts predicateCounts = PredicateCounts.getInstance(mConfiguration, mFacts);
+		
 		// for each rule layer, reorder and optimize, compile, evaluate
 		for (List<IRule> stratum : stratifiedRules) {
+			
+			for (IRule rule : stratum) {
+				ListIterator<ILiteral> iterator = rule.getBody().listIterator();
+				while (iterator.hasNext()) {
+					ILiteral literal = iterator.next();
+					Long count = predicateCounts.getCount(literal.getAtom());
+				}
+			}
+
 			// Re-order stratum, this could also work on the whole program at
 			// once, see above
 			List<IRule> reorderedRules = utils.reOrderRules(stratum);
@@ -159,8 +174,10 @@ public class DistributedBottomUpEvaluationStrategy implements
 
 	protected final IDistributedRuleEvaluatorFactory mRuleEvaluatorFactory;
 
+	protected final FactsFactory mFacts;
+	
 	protected final List<IRule> mRules;
 
-	protected final Configuration mConfiguration;
+	protected final eu.larkc.iris.Configuration mConfiguration;
 	
 }

@@ -18,13 +18,14 @@ package eu.larkc.iris.evaluation.distributed;
 import java.util.Collection;
 import java.util.List;
 
-import org.deri.iris.Configuration;
 import org.deri.iris.api.basics.IQuery;
 import org.deri.iris.api.basics.IRule;
 import org.deri.iris.api.terms.IVariable;
 import org.deri.iris.compiler.Parser;
 import org.deri.iris.compiler.ParserException;
 import org.deri.iris.storage.IRelation;
+
+import eu.larkc.iris.storage.FactsFactory;
 
 /**
  * 
@@ -84,23 +85,23 @@ public abstract class ProgramEvaluationTest extends EvaluationTest {
 		return null;
 	}
 
-	protected IRelation evaluate(String query) throws Exception {
-		return evaluate(parseQuery(query));
+	protected IRelation evaluate(FactsFactory facts, String query) throws Exception {
+		return evaluate(facts, parseQuery(query));
 	}
 
-	protected IRelation evaluate(String query, eu.larkc.iris.Configuration configuration)
+	protected IRelation evaluate(FactsFactory facts, String query, eu.larkc.iris.Configuration configuration)
 			throws Exception {
-		return evaluate(parseQuery(query), configuration);
+		return evaluate(facts, parseQuery(query), configuration);
 	}
 
-	protected IRelation evaluate(String query, List<IVariable> outputVariables)
+	protected IRelation evaluate(FactsFactory facts, String query, List<IVariable> outputVariables)
 			throws Exception {
-		return evaluate(parseQuery(query), outputVariables);
+		return evaluate(facts, parseQuery(query), outputVariables);
 	}
 
-	protected IRelation evaluate(String query, List<IVariable> outputVariables,
+	protected IRelation evaluate(FactsFactory facts, String query, List<IVariable> outputVariables,
 			eu.larkc.iris.Configuration configuration) throws Exception {
-		return evaluate(parseQuery(query), outputVariables, configuration);
+		return evaluate(facts, parseQuery(query), outputVariables, configuration);
 	}
 
 	/**

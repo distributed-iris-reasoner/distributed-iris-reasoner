@@ -39,7 +39,7 @@ import cascading.tuple.TupleEntryIterator;
 public class CascadingCompiledRule implements IDistributedCompiledRule {
 
 	
-	public CascadingCompiledRule(IPredicate headPredicate, FlowAssembly flowAssembly, Configuration configuration){
+	public CascadingCompiledRule(IPredicate headPredicate, FlowAssembly flowAssembly, eu.larkc.iris.Configuration configuration){
 		this.mHeadPredicate = headPredicate;
 		this.mFlowAssembly = flowAssembly;
 		this.mConfiguration = configuration;
@@ -71,27 +71,29 @@ public class CascadingCompiledRule implements IDistributedCompiledRule {
 		//Naive evaluation will terminate when evaluate returns null.
 		//Until recursion is supported this code will work fine, then a more complex solution is needed.
 		
+		return hasNewInferences(flow);
+	}
+
+	/*
+	 * Check if new inferences have been generated with the last evaluation
+	 */
+	private boolean hasNewInferences(Flow flow) throws EvaluationException {
 		boolean hasNewInferences = false;
 		try {
-			TupleEntryIterator iterator = flow.openSink("countTail");
+			TupleEntryIterator iterator = flow.openSink(mConfiguration.DELTA_TAIL_NAME);
 			while (iterator.hasNext()) {
 				Tuple tuple = iterator.next().getTuple();
-				String predicate = tuple.getString(0);
-				String subject = tuple.getString(1);
-				String object = tuple.getString(2);
-				if (predicate.equals("http://eu.larkc/delta") && subject.equals(flowName)) {
-					if (Integer.valueOf(object.replace("'", "")) > 0) {
-						hasNewInferences = true;
-					}
+				String delta = tuple.getString(0);
+				if (Integer.valueOf(delta) > 0) {
+					hasNewInferences = true;
 				}
 			}
 		} catch (IOException e) {
 			throw new EvaluationException("unable to open delta tail");
 		}
-		
 		return hasNewInferences;
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * @see eu.larkc.iris.rules.compiler.IDistributedCompiledRule#evaluateIteratively(org.deri.iris.facts.IFacts)
@@ -112,7 +114,7 @@ public class CascadingCompiledRule implements IDistributedCompiledRule {
 	}
 	
 	
-	private final Configuration mConfiguration;
+	private final eu.larkc.iris.Configuration mConfiguration;
 	
 	/**
 	 * Describes the predicate to which the original rules output belongs.

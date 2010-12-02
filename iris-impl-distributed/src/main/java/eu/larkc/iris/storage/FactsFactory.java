@@ -81,4 +81,8 @@ public class FactsFactory {
 		String factsConfigurationClass = properties.getProperty(IFactsConfiguration.FACTS_CONFIGURATION_CLASS);
 		return new FactsTap(factsConfigurationClass, storageId);
 	}
+
+	public String getStorageId() {
+		return storageId;
+	}
 }

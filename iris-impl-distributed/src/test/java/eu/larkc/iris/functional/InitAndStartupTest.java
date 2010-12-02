@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.larkc.iris.CascadingTest;
+import eu.larkc.iris.storage.FactsFactory;
 
 /**
  * 
@@ -74,7 +75,7 @@ public class InitAndStartupTest extends CascadingTest {
 	}
 
 	public void testEvaluation() throws Exception {
-		IRelation relation = evaluate("?- p(?X, ?Y).");
+		IRelation relation = evaluate(FactsFactory.getInstance("default"), "?- p(?X, ?Y).");
 		
 		ClosableIterator<Statement> iterator = model.findStatements(new TriplePatternImpl((ResourceOrVariable) null, 
 				new URIImpl("http://larkc.eu/default/p"), (NodeOrVariable) null));

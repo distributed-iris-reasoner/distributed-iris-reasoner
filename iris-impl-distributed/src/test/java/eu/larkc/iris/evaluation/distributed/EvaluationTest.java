@@ -29,6 +29,7 @@ import org.deri.iris.storage.IRelation;
 
 import eu.larkc.iris.evaluation.bottomup.DistributedBottomUpEvaluationStrategyFactory;
 import eu.larkc.iris.evaluation.bottomup.naive.DistributedNaiveEvaluatorFactory;
+import eu.larkc.iris.storage.FactsFactory;
 
 /**
  * 
@@ -71,29 +72,29 @@ public abstract class EvaluationTest extends TestCase {
 
 	protected abstract List<IQuery> createQueries();
 
-	protected IRelation evaluate(IQuery query) throws Exception {
+	protected IRelation evaluate(FactsFactory facts, IQuery query) throws Exception {
 		// Use default configuration.
-		return evaluate(query, new ArrayList<IVariable>(), defaultConfiguration);
+		return evaluate(facts, query, new ArrayList<IVariable>(), defaultConfiguration);
 	}
 
-	protected IRelation evaluate(IQuery query, eu.larkc.iris.Configuration configuration)
+	protected IRelation evaluate(FactsFactory facts, IQuery query, eu.larkc.iris.Configuration configuration)
 			throws Exception {
-		return evaluate(query, new ArrayList<IVariable>(), configuration);
+		return evaluate(facts, query, new ArrayList<IVariable>(), configuration);
 	}
 
-	protected IRelation evaluate(IQuery query, List<IVariable> outputVariables)
+	protected IRelation evaluate(FactsFactory facts, IQuery query, List<IVariable> outputVariables)
 			throws Exception {
 		// Use default configuration.
-		return evaluate(query, outputVariables, defaultConfiguration);
+		return evaluate(facts, query, outputVariables, defaultConfiguration);
 	}
 
-	protected IRelation evaluate(IQuery query, List<IVariable> outputVariables,
+	protected IRelation evaluate(FactsFactory facts, IQuery query, List<IVariable> outputVariables,
 			eu.larkc.iris.Configuration configuration) throws Exception {
 		// Create strategy using factory.
 		long begin = System.currentTimeMillis();
 		//FIXME create a factory for the distributed environment without the facts parameter
 		IEvaluationStrategy strategy = configuration.evaluationStrategyFactory
-				.createEvaluator(rules, configuration); 
+				.createEvaluator(facts, rules, configuration); 
 
 		IRelation relation = strategy.evaluateQuery(query, outputVariables);
 
