@@ -45,14 +45,19 @@ public class RecursiveRuleTest extends CascadingTest {
 	private Model model = createStorage("default");
 	
 	public RecursiveRuleTest(String name) {
-		super(name);
+		super(name, true);
 	}
 	
-
 	@Override
 	protected  void createFacts() throws IOException {		
 		model.readFrom(this.getClass().getResourceAsStream("/input/recursive.rdf"));
 		model.commit();
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		model.close();
 	}
 
 	@Override
