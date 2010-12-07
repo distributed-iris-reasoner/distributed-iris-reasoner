@@ -47,19 +47,23 @@ public interface IFactsConfiguration extends Serializable {
 	
 	public static final String SINK_STORAGE_ID_PROPERTY = "mapred.facts.sink.storage.id";
 	
-	public void setSourceStorageId(JobConf jobConf, String storageId);
+	public void setJobConf(JobConf jobConf);
 	
-	public String getSourceStorageId(JobConf jobConf);
+	public JobConf getJobConf();
+	
+	public void setSourceStorageId(String storageId);
+	
+	public String getSourceStorageId();
 
-	public void setSinkStorageId(JobConf jobConf, String storageId);
+	public void setSinkStorageId(String storageId);
 	
-	public String getSinkStorageId(JobConf jobConf);
+	public String getSinkStorageId();
 	
 	public void setStorageProperties(Properties properties);
 	
-	public void configureInput(JobConf jobConf);
+	public void configureInput();
 	
-	public void configureOutput(JobConf jobConf);
+	public void configureOutput();
 	
 	public Class<? extends AtomRecord> getInputClass();
 	

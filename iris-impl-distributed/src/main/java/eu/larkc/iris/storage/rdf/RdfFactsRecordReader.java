@@ -18,6 +18,8 @@ package eu.larkc.iris.storage.rdf;
 
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
+import org.ontoware.rdf2go.model.ModelSet;
+import org.ontoware.rdf2go.model.node.impl.URIImpl;
 
 import eu.larkc.iris.storage.AtomRecord;
 import eu.larkc.iris.storage.FactsConfigurationFactory;
@@ -29,9 +31,11 @@ public class RdfFactsRecordReader<LongWritable, T extends AtomRecord> extends Fa
 	public RdfFactsRecordReader(InputSplit split, Class<T> inputClass, JobConf job) {
 		super(split, inputClass, job);
 		
+		String contextURI = ((RdfInputSplit) split).getContextURI();
 		rdfStorage = new RdfStorage();
 		RdfFactsConfiguration rdfFactsConfiguration = (RdfFactsConfiguration) FactsConfigurationFactory.getFactsConfiguration(job);
-		rdfStorage.setModel(rdfFactsConfiguration.getModel(job, true));
+		ModelSet modelSet = rdfFactsConfiguration.getModelSet(true);
+		rdfStorage.setModel(contextURI == null ? modelSet.getDefaultModel() : modelSet.getModel(new URIImpl(contextURI)));
 		rdfStorage.setPredicateFilter(job.get(IFactsConfiguration.PREDICATE_FILTER));
 	}
 }

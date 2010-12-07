@@ -15,7 +15,6 @@
  */
 package eu.larkc.iris.storage.rdf;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,12 +27,8 @@ import org.deri.iris.api.basics.IPredicate;
 import org.deri.iris.api.basics.ITuple;
 import org.deri.iris.basics.BasicFactory;
 import org.deri.iris.terms.TermFactory;
-import org.ontoware.rdf2go.model.Model;
-import org.ontoware.rdf2go.model.Statement;
-import org.ontoware.rdf2go.model.impl.StatementImpl;
-import org.ontoware.rdf2go.model.node.impl.PlainLiteralImpl;
-import org.ontoware.rdf2go.model.node.impl.URIImpl;
-import org.openrdf.rdf2go.RepositoryModel;
+import org.ontoware.rdf2go.model.ModelSet;
+import org.openrdf.rdf2go.RepositoryModelSet;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
@@ -55,7 +50,6 @@ import cascading.tuple.TupleEntryIterator;
 import eu.larkc.iris.storage.FactsConfigurationFactory;
 import eu.larkc.iris.storage.FactsFactory;
 import eu.larkc.iris.storage.FactsTap;
-import eu.larkc.iris.storage.FieldsVariablesMapping;
 
 /**
  * Tests for The Facts Tap
@@ -86,7 +80,7 @@ public class RdfFactsTapTest extends TestCase {
 		return new HashMap<Object, Object>(properties);
 	}
 
-	private Model createStorage(String storageId) {
+	private ModelSet createStorage(String storageId) {
 		Repository repository = new SailRepository(new MemoryStore());
 		try {
 			repository.initialize();
@@ -94,11 +88,10 @@ public class RdfFactsTapTest extends TestCase {
 			log.error("error initializing repository" ,e);
 			throw new RuntimeException("error initializing repository" ,e);
 		}
-		Model model = new RepositoryModel(repository);
-		model.open();
-		RdfFactsConfiguration.memoryRepositoryModels.put(storageId, model);
+		ModelSet modelSet = new RepositoryModelSet(repository);
+		RdfFactsConfiguration.memoryRepositoryModelSets.put(storageId, modelSet);
 		
-		return model;
+		return modelSet;
 	}
 	
 	@Override
@@ -124,7 +117,7 @@ public class RdfFactsTapTest extends TestCase {
 		
 		FactsConfigurationFactory.STORAGE_PROPERTIES = "/facts-storage-configuration-test.properties";
 
-		Model model = createStorage("humans");
+		ModelSet model = createStorage("humans");
 
 		model.readFrom(this.getClass().getResourceAsStream("/input/humans.rdf"));
 		

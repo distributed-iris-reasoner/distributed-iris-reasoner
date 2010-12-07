@@ -14,7 +14,8 @@ import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MiniMRCluster;
 import org.ontoware.rdf2go.model.Model;
-import org.openrdf.rdf2go.RepositoryModel;
+import org.ontoware.rdf2go.model.ModelSet;
+import org.openrdf.rdf2go.RepositoryModelSet;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
@@ -83,7 +84,7 @@ public abstract class CascadingTest extends ProgramEvaluationTest {
 		return new HashMap<Object, Object>(properties);
 	}
 
-	protected Model createStorage(String storageId) {
+	protected ModelSet createStorage(String storageId) {
 		Repository repository = new SailRepository(new MemoryStore());
 		try {
 			repository.initialize();
@@ -91,11 +92,10 @@ public abstract class CascadingTest extends ProgramEvaluationTest {
 			logger.error("error initializing repository" ,e);
 			throw new RuntimeException("error initializing repository" ,e);
 		}
-		Model model = new RepositoryModel(repository);
-		model.open();
-		RdfFactsConfiguration.memoryRepositoryModels.put(storageId, model);
+		ModelSet modelSet = new RepositoryModelSet(repository);
+		RdfFactsConfiguration.memoryRepositoryModelSets.put(storageId, modelSet);
 		
-		return model;
+		return modelSet;
 	}
 
 	@Override

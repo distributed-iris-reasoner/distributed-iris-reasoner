@@ -21,9 +21,9 @@ import java.util.Collection;
 
 import org.deri.iris.storage.IRelation;
 import org.ontoware.aifbcommons.collection.ClosableIterator;
-import org.ontoware.rdf2go.model.Model;
+import org.ontoware.rdf2go.model.ModelSet;
 import org.ontoware.rdf2go.model.Statement;
-import org.ontoware.rdf2go.model.impl.TriplePatternImpl;
+import org.ontoware.rdf2go.model.impl.QuadPatternImpl;
 import org.ontoware.rdf2go.model.node.NodeOrVariable;
 import org.ontoware.rdf2go.model.node.ResourceOrVariable;
 import org.ontoware.rdf2go.model.node.impl.URIImpl;
@@ -42,14 +42,15 @@ public class ConstantFilterTest extends CascadingTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(ConstantFilterTest.class);
 
-	private Model model = createStorage("default");
+	private ModelSet model = createStorage("default");
 	
 	public ConstantFilterTest(String name) {
 		super(name, true);
 	}
 	
 	@Override
-	protected  void createFacts() throws IOException {		
+	protected  void createFacts() throws IOException {
+		model.open();
 		model.readFrom(this.getClass().getResourceAsStream("/input/default.rdf"));
 		model.commit();
 	}
@@ -72,7 +73,7 @@ public class ConstantFilterTest extends CascadingTest {
 	public void testEvaluation() throws Exception {
 		IRelation relation = evaluate(FactsFactory.getInstance("default"), "?- p(?X, ?Y).");
 		
-		ClosableIterator<Statement> iterator = model.findStatements(new TriplePatternImpl((ResourceOrVariable) null, 
+		ClosableIterator<Statement> iterator = model.findStatements(new QuadPatternImpl(null, (ResourceOrVariable) null, 
 				new URIImpl("http://larkc.eu/default/p"), (NodeOrVariable) null));
 		assertTrue("no data", iterator.hasNext());
 		Statement statement = iterator.next();

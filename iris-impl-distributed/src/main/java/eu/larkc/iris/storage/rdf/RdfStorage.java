@@ -48,6 +48,9 @@ public class RdfStorage implements FactsStorage {
 	
 	@Override
 	public IAtom next() {
+		if (!model.isOpen()) {
+			model.open();
+		}
 		if (iterator == null) {
 			if (predicateFilter != null) {
 				iterator = model.findStatements(new TriplePatternImpl((ResourceOrVariable) null, new URIImpl(predicateFilter), (NodeOrVariable) null));
@@ -56,6 +59,9 @@ public class RdfStorage implements FactsStorage {
 			}
 		}
 		if (!iterator.hasNext()) {
+			if (model.isOpen()) {
+				model.close();
+			}
 			return null;
 		}
 		Statement statement = iterator.next();

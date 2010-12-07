@@ -33,6 +33,7 @@ import cascading.tap.TapException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import eu.larkc.iris.storage.rdf.RdfRecord;
 
 /**
  * Scheme used with a facts tap the source fields are the variable names of the
@@ -53,8 +54,6 @@ public class FactsScheme extends Scheme {
 	private String storageId;
 	private IAtom atom = null;
 	
-	IFactsConfiguration factsConfiguration = null;
-
 	public FactsScheme(String storageId) {
 		this.storageId = storageId;
 	}
@@ -122,9 +121,9 @@ public class FactsScheme extends Scheme {
 
 	@Override
 	public void sourceInit(Tap tap, JobConf jobConf) throws IOException {
-		factsConfiguration = FactsConfigurationFactory
+		IFactsConfiguration factsConfiguration = FactsConfigurationFactory
 				.getFactsConfiguration(jobConf);
-		factsConfiguration.configureInput(jobConf);
+		factsConfiguration.configureInput();
 	}
 
 	@Override
@@ -132,9 +131,9 @@ public class FactsScheme extends Scheme {
 		if (atom != null)
 			throw new TapException("cannot sink to this Scheme");
 
-		factsConfiguration = FactsConfigurationFactory
+		IFactsConfiguration factsConfiguration = FactsConfigurationFactory
 				.getFactsConfiguration(jobConf);
-		factsConfiguration.configureOutput(jobConf);
+		factsConfiguration.configureOutput();
 	}
 
 	@Override
@@ -149,8 +148,9 @@ public class FactsScheme extends Scheme {
 	public void sink(TupleEntry tupleEntry, OutputCollector outputCollector)
 			throws IOException {
 		Tuple result = tupleEntry.selectTuple(getSinkFields());
-		assert factsConfiguration != null;
-		outputCollector.collect(factsConfiguration.newRecordInstance(result), null);
+		//assert factsConfiguration != null;
+		//AtomRecord atomRecord = 
+		outputCollector.collect(new RdfRecord(result), null); //FIXME abstract RdfRecord class
 	}
 
 }

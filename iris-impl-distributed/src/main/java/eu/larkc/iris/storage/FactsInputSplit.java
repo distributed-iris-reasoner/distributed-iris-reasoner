@@ -32,12 +32,4 @@ public abstract class FactsInputSplit implements InputSplit {
 		return new String[] {};
 	}
 
-	/** {@inheritDoc} */
-	public void readFields(DataInput input) throws IOException {
-	}
-
-	/** {@inheritDoc} */
-	public void write(DataOutput output) throws IOException {
-	}
-
 }

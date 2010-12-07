@@ -38,29 +38,41 @@ public abstract class FactsConfiguration implements IFactsConfiguration {
 	protected Properties storageProperties = null;
 	public boolean newInferences;
 	
+	protected JobConf jobConf;
+	
 	public FactsConfiguration() {}
 
 	@Override
-	public void setSourceStorageId(JobConf jobConf, String storageId) {
+	public void setJobConf(JobConf jobConf) {
+		this.jobConf = jobConf;
+	}
+
+	@Override
+	public JobConf getJobConf() {
+		return jobConf;
+	}
+
+	@Override
+	public void setSourceStorageId(String storageId) {
 		if (storageId != null) {
 			jobConf.set(IFactsConfiguration.SOURCE_STORAGE_ID_PROPERTY, storageId);
 		}
 	}
 
 	@Override
-	public String getSourceStorageId(JobConf jobConf) {
+	public String getSourceStorageId() {
 		return jobConf.get(IFactsConfiguration.SOURCE_STORAGE_ID_PROPERTY, "default");
 	}
 
 	@Override
-	public void setSinkStorageId(JobConf jobConf, String storageId) {
+	public void setSinkStorageId(String storageId) {
 		if (storageId != null) {
 			jobConf.set(IFactsConfiguration.SINK_STORAGE_ID_PROPERTY, storageId);
 		}
 	}
 
 	@Override
-	public String getSinkStorageId(JobConf jobConf) {
+	public String getSinkStorageId() {
 		return jobConf.get(IFactsConfiguration.SINK_STORAGE_ID_PROPERTY, "default");
 	}
 
@@ -70,13 +82,13 @@ public abstract class FactsConfiguration implements IFactsConfiguration {
 	}
 
 	@Override
-	public void configureInput(JobConf jobConf) {
+	public void configureInput() {
 		jobConf.setClass(IFactsConfiguration.INPUT_CLASS_PROPERTY, getInputClass(), AtomRecord.class);
 		jobConf.setInputFormat(getInputFormat());
 	}
 	
 	@Override
-	public void configureOutput(JobConf jobConf) {
+	public void configureOutput() {
 		jobConf.setOutputFormat(getOutputFormat());
 	
 		// writing doesn't always happen in reduce

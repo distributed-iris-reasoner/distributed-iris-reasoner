@@ -132,7 +132,7 @@ public class FactsTap extends Tap {
 		}
 		
 		IFactsConfiguration factsConfiguration = FactsConfigurationFactory.getFactsConfiguration(jobConf);
-		factsConfiguration.setSourceStorageId(jobConf, storageId);
+		factsConfiguration.setSourceStorageId(storageId);
 		
 		//RdfFactsConfiguration.configure(conf, rdf2GoImpl, serverURL, repositoryID);
 
@@ -147,7 +147,7 @@ public class FactsTap extends Tap {
 		jobConf.set(IFactsConfiguration.FACTS_CONFIGURATION_CLASS, factsConfigurationClass);
 		
 		IFactsConfiguration factsConfiguration = FactsConfigurationFactory.getFactsConfiguration(jobConf);
-		factsConfiguration.setSinkStorageId(jobConf, storageId);
+		factsConfiguration.setSinkStorageId(storageId);
 
 		//RdfFactsConfiguration.configure(conf, rdf2GoImpl, serverURL, repositoryID);
 

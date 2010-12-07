@@ -35,21 +35,22 @@ public class FactsConfigurationFactory {
 
 	private static final Logger logger = LoggerFactory.getLogger(FactsConfigurationFactory.class);
 	
-	private static final Map<String, IFactsConfiguration> factsConfigurations = new HashMap<String, IFactsConfiguration>();
+	private static final Map<JobConf, IFactsConfiguration> factsConfigurations = new HashMap<JobConf, IFactsConfiguration>();
 
-	public static String STORAGE_PROPERTIES = "/facts_storage_configuration.properties";
+	public static String STORAGE_PROPERTIES = "/facts-storage-configuration.properties";
 	
 	public static IFactsConfiguration getFactsConfiguration(JobConf jobConf) {
 		if (factsConfigurations.containsKey(jobConf.get(IFactsConfiguration.FACTS_CONFIGURATION_CLASS))) {
 			return factsConfigurations.get(jobConf.get(IFactsConfiguration.FACTS_CONFIGURATION_CLASS));
 		}
-		return createFactsConfiguration(jobConf.get(IFactsConfiguration.FACTS_CONFIGURATION_CLASS));
+		return createFactsConfiguration(jobConf);
 	}
 	
-	public static IFactsConfiguration createFactsConfiguration(String factsConfigurationClass) {
-		if (factsConfigurations.containsKey(factsConfigurationClass)) {
-			return factsConfigurations.get(factsConfigurationClass);
+	public static IFactsConfiguration createFactsConfiguration(JobConf jobConf) {
+		if (factsConfigurations.containsKey(jobConf)) {
+			return factsConfigurations.get(jobConf);
 		}
+		String factsConfigurationClass = jobConf.get(IFactsConfiguration.FACTS_CONFIGURATION_CLASS);
 		Class<? extends IFactsConfiguration> clazz = null;
 		try {
 			clazz = (Class<? extends IFactsConfiguration>) Class.forName(factsConfigurationClass);
@@ -61,8 +62,9 @@ public class FactsConfigurationFactory {
 			IFactsConfiguration factsConfiguration = clazz.newInstance();
 			Properties storageProperties = new Properties();
 			storageProperties.load(FactsConfigurationFactory.class.getResourceAsStream(STORAGE_PROPERTIES));
+			factsConfiguration.setJobConf(jobConf);
 			factsConfiguration.setStorageProperties(storageProperties);
-			factsConfigurations.put(factsConfigurationClass, factsConfiguration);
+			factsConfigurations.put(jobConf, factsConfiguration);
 			return factsConfiguration;
 		} catch (Exception e) {
 			logger.error("exception creating instance from class", e);

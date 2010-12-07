@@ -22,11 +22,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.hadoop.mapred.InputFormat;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputFormat;
 import org.ontoware.rdf2go.RDF2Go;
-import org.ontoware.rdf2go.model.Model;
-import org.openrdf.rdf2go.RepositoryModel;
+import org.ontoware.rdf2go.model.ModelSet;
+import org.openrdf.rdf2go.RepositoryModelSet;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.http.HTTPRepository;
@@ -52,6 +51,8 @@ public class RdfFactsConfiguration extends FactsConfiguration {
 
 	private static final Logger logger = LoggerFactory.getLogger(RdfFactsConfiguration.class);
 	
+	public static final String CONTEXT_URI_PROPERTY = "mapred.facts.context.uri";
+	
 	public RdfFactsConfiguration() {}
 	
 	public enum RDF2GO_ADAPTER {
@@ -74,18 +75,18 @@ public class RdfFactsConfiguration extends FactsConfiguration {
 	private String repositoryId = null;
 
 	//the memory repositories work only for jobs running in same jvm (only for tests)
-	public static Map<String, Model> memoryRepositoryModels = new HashMap<String, Model>();
+	public static Map<String, ModelSet> memoryRepositoryModelSets = new HashMap<String, ModelSet>();
 	
-	private void readStorageProperties(JobConf jobConf, boolean input) {
-		String storageId = input ? getSourceStorageId(jobConf) : getSinkStorageId(jobConf);
+	private void readStorageProperties(boolean input) {
+		String storageId = input ? getSourceStorageId() : getSinkStorageId();
 		rdf2GoAdapter = RDF2GO_ADAPTER.valueOf(storageProperties.getProperty(storageId + "." + "rdf2go.adapter"));
 		repositoryType = REPOSITORY_TYPE.valueOf(storageProperties.getProperty(storageId + "." + "repository.type"));
 		serverURL = storageProperties.getProperty(storageId + "." + "server.url");
 		repositoryId = storageProperties.getProperty(storageId + "." + "repository.id");
 	}
 	
-	private void configureStorage(JobConf jobConf, boolean input) {
-		readStorageProperties(jobConf, input);
+	private void configureStorage(boolean input) {
+		readStorageProperties(input);
 		jobConf.setEnum(RDF2GO_ADAPTER_PROPERTY, rdf2GoAdapter);
 		jobConf.setEnum(REPOSITORY_TYPE_PROPERTY, repositoryType);
 		if (jobConf.getEnum(RDF2GO_ADAPTER_PROPERTY, RDF2GO_ADAPTER.SESAME) == RDF2GO_ADAPTER.SESAME) {
@@ -103,36 +104,32 @@ public class RdfFactsConfiguration extends FactsConfiguration {
 	}
 	
 	@Override
-	public void configureInput(JobConf jobConf) {
-		configureStorage(jobConf, true);
+	public void configureInput() {
+		configureStorage(true);
 		
-		super.configureInput(jobConf);
+		super.configureInput();
 	}
 
 	@Override
-	public void configureOutput(JobConf jobConf) {
-		configureStorage(jobConf, false);
+	public void configureOutput() {
+		configureStorage(false);
 		
-		super.configureOutput(jobConf);
-	}
-
-	public static void configure(RDF2GO_ADAPTER rdfRepositoryImplementation, URL rdf2GoServerURL, String repositoryID) {
-		
+		super.configureOutput();
 	}
 	
-	public Model getModel(JobConf jobConf, boolean input) {
-		String storageId = input ? getSourceStorageId(jobConf) : getSinkStorageId(jobConf);
-		Model model = null;
+	public ModelSet getModelSet(boolean input) {
+		String storageId = input ? getSourceStorageId() : getSinkStorageId();
+		ModelSet model = null;
 		if (jobConf.getEnum(RDF2GO_ADAPTER_PROPERTY, RDF2GO_ADAPTER.SESAME) == RDF2GO_ADAPTER.SESAME) {
 			if (jobConf.getEnum(REPOSITORY_TYPE_PROPERTY, REPOSITORY_TYPE.MEMORY) == REPOSITORY_TYPE.REMOTE) {
 				String sesameServer = jobConf.get(SERVER_URL_PROPERTY);
 				String repositoryID = jobConf.get(REPOSITORY_ID_PROPERTY);
 	
 				Repository myRepository = new HTTPRepository(sesameServer, repositoryID);
-				model = new RepositoryModel(myRepository);
-				model.open();			
+				model = new RepositoryModelSet(myRepository);
+				//model.open();			
 			} else if (jobConf.getEnum(REPOSITORY_TYPE_PROPERTY, REPOSITORY_TYPE.MEMORY) == REPOSITORY_TYPE.MEMORY) {
-				if (!RdfFactsConfiguration.memoryRepositoryModels.containsKey(storageId)) {
+				if (!RdfFactsConfiguration.memoryRepositoryModelSets.containsKey(storageId)) {
 					Repository repository = new SailRepository(new MemoryStore());
 					try {
 						repository.initialize();
@@ -140,11 +137,11 @@ public class RdfFactsConfiguration extends FactsConfiguration {
 						logger.error("error initializing repository" ,e);
 						throw new RuntimeException("error initializing repository" ,e);
 					}
-					model = new RepositoryModel(repository);
-					model.open();
-					RdfFactsConfiguration.memoryRepositoryModels.put(storageId, model);
+					model = new RepositoryModelSet(repository);
+					//model.open();
+					RdfFactsConfiguration.memoryRepositoryModelSets.put(storageId, model);
 				} else {
-					model = RdfFactsConfiguration.memoryRepositoryModels.get(storageId);
+					model = RdfFactsConfiguration.memoryRepositoryModelSets.get(storageId);
 				}
 			}
 		}
@@ -171,4 +168,11 @@ public class RdfFactsConfiguration extends FactsConfiguration {
 		return new RdfRecord(tuple);
 	}
 
+	public String getContextURI() {
+		return jobConf.get(RdfFactsConfiguration.CONTEXT_URI_PROPERTY, null);
+	}
+
+	public void setContextURI(String contextURI) {
+		jobConf.set(RdfFactsConfiguration.CONTEXT_URI_PROPERTY, contextURI);
+	}
 }

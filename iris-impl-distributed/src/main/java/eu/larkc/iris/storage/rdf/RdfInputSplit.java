@@ -16,29 +16,49 @@
 
 package eu.larkc.iris.storage.rdf;
 
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.IOException;
-
-import org.ontoware.rdf2go.model.Model;
 
 import eu.larkc.iris.storage.FactsInputSplit;
 
 public class RdfInputSplit extends FactsInputSplit {
 
-	private Model model;
+	private String contextURI = null;
+	private long size = 0;
 	
 	public RdfInputSplit() {
 	}
 	
-	public RdfInputSplit(Model model) {
-		this.model = model;
+	public RdfInputSplit(String contextURI, long size) {
+		this.contextURI = contextURI;
+		this.size = size;
+	}
+
+	public String getContextURI() {
+		return contextURI;
+	}
+
+	public long getSize() {
+		return size;
 	}
 
 	@Override
 	public long getLength() throws IOException {
-		if (model == null) {
-			return 0;
-		}
-		return model.size();
+		return size;
+	}
+
+	@Override
+	public void write(DataOutput out) throws IOException {
+		out.writeUTF(contextURI == null ? "" : contextURI);
+		out.writeLong(size);
+	}
+
+	@Override
+	public void readFields(DataInput in) throws IOException {
+		String inContextURI = in.readUTF();
+		contextURI = inContextURI.equals("") ? null : inContextURI;
+		size = in.readLong();
 	}
 
 }

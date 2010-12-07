@@ -17,13 +17,18 @@
 package eu.larkc.iris.storage.rdf;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
+import org.ontoware.aifbcommons.collection.ClosableIterator;
 import org.ontoware.rdf2go.model.Model;
+import org.ontoware.rdf2go.model.ModelSet;
+import org.ontoware.rdf2go.model.node.URI;
 
 import eu.larkc.iris.storage.AtomRecord;
 import eu.larkc.iris.storage.FactsConfigurationFactory;
@@ -31,13 +36,28 @@ import eu.larkc.iris.storage.FactsInputFormat;
 
 public class RdfInputFormat<T extends AtomRecord> extends FactsInputFormat<T> {
 
-	private Model model;
-	
 	@Override
 	public InputSplit[] getSplits(JobConf job, int numSplits)
 			throws IOException {
 		RdfFactsConfiguration rdfFactsConfiguration = (RdfFactsConfiguration) FactsConfigurationFactory.getFactsConfiguration(job);
-		return new InputSplit[] { new RdfInputSplit(rdfFactsConfiguration.getModel(job, true)) };
+		
+		List<RdfInputSplit> splits = new ArrayList<RdfInputSplit>();
+		
+		ModelSet modelSet = rdfFactsConfiguration.getModelSet(true);
+		if (!modelSet.isOpen()) {
+			modelSet.open();
+		}
+		ClosableIterator<Model> modelsIterator = modelSet.getModels();
+		while (modelsIterator.hasNext()) {
+			Model model = modelsIterator.next();
+			splits.add(new RdfInputSplit(model.getContextURI().toString(), model.size()));
+		}
+		if (splits.isEmpty()) {
+			Model model = modelSet.getDefaultModel();
+			URI uri = model.getContextURI();
+			splits.add(new RdfInputSplit(uri == null ? null : uri.toString(), model.size()));
+		}
+		return splits.toArray(new RdfInputSplit[0]);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
