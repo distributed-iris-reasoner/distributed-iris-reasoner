@@ -32,6 +32,8 @@ import org.deri.iris.storage.IRelation;
 
 import eu.larkc.iris.evaluation.PredicateCounts;
 import eu.larkc.iris.evaluation.bottomup.naive.DistributedNaiveEvaluator;
+import eu.larkc.iris.rules.IRecursiveRulePreProcessor;
+import eu.larkc.iris.rules.NonOptimizingRecursiveRulePreProcessor;
 import eu.larkc.iris.rules.compiler.CascadingRuleCompiler;
 import eu.larkc.iris.rules.compiler.IDistributedCompiledRule;
 import eu.larkc.iris.rules.compiler.IDistributedRuleCompiler;
@@ -83,11 +85,8 @@ public class DistributedBottomUpEvaluationStrategy implements
 			throws ProgramNotStratifiedException, RuleUnsafeException,
 			EvaluationException {
 
-		// TODO (fisf): for testing, where we only care about evaluating the
-		// rules. So we directly invoke initBottomUpEvaluation(mRules);
-
 		
-		// Real query answering should then be delegated to an external store.
+		// Real query answering should be delegated to an external store.
 		// this requires 1.) Wrapping up e.g. a sparql query in a IQuery implementation, and 2.) accessing the external store hidden behind
 		// an IFacts implementation
 		
@@ -109,6 +108,7 @@ public class DistributedBottomUpEvaluationStrategy implements
 	 * @throws EvaluationException
 	 */
 	public void initBottomUpEvaluation(List<IRule> rules) throws EvaluationException {
+		
 		// setup of utils (stratification, etc.) according to configuration
 		// objects
 		EvaluationUtilities utils = new EvaluationUtilities(mConfiguration);
@@ -116,7 +116,13 @@ public class DistributedBottomUpEvaluationStrategy implements
 		// are rules safe? TODO (fisf): check close compliance with
 		// http://www.w3.org/TR/rif-core/#Safeness_Criteria
 		List<IRule> safeRules = utils.applyRuleSafetyProcessor(rules);
-
+		
+		//we need to determine if there are cycles 
+		//TODO (fisf): make it possible to enable/disable this with a switch on mConfiguration
+		//this should be encapsulated in EvaluationUtilities when there are multiple implementations that e.g. can be chained
+		//IRecursiveRulePreProcessor recursiveRuleProcessor = new NonOptimizingRecursiveRulePreProcessor();
+		//safeRules = recursiveRuleProcessor.process(safeRules);
+				
 		// order rules into different strata for execution. TODO (fisf,
 		// optimization): This might be more expensive than needed in the
 		// absence of negation,
@@ -127,10 +133,8 @@ public class DistributedBottomUpEvaluationStrategy implements
 		IDistributedRuleCompiler rc = new CascadingRuleCompiler(mConfiguration, mFacts);
 
 		IDistributedRuleEvaluator evaluator = mRuleEvaluatorFactory.createEvaluator();
-		// A naive evaluator should work here, otherwise a new factory simply
-		// needs to be passed in
-		assert evaluator instanceof DistributedNaiveEvaluator : "Only naiveEvaluator for now";
-
+		
+		
 		PredicateCounts predicateCounts = PredicateCounts.getInstance(mConfiguration, mFacts);
 		
 		// for each rule layer, reorder and optimize, compile, evaluate
