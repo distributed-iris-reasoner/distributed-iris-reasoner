@@ -65,19 +65,23 @@ public class ConstantFilterTest extends CascadingTest {
 	protected Collection<String> createExpressions() {
 		Collection<String> expressions = new ArrayList<String>();
 
-		expressions.add("p( ?X, ?Y ) :- q( ?X, ?Y ), r( ?Y, 'http://larkc.eu/default/3' ).");
+		expressions.add("p( ?X, ?Y ) :- q( ?X, ?Y ), r( ?Y, 'http://dbpedia.org/ontology/3' ).");
 
 		return expressions;
 	}
 
 	public void testEvaluation() throws Exception {
 		IRelation relation = evaluate(FactsFactory.getInstance("default"), "?- p(?X, ?Y).");
-		
-		ClosableIterator<Statement> iterator = model.findStatements(new QuadPatternImpl(null, (ResourceOrVariable) null, 
-				new URIImpl("http://larkc.eu/default/p"), (NodeOrVariable) null));
-		assertTrue("no data", iterator.hasNext());
-		Statement statement = iterator.next();
-		logger.info("result : " + statement);
+		model.open();
+		try {
+			ClosableIterator<Statement> iterator = model.findStatements(new QuadPatternImpl(null, (ResourceOrVariable) null, 
+					new URIImpl("http://www.w3.org/2000/01/rdf-schema#p"), (NodeOrVariable) null));
+			assertTrue("no data", iterator.hasNext());
+			Statement statement = iterator.next();
+			logger.info("result : " + statement);
+		} finally {
+			model.close();
+		}
 	}
 
 }

@@ -83,16 +83,21 @@ public class InitAndStartupTest extends CascadingTest {
 	public void testEvaluation() throws Exception {
 		IRelation relation = evaluate(FactsFactory.getInstance("default"), "?- p(?X, ?Y).");
 		
-		ClosableIterator<Statement> iterator = model.findStatements(new QuadPatternImpl(null, (ResourceOrVariable) null, 
-				new URIImpl("http://larkc.eu/default/p"), (NodeOrVariable) null));
-		assertTrue("no data", iterator.hasNext());
-		int size = 0;
-		while (iterator.hasNext()) {
-			Statement statement = iterator.next();
-			size++;
-			logger.info("result : " + statement);
+		model.open();
+		try {
+			ClosableIterator<Statement> iterator = model.findStatements(new QuadPatternImpl(null, (ResourceOrVariable) null, 
+					new URIImpl("http://www.w3.org/2000/01/rdf-schema#p"), (NodeOrVariable) null));
+			assertTrue("no data", iterator.hasNext());
+			int size = 0;
+			while (iterator.hasNext()) {
+				Statement statement = iterator.next();
+				size++;
+				logger.info("result : " + statement);
+			}
+			assertEquals(2, size);
+		} finally {
+			model.close();
 		}
-		assertEquals(2, size);
 	}
 
 }

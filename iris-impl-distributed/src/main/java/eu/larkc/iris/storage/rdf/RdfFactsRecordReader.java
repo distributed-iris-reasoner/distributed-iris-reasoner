@@ -20,6 +20,8 @@ import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
 import org.ontoware.rdf2go.model.ModelSet;
 import org.ontoware.rdf2go.model.node.impl.URIImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.larkc.iris.storage.AtomRecord;
 import eu.larkc.iris.storage.FactsConfigurationFactory;
@@ -28,10 +30,13 @@ import eu.larkc.iris.storage.IFactsConfiguration;
 
 public class RdfFactsRecordReader<LongWritable, T extends AtomRecord> extends FactsRecordReader<T> {
 	
+	private static final Logger logger = LoggerFactory.getLogger(RdfFactsRecordReader.class);
+	
 	public RdfFactsRecordReader(InputSplit split, Class<T> inputClass, JobConf job) {
 		super(split, inputClass, job);
 		
 		String contextURI = ((RdfInputSplit) split).getContextURI();
+		logger.info("use model for context URI : " + contextURI);
 		rdfStorage = new RdfStorage();
 		RdfFactsConfiguration rdfFactsConfiguration = (RdfFactsConfiguration) FactsConfigurationFactory.getFactsConfiguration(job);
 		ModelSet modelSet = rdfFactsConfiguration.getModelSet(true);

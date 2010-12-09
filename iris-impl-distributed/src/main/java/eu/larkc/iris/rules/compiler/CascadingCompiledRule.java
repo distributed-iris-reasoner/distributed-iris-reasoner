@@ -56,7 +56,7 @@ public class CascadingCompiledRule implements IDistributedCompiledRule {
 		if(mFlowAssembly == null) {
 			throw new IllegalArgumentException("Flow assembly must not be null");
 		}
-		String flowName = "http://eu.larkc/flow/" + System.currentTimeMillis();
+		String flowName = "flow" + System.currentTimeMillis();
 		Flow flow = mFlowAssembly.createFlow(flowName);
 		flow.complete();
 		

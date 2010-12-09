@@ -25,6 +25,7 @@ import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
+import eu.larkc.iris.Configuration;
 
 /**
  * @author valer.roman@softgress.com
@@ -32,12 +33,14 @@ import cascading.tap.Tap;
  */
 public class FlowAssembly {
 
-
+	private Configuration mConfiguration;
+	
 	private Map<String, Tap> sources;
 	private Map<String, Tap> sinks;
 	private Pipe[] pipes;
 	
-	public FlowAssembly (Map<String, Tap> sources, Map<String, Tap> sinks, Pipe... pipes) {
+	public FlowAssembly (Configuration configuration, Map<String, Tap> sources, Map<String, Tap> sinks, Pipe... pipes) {
+		this.mConfiguration = configuration;
 		this.sources = sources;
 		this.sinks = sinks;
 		this.pipes = pipes;
@@ -45,7 +48,7 @@ public class FlowAssembly {
 	
 	public Flow createFlow(String flowName) {
 
-		Flow flow = new FlowConnector().connect(flowName, sources, sinks, pipes);
+		Flow flow = new FlowConnector(mConfiguration.flowProperties).connect(flowName, sources, sinks, pipes);
 		
 		if(flow != null) {
 			flow.writeDOT("flow.dot");

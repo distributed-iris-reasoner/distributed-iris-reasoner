@@ -48,12 +48,13 @@ public class AtomsCommonFields {
 	/*
 	 * From two atoms return the field names correesponding with the common variables
 	 */
+	@SuppressWarnings("rawtypes")
 	private void constructCommonFields() {
 		List<IVariable> variables = TermMatchingAndSubstitution.getVariables(atom.getTuple(), true);
 		commonFields = new HashMap<String, String>();
 		for (String field : lhsFields) {
 			for (IVariable variable : variables) {
-				ITerm previousVariable = fieldsVariablesMapping.getVariable(field);
+				Comparable previousVariable = fieldsVariablesMapping.getComparable(field);
 				if (previousVariable != null && previousVariable.equals(variable)) {
 					commonFields.put(fieldsVariablesMapping.getField(atom, variable), field);
 				}

@@ -22,6 +22,9 @@
  */
 package eu.larkc.iris;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import eu.larkc.iris.evaluation.IDistributedEvaluationStrategyFactory;
 import eu.larkc.iris.evaluation.bottomup.DistributedBottomUpEvaluationStrategyFactory;
 import eu.larkc.iris.evaluation.bottomup.naive.DistributedNaiveEvaluatorFactory;
@@ -31,10 +34,12 @@ import eu.larkc.iris.evaluation.bottomup.naive.DistributedNaiveEvaluatorFactory;
  */
 public class Configuration extends org.deri.iris.Configuration
 {
+	public Map<Object, Object> flowProperties = new HashMap<Object, Object>();
 	
 	public final String DELTA_TAIL_NAME = "deltaTail";
 	
 	private final String HADOOP_HFS_PATH = "build/test";
+	//private final String HADOOP_HFS_PATH = "";
 	
 	public final String DELTA_TAIL_HFS_PATH = HADOOP_HFS_PATH + "/delta";
 	

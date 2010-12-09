@@ -5,9 +5,7 @@ package eu.larkc.iris;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.mapred.JobConf;
@@ -22,8 +20,13 @@ import org.deri.iris.compiler.Parser;
 import org.deri.iris.compiler.ParserException;
 import org.deri.iris.evaluation.IEvaluationStrategy;
 import org.deri.iris.storage.IRelation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import cascading.flow.Flow;
+import cascading.flow.FlowConnector;
 import cascading.flow.MultiMapReducePlanner;
+import cascading.operation.DebugLevel;
 import eu.larkc.iris.evaluation.bottomup.DistributedBottomUpEvaluationStrategyFactory;
 import eu.larkc.iris.evaluation.bottomup.naive.DistributedNaiveEvaluatorFactory;
 import eu.larkc.iris.storage.FactsFactory;
@@ -34,8 +37,10 @@ import eu.larkc.iris.storage.FactsFactory;
  */
 public class Main extends Configured implements Tool {
 
+	private static final Logger logger = LoggerFactory.getLogger(Main.class);
+	
 	private eu.larkc.iris.Configuration defaultConfiguration;
-	transient private static Map<Object, Object> properties = new HashMap<Object, Object>();
+	//transient private static Map<Object, Object> properties = new HashMap<Object, Object>();
 	
 	private Parser parser;
 	
@@ -45,11 +50,25 @@ public class Main extends Configured implements Tool {
 	public int run(String[] args) throws Exception {
 		GenericOptionsParser gop = new GenericOptionsParser(getConf(), new org.apache.commons.cli.Options(), args);
 		
-		JobConf conf = new JobConf(gop.getConfiguration(), Main.class); 
+		JobConf jobConf = new JobConf(gop.getConfiguration(), Main.class); 
 	    // run the job here.
-		MultiMapReducePlanner.setJobConf( properties, conf );
 		
-		evaluate(FactsFactory.getInstance("default"), parseQuery("?- p(?X, ?Y)."), new ArrayList<IVariable>(), defaultConfiguration);
+	    if( System.getProperty("log4j.logger") != null )
+	    	defaultConfiguration.flowProperties.put( "log4j.logger", System.getProperty("log4j.logger") );
+
+		jobConf.set("mapred.child.java.opts", "-Xmx512m");
+		jobConf.setMapSpeculativeExecution(false);
+		jobConf.setReduceSpeculativeExecution(false);
+
+		jobConf.setNumMapTasks(4);
+		jobConf.setNumReduceTasks(1);
+
+		MultiMapReducePlanner.setJobConf( defaultConfiguration.flowProperties, jobConf );
+		FlowConnector.setDebugLevel(defaultConfiguration.flowProperties, DebugLevel.VERBOSE);
+		
+		Flow.setJobPollingInterval(defaultConfiguration.flowProperties, 500);
+		
+		evaluate(FactsFactory.getInstance("default"), parseQuery("?- subClassOf(?X, ?Y)."), new ArrayList<IVariable>(), defaultConfiguration);
 
 	    return 0; 
 	}
@@ -57,7 +76,7 @@ public class Main extends Configured implements Tool {
 	protected Collection<String> createExpressions() {
 		Collection<String> expressions = new ArrayList<String>();
 
-		expressions.add("p( ?X, ?Y ) :- q( ?X, ?Y ), r( ?Y, ?Z ).");
+		expressions.add("subClassOf( ?X, ?Z ) :- subClassOf( ?X, ?Y ), subClassOf( ?Y, ?Z ).");
 
 		return expressions;
 	}
@@ -79,6 +98,15 @@ public class Main extends Configured implements Tool {
 	}
 
 	public Main() {
+		logger.info("start iris distributed reasoner ...");
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
 		org.apache.hadoop.conf.Configuration configuration = new org.apache.hadoop.conf.Configuration();
 		setConf(configuration);
 		

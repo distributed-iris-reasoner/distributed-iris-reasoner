@@ -14,17 +14,16 @@ import org.deri.iris.api.basics.IAtom;
 import org.deri.iris.api.basics.ILiteral;
 import org.deri.iris.api.basics.IPredicate;
 import org.deri.iris.api.basics.IRule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
-import cascading.operation.Identity;
 import cascading.operation.aggregator.Count;
-import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.tap.Hfs;
-import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
@@ -39,6 +38,8 @@ import eu.larkc.iris.storage.FactsTap;
  */
 public class PredicateCounts {
 
+	private static final Logger logger = LoggerFactory.getLogger(PredicateCounts.class);
+	
 	private static Map<FactsFactory, PredicateCounts> predicateCounts = new HashMap<FactsFactory, PredicateCounts>();
 	
 	private Configuration mConfiguration;
@@ -75,9 +76,9 @@ public class PredicateCounts {
 		
 		String path = mConfiguration.PREDICATE_COUNT_TAIL_HFS_ROOT_PATH + "/" + mFactsFactory.getStorageId() + 
 			"/" + predicateSymbol.replace("/", "").replace(":", "");
-		Hfs sink = new Hfs(new Fields("predicateSymbol", "count"), path, true);
+		Hfs sink = new Hfs(new Fields(predicateSymbol, "count"), path, true);
 		
-		Long count = findPredicate(sink,predicateSymbol);		
+		Long count = findPredicate(sink, predicateSymbol, new JobConf());		
 		if (count != null) {
 			counts.put(atom.getPredicate(), count);
 			return;
@@ -88,23 +89,24 @@ public class PredicateCounts {
 		Pipe countPipe = new Pipe("predicate_count");
 		countPipe = new GroupBy(countPipe, new Fields(predicateSymbol));
 		countPipe = new Every(countPipe, new Count(new Fields("count")), new Fields(predicateSymbol, "count"));
-		countPipe = new Each( countPipe, new Fields(predicateSymbol, "count"), new Identity(new Fields("predicateSymbol", "count")));
+		//countPipe = new Each( countPipe, new Fields(predicateSymbol, "count"), new Identity(new Fields("predicateSymbol", "count")));
 
-		Flow flow = new FlowConnector().connect(facts, sink, countPipe);
+		Flow flow = new FlowConnector(mConfiguration.flowProperties).connect(facts, sink, countPipe);
 		flow.complete();
 		
-		count = findPredicate(sink,predicateSymbol);		
+		count = findPredicate(sink,predicateSymbol,flow.getJobConf());		
 		if (count != null) {
 			counts.put(atom.getPredicate(), count);
 		}
 	}
 	
-	private Long findPredicate(Tap sink, String predicateSymbol) {
+	private Long findPredicate(Tap sink, String predicateSymbol, JobConf jobConf) {
 		TupleEntryIterator tupleEntryIterator = null;
 		try {
-			tupleEntryIterator = sink.openForRead(new JobConf());
+			tupleEntryIterator = sink.openForRead(jobConf);
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("io exception", e);
+			throw new RuntimeException("io exception", e);
 		}
 		while (tupleEntryIterator.hasNext()) {
 			Tuple tuple = tupleEntryIterator.next().getTuple();

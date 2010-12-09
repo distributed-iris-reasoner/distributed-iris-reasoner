@@ -28,7 +28,8 @@ import org.apache.hadoop.mapred.Reporter;
 import org.ontoware.aifbcommons.collection.ClosableIterator;
 import org.ontoware.rdf2go.model.Model;
 import org.ontoware.rdf2go.model.ModelSet;
-import org.ontoware.rdf2go.model.node.URI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.larkc.iris.storage.AtomRecord;
 import eu.larkc.iris.storage.FactsConfigurationFactory;
@@ -36,6 +37,8 @@ import eu.larkc.iris.storage.FactsInputFormat;
 
 public class RdfInputFormat<T extends AtomRecord> extends FactsInputFormat<T> {
 
+	private static final Logger logger = LoggerFactory.getLogger(RdfInputFormat.class);
+	
 	@Override
 	public InputSplit[] getSplits(JobConf job, int numSplits)
 			throws IOException {
@@ -47,16 +50,16 @@ public class RdfInputFormat<T extends AtomRecord> extends FactsInputFormat<T> {
 		if (!modelSet.isOpen()) {
 			modelSet.open();
 		}
+		splits.add(new RdfInputSplit(null, modelSet.getDefaultModel().size()));
 		ClosableIterator<Model> modelsIterator = modelSet.getModels();
 		while (modelsIterator.hasNext()) {
 			Model model = modelsIterator.next();
 			splits.add(new RdfInputSplit(model.getContextURI().toString(), model.size()));
 		}
-		if (splits.isEmpty()) {
-			Model model = modelSet.getDefaultModel();
-			URI uri = model.getContextURI();
-			splits.add(new RdfInputSplit(uri == null ? null : uri.toString(), model.size()));
+		if (modelSet.isOpen()) {
+			modelSet.close();
 		}
+		logger.info("returning " + splits.size() + " splits");
 		return splits.toArray(new RdfInputSplit[0]);
 	}
 
@@ -64,6 +67,7 @@ public class RdfInputFormat<T extends AtomRecord> extends FactsInputFormat<T> {
 	@Override
 	public RecordReader<LongWritable, T> getRecordReader(InputSplit split,
 			JobConf job, Reporter reporter) throws IOException {
+		logger.info("getRecordReader()");
 		Class inputClass = job.getClass(RdfFactsConfiguration.INPUT_CLASS_PROPERTY, FactsInputFormat.NullAtomWritable.class);
 		return new RdfFactsRecordReader((RdfInputSplit) split, inputClass, job);
 	}

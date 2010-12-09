@@ -2,39 +2,39 @@
 
 <!DOCTYPE rdf:RDF [
     <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
-    <!ENTITY default "http://larkc.eu/default#">
 ]>
 
 <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-         xmlns:d="http://larkc.eu/default/"
-         xml:base="http://larkc.eu/default/">
+		 xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:d="http://dbpedia.org/ontology/"
+         xml:base="http://dbpedia.org/ontology/">
 
   <rdf:Description rdf:about="1">
-    <d:q rdf:resource="2" />
+    <rdfs:q rdf:resource="2" />
   </rdf:Description>
 
   <rdf:Description rdf:about="2">
-    <d:r rdf:resource="3" />
+    <rdfs:r rdf:resource="3" />
   </rdf:Description>
 
   <rdf:Description rdf:about="1">
-	<d:s rdf:resource="3" />
+	<rdfs:s rdf:resource="3" />
   </rdf:Description>
 
   <rdf:Description rdf:about="1">
-	<d:p rdf:resource="2" />
+	<rdfs:p rdf:resource="2" />
   </rdf:Description>
 
   <rdf:Description rdf:about="4">
-    <d:q rdf:resource="5" />
+    <rdfs:q rdf:resource="5" />
   </rdf:Description>
 
   <rdf:Description rdf:about="5">
-    <d:r rdf:resource="6" />
+    <rdfs:r rdf:resource="6" />
   </rdf:Description>
 
   <rdf:Description rdf:about="4">
-	<d:s rdf:resource="6" />
+	<rdfs:s rdf:resource="6" />
   </rdf:Description>
 
 </rdf:RDF>

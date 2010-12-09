@@ -118,17 +118,20 @@ public class RdfFactsConfiguration extends FactsConfiguration {
 	}
 	
 	public ModelSet getModelSet(boolean input) {
+		RDF2GO_ADAPTER adapter = jobConf.getEnum(RDF2GO_ADAPTER_PROPERTY, RDF2GO_ADAPTER.SESAME);
+		REPOSITORY_TYPE repositoryType = jobConf.getEnum(REPOSITORY_TYPE_PROPERTY, REPOSITORY_TYPE.MEMORY);
 		String storageId = input ? getSourceStorageId() : getSinkStorageId();
+		logger.info("getModelSet : " + input + "," + adapter.name() + "," + repositoryType + "," + storageId);
 		ModelSet model = null;
-		if (jobConf.getEnum(RDF2GO_ADAPTER_PROPERTY, RDF2GO_ADAPTER.SESAME) == RDF2GO_ADAPTER.SESAME) {
-			if (jobConf.getEnum(REPOSITORY_TYPE_PROPERTY, REPOSITORY_TYPE.MEMORY) == REPOSITORY_TYPE.REMOTE) {
+		if (adapter == RDF2GO_ADAPTER.SESAME) {
+			if (repositoryType == REPOSITORY_TYPE.REMOTE) {
 				String sesameServer = jobConf.get(SERVER_URL_PROPERTY);
 				String repositoryID = jobConf.get(REPOSITORY_ID_PROPERTY);
-	
+				logger.info("for remote type use : " + sesameServer + "," + repositoryID);
 				Repository myRepository = new HTTPRepository(sesameServer, repositoryID);
 				model = new RepositoryModelSet(myRepository);
 				//model.open();			
-			} else if (jobConf.getEnum(REPOSITORY_TYPE_PROPERTY, REPOSITORY_TYPE.MEMORY) == REPOSITORY_TYPE.MEMORY) {
+			} else if (repositoryType == REPOSITORY_TYPE.MEMORY) {
 				if (!RdfFactsConfiguration.memoryRepositoryModelSets.containsKey(storageId)) {
 					Repository repository = new SailRepository(new MemoryStore());
 					try {

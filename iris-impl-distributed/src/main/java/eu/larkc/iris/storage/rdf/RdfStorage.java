@@ -32,6 +32,8 @@ import org.ontoware.rdf2go.model.node.NodeOrVariable;
 import org.ontoware.rdf2go.model.node.Resource;
 import org.ontoware.rdf2go.model.node.ResourceOrVariable;
 import org.ontoware.rdf2go.model.node.impl.URIImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.larkc.iris.storage.FactsStorage;
 
@@ -41,6 +43,8 @@ import eu.larkc.iris.storage.FactsStorage;
  */
 public class RdfStorage implements FactsStorage {
 
+	private static final Logger logger = LoggerFactory.getLogger(RdfStorage.class);
+	
 	private Model model;
 	private String predicateFilter;
 
@@ -48,6 +52,7 @@ public class RdfStorage implements FactsStorage {
 	
 	@Override
 	public IAtom next() {
+		logger.info("get next atom from storage for predicateFilter : " + predicateFilter);
 		if (!model.isOpen()) {
 			model.open();
 		}
@@ -62,6 +67,7 @@ public class RdfStorage implements FactsStorage {
 			if (model.isOpen()) {
 				model.close();
 			}
+			logger.info("returning null, no more data");
 			return null;
 		}
 		Statement statement = iterator.next();
@@ -76,6 +82,7 @@ public class RdfStorage implements FactsStorage {
 		}
 		RdfAtom rdfAtom = new RdfAtom(basicFactory.createPredicate(statement.getPredicate().toString(), 2), 
 				concreteFactory.createIri(statement.getSubject().toString()), object);
+		logger.info("returning atom : " + rdfAtom);
 		return rdfAtom;
 	}
 

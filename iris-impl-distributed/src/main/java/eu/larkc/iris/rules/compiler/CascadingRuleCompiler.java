@@ -23,11 +23,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.lang.NotImplementedException;
-import org.deri.iris.Configuration;
 import org.deri.iris.EvaluationException;
 import org.deri.iris.api.basics.IAtom;
 import org.deri.iris.api.basics.ILiteral;
@@ -39,9 +37,10 @@ import org.deri.iris.api.terms.IConstructedTerm;
 import org.deri.iris.api.terms.ITerm;
 import org.deri.iris.api.terms.IVariable;
 import org.deri.iris.utils.TermMatchingAndSubstitution;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import cascading.flow.FlowConnector;
-import cascading.operation.DebugLevel;
+import cascading.operation.Debug;
 import cascading.operation.Identity;
 import cascading.operation.Insert;
 import cascading.operation.aggregator.Count;
@@ -56,6 +55,7 @@ import cascading.pipe.cogroup.LeftJoin;
 import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
+import eu.larkc.iris.Main;
 import eu.larkc.iris.evaluation.ConstantFilter;
 import eu.larkc.iris.storage.FactsFactory;
 import eu.larkc.iris.storage.FieldsVariablesMapping;
@@ -70,6 +70,8 @@ import eu.larkc.iris.storage.FieldsVariablesMapping;
  */
 public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 
+	private static final Logger logger = LoggerFactory.getLogger(CascadingRuleCompiler.class);
+	
 	/*
 	 * Field name used for head predicate
 	 */
@@ -108,8 +110,8 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		PipeFielded bodyPipe = compileBody(fieldsVariableMapping, head, body);
 		
 		// tell the planner remove all Debug operations
-		Properties properties = new Properties();
-		FlowConnector.setDebugLevel(properties, DebugLevel.NONE);
+		//Properties properties = new Properties();
+		//FlowConnector.setDebugLevel(properties, DebugLevel.NONE);
 
 		FlowAssembly compiledCascadingRuleFlowAssembly = attachTaps(fieldsVariableMapping, bodyPipe, rule);
 
@@ -182,12 +184,13 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	/*
 	 * Remove unwanted fields from the join output fields (predicates, diuplicated variables)
 	 */
+	@SuppressWarnings("rawtypes")
 	private FieldsList fieldsToKeep(FieldsVariablesMapping fieldsVariablesMapping, FieldsList outputFields) {
 		FieldsList keepFieldsList = new FieldsList();
-		Set<ITerm> fieldTerms = new HashSet<ITerm>();
+		Set<Comparable> fieldTerms = new HashSet<Comparable>();
 		for (String field : outputFields) {
-			ITerm term = fieldsVariablesMapping.getVariable(field);
-			if (term == null) {
+			Comparable term = fieldsVariablesMapping.getComparable(field);
+			if (term == null || (term instanceof IPredicate)) {
 				continue;
 			}
 			if (fieldTerms.contains(term)) {
@@ -196,6 +199,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 			fieldTerms.add(term);
 			keepFieldsList.add(field);
 		}
+		logger.info("fields to keep : " + keepFieldsList);
 		return keepFieldsList;
 	}
 	
@@ -204,7 +208,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 */
 	private FieldsList composeOutputFields(FieldsVariablesMapping fieldsVariablesMapping, FieldsList initialFields, IAtom atom) {
 		FieldsList outputFieldsList = new FieldsList(initialFields);
-		outputFieldsList.add(atom.getPredicate().getPredicateSymbol());
+		outputFieldsList.add(fieldsVariablesMapping.getField(atom, atom.getPredicate()));
 		for (int i = 0; i < atom.getTuple().size(); i++) {
 			ITerm term = atom.getTuple().get(i);
 			String field = fieldsVariablesMapping.getField(atom, term);
@@ -279,6 +283,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		
 		FieldsList keepFieldsList = fieldsToKeep(fieldsVariablesMapping, outputFieldsList);
 		join = new Each( join, keepFieldsList.getFields(), new Identity());	// outgoing -> "keepField"
+		//join = new Each( join, new Debug(true));
 		
 		PipeFielded pipeFielded = new PipeFielded(fieldsVariablesMapping, join, keepFieldsList);
 		return buildJoin(fieldsVariablesMapping, head, leftJoinApplied, pipeFielded, subgoalsIterator);
@@ -433,7 +438,8 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		sources.put(headAtom.toString(), headTap);
 
 		Pipe resultPipe = new Pipe("resultTail", rulePipe);
-		resultPipe = new Each( resultPipe, new Insert( new Fields(HEAD_PREDICATE_FIELD), headAtom.getPredicate().getPredicateSymbol()), Fields.ALL );
+		resultPipe = new Each( resultPipe, new Insert( new Fields(HEAD_PREDICATE_FIELD), 
+				headAtom.getPredicate().getPredicateSymbol()), Fields.ALL );
 		
 		FieldsList headFieldsList = identifyHeadVariableFields(fieldsVariablesMapping, headAtom, rulePipeFielded.getFields());
 		headFieldsList.add(0, HEAD_PREDICATE_FIELD);
@@ -446,9 +452,10 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		//Tap headSink = mFacts.getFacts(headAtom);
 		Tap headSink = mFacts.getFacts();
 		
-		Pipe countPipe = new Pipe(mConfiguration.DELTA_TAIL_NAME, rulePipe);
-		countPipe = new GroupBy(countPipe);
+		Pipe countPipe = new Pipe(mConfiguration.DELTA_TAIL_NAME, resultPipe);
+		countPipe = new GroupBy(countPipe, new Fields(HEAD_PREDICATE_FIELD));
 		countPipe = new Every(countPipe, new Count(new Fields(DELTA_FIELD)));
+		//countPipe = new Each(countPipe, new Debug(true)); //FIXME debug the group by generates as many rows s input, optimize to just one
 		countPipe = new Each( countPipe, new Fields(DELTA_FIELD), new Identity());
 		Tap countSink = new Hfs(new Fields(DELTA_FIELD), mConfiguration.DELTA_TAIL_HFS_PATH, true);
 		
@@ -463,7 +470,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		}
 		*/
 		
-		FlowAssembly flowAssembly = new FlowAssembly(sources, sinks, resultPipe, countPipe);
+		FlowAssembly flowAssembly = new FlowAssembly(mConfiguration, sources, sinks, resultPipe, countPipe);
 		return flowAssembly;
 	}
 
@@ -476,7 +483,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		for (IVariable variable : variables) {
 			boolean identified = false;
 			for (String field : resultStreamFields) {
-				if (variable.equals(fieldsVariablesMapping.getVariable(field))) {
+				if (variable.equals(fieldsVariablesMapping.getComparable(field))) {
 					headFieldsList.add(field);
 					identified = true;
 					break;

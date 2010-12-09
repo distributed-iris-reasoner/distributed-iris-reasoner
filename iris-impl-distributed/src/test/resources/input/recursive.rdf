@@ -6,15 +6,16 @@
 ]>
 
 <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+		 xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
          xmlns:d="http://larkc.eu/default/"
          xml:base="http://larkc.eu/default/">
 
   <rdf:Description rdf:about="1">
-    <d:q rdf:resource="2" />
+    <rdfs:q rdf:resource="2" />
   </rdf:Description>
 
   <rdf:Description rdf:about="2">
-    <d:p rdf:resource="3" />
+    <rdfs:p rdf:resource="3" />
   </rdf:Description>
 
 </rdf:RDF>

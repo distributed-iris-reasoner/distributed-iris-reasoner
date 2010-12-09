@@ -23,6 +23,8 @@ import org.ontoware.rdf2go.model.node.Node;
 import org.ontoware.rdf2go.model.node.Resource;
 import org.ontoware.rdf2go.model.node.impl.PlainLiteralImpl;
 import org.ontoware.rdf2go.model.node.impl.URIImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cascading.tuple.Tuple;
 import eu.larkc.iris.storage.AtomRecord;
@@ -30,6 +32,8 @@ import eu.larkc.iris.storage.FactsStorage;
 
 public class RdfRecord extends AtomRecord {
 
+	private static final Logger logger = LoggerFactory.getLogger(RdfRecord.class);
+	
 	public RdfRecord() {}
 	
 	public RdfRecord(Tuple tuple) {
@@ -57,6 +61,7 @@ public class RdfRecord extends AtomRecord {
 		}
 		Statement statement = model.createStatement(subject, new URIImpl((String) tuple.get(0)), object);
 		model.addStatement(statement);
+		logger.info("added statement " + statement + " on contextURI " + model.getContextURI());
 		model.commit();
 	}
 

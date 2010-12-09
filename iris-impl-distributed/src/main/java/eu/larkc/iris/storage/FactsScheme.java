@@ -26,6 +26,8 @@ import org.deri.iris.api.basics.IAtom;
 import org.deri.iris.api.basics.ITuple;
 import org.deri.iris.api.terms.ITerm;
 import org.deri.iris.api.terms.IVariable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cascading.scheme.Scheme;
 import cascading.tap.Tap;
@@ -51,6 +53,8 @@ public class FactsScheme extends Scheme {
 	 */
 	private static final long serialVersionUID = 3622684910621818754L;
 
+	private static final Logger logger = LoggerFactory.getLogger(FactsScheme.class);
+	
 	private String storageId;
 	private IAtom atom = null;
 	
@@ -63,7 +67,11 @@ public class FactsScheme extends Scheme {
 		this.atom = atom;
 		ITuple tuple = atom.getTuple();
 		Fields sourceFields = new Fields();
-		sourceFields = sourceFields.append(new Fields((String) atom.getPredicate().getPredicateSymbol()));
+		if (fieldsVariablesMapping != null) {
+			sourceFields = sourceFields.append(new Fields(fieldsVariablesMapping.getField(atom, atom.getPredicate())));
+		} else {
+			sourceFields = sourceFields.append(new Fields(atom.getPredicate().getPredicateSymbol()));
+		}
 		for (int i = 0; i < tuple.size(); i++) {
 			ITerm term = tuple.get(i);
 			String field = null;
@@ -138,7 +146,7 @@ public class FactsScheme extends Scheme {
 
 	@Override
 	public Tuple source(Object key, Object value) {
-		Fields sourceFields = getSourceFields();
+		//Fields sourceFields = getSourceFields();
 		Tuple tuple = ((AtomRecord) value).getTuple();
 		// assert sourceFields.size() == tuple.size();
 		return tuple;
@@ -149,7 +157,10 @@ public class FactsScheme extends Scheme {
 			throws IOException {
 		Tuple result = tupleEntry.selectTuple(getSinkFields());
 		//assert factsConfiguration != null;
-		//AtomRecord atomRecord = 
+		//AtomRecord atomRecord =
+		
+		logger.info("output : " + result);
+		
 		outputCollector.collect(new RdfRecord(result), null); //FIXME abstract RdfRecord class
 	}
 
