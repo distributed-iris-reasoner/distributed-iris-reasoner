@@ -25,8 +25,6 @@ import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.deri.iris.api.basics.IAtom;
 
-import eu.larkc.iris.storage.rdf.RdfStorage;
-
 public class FactsRecordReader<T extends AtomRecord> implements RecordReader<LongWritable, T> {
 
 	private Class<T> inputClass;
@@ -34,7 +32,7 @@ public class FactsRecordReader<T extends AtomRecord> implements RecordReader<Lon
 	private InputSplit split;
 
 	private long pos = 0;
-	protected RdfStorage rdfStorage;
+	protected FactsStorage factsStorage;
 
 	public FactsRecordReader(InputSplit split, Class<T> inputClass, JobConf job) {
 		this.inputClass = inputClass;
@@ -44,7 +42,7 @@ public class FactsRecordReader<T extends AtomRecord> implements RecordReader<Lon
 
 	@Override
 	public boolean next(LongWritable key, T value) throws IOException {
-		IAtom atom = rdfStorage.next();
+		IAtom atom = factsStorage.next();
 		if (atom == null) {
 			return false;
 		}

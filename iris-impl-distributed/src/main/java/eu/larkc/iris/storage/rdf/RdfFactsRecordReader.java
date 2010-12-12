@@ -37,10 +37,10 @@ public class RdfFactsRecordReader<LongWritable, T extends AtomRecord> extends Fa
 		
 		String contextURI = ((RdfInputSplit) split).getContextURI();
 		logger.info("use model for context URI : " + contextURI);
-		rdfStorage = new RdfStorage();
+		factsStorage = new RdfStorage();
 		RdfFactsConfiguration rdfFactsConfiguration = (RdfFactsConfiguration) FactsConfigurationFactory.getFactsConfiguration(job);
 		ModelSet modelSet = rdfFactsConfiguration.getModelSet(true);
-		rdfStorage.setModel(contextURI == null ? modelSet.getDefaultModel() : modelSet.getModel(new URIImpl(contextURI)));
-		rdfStorage.setPredicateFilter(job.get(IFactsConfiguration.PREDICATE_FILTER));
+		((RdfStorage) factsStorage).setModel(contextURI == null ? modelSet.getDefaultModel() : modelSet.getModel(new URIImpl(contextURI)));
+		((RdfStorage) factsStorage).setPredicateFilter(job.get(IFactsConfiguration.PREDICATE_FILTER));
 	}
 }
