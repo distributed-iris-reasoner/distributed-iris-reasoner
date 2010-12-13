@@ -98,6 +98,8 @@ public class RdfFactsTapTest extends TestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 
+		properties.put("cascading.serialization.tokens", "130=eu.larkc.iris.storage.IRIWritable,131=eu.larkc.iris.storage.PredicateWritable,132=eu.larkc.iris.storage.StringTermWritable");
+		
 		jobConf = new JobConf();
 
 		jobConf.setNumMapTasks(numMapTasks);
@@ -119,6 +121,8 @@ public class RdfFactsTapTest extends TestCase {
 
 		ModelSet model = createStorage("humans");
 
+		model.open();
+		
 		model.readFrom(this.getClass().getResourceAsStream("/input/humans.rdf"));
 		
 		model.commit();
@@ -156,13 +160,13 @@ public class RdfFactsTapTest extends TestCase {
 		FactsTap nameFactsTap = humansFactsFactory.getFacts(atom);
 		
 		String output = "./build/test/output/";
-		Tap sink = new Hfs( new Fields("F"), output , true );
+		Tap sink = new Hfs( new Fields("http://www.w3.org/2000/01/rdf-schema#name", "X", "Y"), output , true );
 
 		Map<String, Tap> sources = new HashMap<String, Tap>();
 		sources.put("source", nameFactsTap);
 
 		Pipe sourcePipe = new Pipe("source");
-		Pipe identity = new Each(sourcePipe, new Fields("http://larkc.eu/default/name", "X", "Y"), new FieldJoiner(new Fields("F"), ";"));
+		Pipe identity = new Each(sourcePipe, new Fields("http://www.w3.org/2000/01/rdf-schema#name", "X", "Y"), new Identity());
 		
 		Flow aFlow = new FlowConnector(getProperties()).connect(sources, sink, identity);
 		aFlow.complete();
@@ -176,17 +180,21 @@ public class RdfFactsTapTest extends TestCase {
 				TermFactory.getInstance().createVariable("Y"));
 		IAtom atom = BasicFactory.getInstance().createAtom(predicate, tuple);
 		
-		FactsFactory humansFactsFactory = FactsFactory.getInstance("humans");
-		FactsTap nameFactsTap = humansFactsFactory.getFacts(atom);
-		
+		//FactsFactory humansFactsFactory = FactsFactory.getInstance("humans");
+		//FactsTap nameFactsTap = humansFactsFactory.getFacts(atom);
+
+		String input = "./build/test/output/";
+		Tap source = new Hfs( new Fields("http://www.w3.org/2000/01/rdf-schema#name", "X", "Y"), input, true );
+
 		FactsFactory humansOutFactsFactory = FactsFactory.getInstance("humans_out");
 		Tap sink = humansOutFactsFactory.getFacts();
 
 		Map<String, Tap> sources = new HashMap<String, Tap>();
-		sources.put("source", nameFactsTap);
-
+		//sources.put("source", nameFactsTap);
+		sources.put("source", source);
+		
 		Pipe sourcePipe = new Pipe("source");
-		Pipe identity = new Each(sourcePipe, new Fields("http://larkc.eu/default/name", "X", "Y"), new Identity(new Fields("http://larkc.eu/default/name", "X", "Y")));
+		Pipe identity = new Each(sourcePipe, new Fields("http://www.w3.org/2000/01/rdf-schema#name", "X", "Y"), new Identity(new Fields("http://www.w3.org/2000/01/rdf-schema#name", "X", "Y")));
 		
 		Flow aFlow = new FlowConnector(getProperties()).connect(sources, sink, identity);
 		aFlow.complete();

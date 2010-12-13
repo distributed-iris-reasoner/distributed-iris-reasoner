@@ -6,8 +6,8 @@
 ]>
 
 <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-         xmlns:h="http://larkc.eu/default/"
-         xml:base="http://larkc.eu/default/">
+         xmlns:h="http://www.w3.org/2000/01/rdf-schema#"
+         xml:base="http://www.w3.org/2000/01/rdf-schema#">
 
   <rdf:Description rdf:about="person#gerard_butler" xml:lang="en">
     <h:name>Gerard Butler</h:name>

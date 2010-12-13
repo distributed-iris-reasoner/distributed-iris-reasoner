@@ -70,4 +70,9 @@ public class PredicateWritable implements WritableComparable<PredicateWritable>,
 		return predicate.compareTo(o.predicate);
 	}
 
+	@Override
+	public String toString() {
+		return "predicate[" + predicate + "]";
+	}
+
 }

@@ -63,4 +63,9 @@ public class IRIWritable implements WritableComparable<IRIWritable> {
 		return iriWritable;
 	}
 
+	@Override
+	public String toString() {
+		return "iri[" + iri.getValue() + "]";
+	}
+
 }

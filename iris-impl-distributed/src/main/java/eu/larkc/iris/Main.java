@@ -27,6 +27,7 @@ import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.MultiMapReducePlanner;
 import cascading.operation.DebugLevel;
+import cascading.tuple.hadoop.SerializationToken;
 import eu.larkc.iris.evaluation.bottomup.DistributedBottomUpEvaluationStrategyFactory;
 import eu.larkc.iris.evaluation.bottomup.naive.DistributedNaiveEvaluatorFactory;
 import eu.larkc.iris.storage.FactsFactory;
@@ -52,6 +53,8 @@ public class Main extends Configured implements Tool {
 		
 		JobConf jobConf = new JobConf(gop.getConfiguration(), Main.class); 
 	    // run the job here.
+		
+		defaultConfiguration.flowProperties.put("cascading.serialization.tokens", "130=eu.larkc.iris.storage.IRIWritable,131=eu.larkc.iris.storage.PredicateWritable.132=eu.larkc.iris.storage.StringTermWritable");
 		
 	    if( System.getProperty("log4j.logger") != null )
 	    	defaultConfiguration.flowProperties.put( "log4j.logger", System.getProperty("log4j.logger") );

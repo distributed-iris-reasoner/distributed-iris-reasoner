@@ -63,4 +63,9 @@ public class StringTermWritable implements WritableComparable<StringTermWritable
 		return stringTerm.compareTo(o.stringTerm);
 	}
 
+	@Override
+	public String toString() {
+		return "stringTerm[" + stringTerm.getValue() + "]";
+	}
+
 }
