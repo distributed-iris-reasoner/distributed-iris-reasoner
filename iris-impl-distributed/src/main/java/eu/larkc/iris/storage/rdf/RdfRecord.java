@@ -17,10 +17,15 @@
 package eu.larkc.iris.storage.rdf;
 
 import org.deri.iris.api.basics.IAtom;
+import org.deri.iris.api.basics.IPredicate;
+import org.deri.iris.api.terms.IStringTerm;
+import org.deri.iris.api.terms.ITerm;
+import org.deri.iris.api.terms.concrete.IIri;
 import org.ontoware.rdf2go.model.Model;
 import org.ontoware.rdf2go.model.Statement;
 import org.ontoware.rdf2go.model.node.Node;
 import org.ontoware.rdf2go.model.node.Resource;
+import org.ontoware.rdf2go.model.node.URI;
 import org.ontoware.rdf2go.model.node.impl.PlainLiteralImpl;
 import org.ontoware.rdf2go.model.node.impl.URIImpl;
 import org.slf4j.Logger;
@@ -29,6 +34,9 @@ import org.slf4j.LoggerFactory;
 import cascading.tuple.Tuple;
 import eu.larkc.iris.storage.AtomRecord;
 import eu.larkc.iris.storage.FactsStorage;
+import eu.larkc.iris.storage.IRIWritable;
+import eu.larkc.iris.storage.PredicateWritable;
+import eu.larkc.iris.storage.StringTermWritable;
 
 public class RdfRecord extends AtomRecord {
 
@@ -44,22 +52,25 @@ public class RdfRecord extends AtomRecord {
 	public void write(FactsStorage storage) {
 		RdfStorage rdfStorage = (RdfStorage) storage;
 		Model model = rdfStorage.getModel();
-		Resource subject = new URIImpl((String) tuple.get(1));
+		URI predicate = new URIImpl(((PredicateWritable) tuple.get(0)).getValue().getPredicateSymbol());
+		Resource subject = new URIImpl(((IRIWritable) tuple.get(1)).getValue().getValue());
 		Class[] types = tuple.getTypes();
-		String objectTuple = null;
-		if (types[2].isAssignableFrom(String.class)) {
-			objectTuple = ((String) tuple.get(2));
+		//String objectTuple = null;
+		Node object = null;
+		if (types[2].isAssignableFrom(StringTermWritable.class)) {
+			object = new PlainLiteralImpl(((StringTermWritable) tuple.get(2)).getValue().getValue());
 		} else {
-			objectTuple = "'" + ((String) tuple.get(2).toString()) + "'";
+			object = new URIImpl(((IRIWritable) tuple.get(2)).getValue().getValue());
 		}
 		
-		Node object = null;
+		/*
 		if (objectTuple.startsWith("'") && objectTuple.endsWith("'")) {
 			object = new PlainLiteralImpl(objectTuple.replace("'", ""));
 		} else {
 			object = new URIImpl(objectTuple);
 		}
-		Statement statement = model.createStatement(subject, new URIImpl((String) tuple.get(0)), object);
+		*/
+		Statement statement = model.createStatement(subject, predicate, object);
 		model.addStatement(statement);
 		logger.info("added statement " + statement + " on contextURI " + model.getContextURI());
 		model.commit();
@@ -69,9 +80,14 @@ public class RdfRecord extends AtomRecord {
 	public void read(IAtom atom) {
 		RdfAtom rdfAtom = (RdfAtom) atom;
 		tuple = new Tuple();
-		tuple.add(rdfAtom.getPredicate().toString());
+		tuple.add(new PredicateWritable(rdfAtom.getPredicate()));
 		for(int i= 0 ; i < rdfAtom.getTuple().size(); i++) {
-			tuple.add(rdfAtom.getTuple().get(i).toString());
+			ITerm term = rdfAtom.getTuple().get(i);
+			if (term instanceof IIri) {
+				tuple.add(new IRIWritable((IIri) term));
+			} else {
+				tuple.add(new StringTermWritable((IStringTerm) term));
+			}
 		}
 	}
 

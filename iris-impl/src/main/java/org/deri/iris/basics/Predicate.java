@@ -57,7 +57,11 @@ public class Predicate implements IPredicate {
 	}
 
 	public String getPredicateSymbol() {
-		return "http://www.w3.org/2000/01/rdf-schema#" + symbol;
+		if (symbol.startsWith("http://")) {
+			return symbol;
+		} else {
+			return "http://www.w3.org/2000/01/rdf-schema#" + symbol;
+		}
 	}
 
 	public int getArity() {

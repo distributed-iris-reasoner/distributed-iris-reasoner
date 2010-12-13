@@ -59,6 +59,7 @@ import eu.larkc.iris.Main;
 import eu.larkc.iris.evaluation.ConstantFilter;
 import eu.larkc.iris.storage.FactsFactory;
 import eu.larkc.iris.storage.FieldsVariablesMapping;
+import eu.larkc.iris.storage.PredicateWritable;
 
 /**
  * 
@@ -439,7 +440,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 
 		Pipe resultPipe = new Pipe("resultTail", rulePipe);
 		resultPipe = new Each( resultPipe, new Insert( new Fields(HEAD_PREDICATE_FIELD), 
-				headAtom.getPredicate().getPredicateSymbol()), Fields.ALL );
+				new PredicateWritable(headAtom.getPredicate())), Fields.ALL );
 		
 		FieldsList headFieldsList = identifyHeadVariableFields(fieldsVariablesMapping, headAtom, rulePipeFielded.getFields());
 		headFieldsList.add(0, HEAD_PREDICATE_FIELD);

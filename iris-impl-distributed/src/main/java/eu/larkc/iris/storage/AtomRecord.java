@@ -38,8 +38,4 @@ public abstract class AtomRecord {
 		return tuple;
 	}
 
-	public void setTuple(Tuple tuple) {
-		this.tuple = tuple;
-	}
-
 }
