@@ -1,0 +1,229 @@
+/*
+ * Integrated Rule Inference System (IRIS):
+ * An extensible rule inference system for datalog with extensions.
+ * 
+ * Copyright (C) 2008 Semantic Technology Institute (STI) Innsbruck, 
+ * University of Innsbruck, Technikerstrasse 21a, 6020 Innsbruck, Austria.
+ * 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ * MA  02110-1301, USA.
+ */
+Package org.deri.iris.parser;
+
+/************************************************************
+ * Helpers                                                  *
+ ************************************************************/
+Helpers 
+	all = [0x0 .. 0xffff];
+    
+	// the whitespace
+	tab = 9;
+	cr = 13;
+	lf = 10;
+	eol = [cr + lf];
+    
+	// defining additional character classes
+	alpha = ['a' .. 'z'] | ['A' .. 'Z'];
+	num = ['0' .. '9'];
+	alphanum = alpha | num;
+	min = '-';
+	dot = '.';
+	comma = ',';
+	predtrailing = alpha | num | '_';
+
+	not_star = [all - '*'];
+	not_slash = [all - '/'];
+	long_comment = '/*' not_star* (('*' not_slash)+ not_star*)* '*/';
+
+	short_comment = '//' [all - eol]* eol*;
+
+    blank = (' ' | tab | eol )+;
+    
+	single_quote = ''';
+	double_quote = '"';
+	quote = [single_quote + double_quote];
+	not_quote = [all - quote];
+	stringchar = not_quote* (('\' quote)+ not_quote*)*;
+    
+    // builtin symbols
+    eq = '=';
+    ne = '!' eq;
+    add = '+';
+    sub = '-';
+    mul = '*';
+    div = '/';
+    mod = '%';
+    lt = '<';
+    le = lt eq;
+    gt = '>';
+    ge = gt eq;
+    
+
+/************************************************************
+ * Tokens                                                   *
+ ************************************************************/  
+Tokens
+    t_blank = blank;
+    t_comment = short_comment | long_comment;
+    t_dot = dot;
+    t_impliedby = ':-';
+    t_and = 'and';
+    t_not = 'not' | 'naf' | '!';
+    t_comma = comma;
+    t_lpar = '(';
+    t_rpar = ')';
+    t_variable = '?' alphanum+;
+    t_query = '?-';
+    t_id = alpha predtrailing*;
+    t_unders = '_';
+    
+    // builtin symbols
+    t_bin_op = ne | lt | le | gt | ge; // binary operators
+    t_ter_op = add | sub | mul | div | mod; // ternary operators
+    t_eq = eq;
+                   
+	// tokens defining the different primitives
+	t_int 		= min? num+;
+	t_posint    = num+;
+	t_dec 		= min? (num* dot num+);
+	t_str 		= single_quote stringchar+ single_quote
+				| double_quote stringchar+ double_quote;
+	t_sq 		= alphanum+ '#' alphanum+;
+	
+	// defining the datatype prefixes
+	t_pre_integer 		= '_integer';
+	t_pre_string 		= '_string';
+	t_pre_decimal 		= '_decimal';
+	t_pre_double 		= '_double';
+	t_pre_float 		= '_float';
+	t_pre_base64 		= '_base64binary';
+	t_pre_boolean 		= '_boolean';
+	t_pre_date 		= '_date';
+	t_pre_datetime 		= '_datetime';
+	t_pre_duration 		= '_duration';
+	t_pre_yearmonthduration = '_yearmonthduration';
+	t_pre_daytimeduration = '_daytimeduration';
+	t_pre_gday 		= '_gday';
+	t_pre_gmonthday 	= '_gmonthday';
+	t_pre_gmonth 		= '_gmonth';
+	t_pre_gyearmonth 	= '_gyearmonth';
+	t_pre_gyear 		= '_gyear';
+	t_pre_hex 		= '_hexbinary';
+	t_pre_iri 		= '_iri';
+	t_pre_sqname 		= '_sqname';
+	t_pre_time 		= '_time';
+	t_pre_xmlliteral	= '_xmlliteral';
+	t_pre_plainliteral		= '_plainliteral';
+
+/************************************************************
+ * Ignored Tokens                                           *
+ ************************************************************/              
+Ignored Tokens  
+    t_blank,
+    t_comment;  
+
+
+/************************************************************
+ * Productions                                              *
+ ************************************************************/  
+Productions
+    program      = expr* ;
+    
+    expr         = {rule} rule |
+                   {fact} fact |
+                   {query} query;
+    
+	rule = 		[head]:litlist t_impliedby [body]:litlist? t_dot;
+    
+	fact = 		predicate t_dot;
+    
+	query = 	t_query litlist t_dot;
+    
+	litlist	=	literal | 
+			{and} litlist t_and literal | 
+			{comma} litlist t_comma literal;
+    
+	literal = 	{negated} t_not predicate |
+			predicate |
+			{builtin} builtin |
+			{negatedbuiltin} t_not builtin;
+    
+	predicate = 	t_id paramlist?;
+
+	paramlist = 	t_lpar termlist? t_rpar;
+
+	termlist = 	{term} term |
+			termlist t_comma term;
+                   
+	intlist	= 	intlist t_comma t_int | 
+			{int} t_int; // don't ask me, why i need this {..}
+                   
+	term =		{function} t_id paramlist |
+                   {var} t_variable |
+                   {integer} t_int | 
+                   {integerl} t_pre_integer t_lpar t_int t_rpar | 
+                   {string} t_str | 
+                   {stringl} t_pre_string t_lpar t_str t_rpar | 
+                   {decimal} t_dec | 
+                   {decimall} t_pre_decimal t_lpar t_dec t_rpar | 
+                   {sqname} t_sq | 
+                   {sqnamel} t_pre_sqname t_lpar t_sq t_rpar | 
+                   {iri} t_unders t_str |
+                   {iril} t_pre_iri t_lpar t_str t_rpar |
+                   {boolean} t_pre_boolean t_lpar t_str  t_rpar |
+                   {double} t_pre_double t_lpar t_dec  t_rpar |
+                   {float} t_pre_float t_lpar t_dec  t_rpar |
+                   
+                   {date}   t_pre_date t_lpar [year]:t_int t_comma [month]:t_int [c2]:t_comma [day]:t_int t_rpar |
+                   {datetz} t_pre_date t_lpar [year]:t_int t_comma [month]:t_int [c2]:t_comma [day]:t_int [c3]:t_comma [tzhour]:t_int [c4]:t_comma [tzminute]:t_int t_rpar |
+                   
+                   {timeis}   t_pre_time t_lpar [hour]:t_int t_comma [minute]:t_int [c2]:t_comma [second]:t_int t_rpar |
+                   {timeistz} t_pre_time t_lpar [hour]:t_int t_comma [minute]:t_int [c2]:t_comma [second]:t_int [c3]:t_comma [tzhour]:t_int [c4]:t_comma [tzminute]:t_int t_rpar |
+                   {timefs}   t_pre_time t_lpar [hour]:t_int t_comma [minute]:t_int [c2]:t_comma [second]:t_dec t_rpar |
+                   {timefstz} t_pre_time t_lpar [hour]:t_int t_comma [minute]:t_int [c2]:t_comma [second]:t_dec [c3]:t_comma [tzhour]:t_int [c4]:t_comma [tzminute]:t_int t_rpar |
+                   {timems}   t_pre_time t_lpar [hour]:t_int t_comma [minute]:t_int [c2]:t_comma [second]:t_int [c3]:t_comma [millisecond]:t_int t_rpar |
+                   {timemstz} t_pre_time t_lpar [hour]:t_int t_comma [minute]:t_int [c2]:t_comma [second]:t_int [c3]:t_comma [millisecond]:t_int [c4]:t_comma [tzhour]:t_int [c5]:t_comma [tzminute]:t_int t_rpar |
+
+                   {datetimeis}   t_pre_datetime t_lpar [year]:t_int t_comma [month]:t_int [c2]:t_comma [day]:t_int [c3]:t_comma  [hour]:t_int [c4]:t_comma [minute]:t_int [c5]:t_comma [second]:t_int t_rpar |
+                   {datetimeistz} t_pre_datetime t_lpar [year]:t_int t_comma [month]:t_int [c2]:t_comma [day]:t_int [c3]:t_comma  [hour]:t_int [c4]:t_comma [minute]:t_int [c5]:t_comma [second]:t_int [c6]:t_comma [tzhour]:t_int [c7]:t_comma [tzminute]:t_int t_rpar |
+                   {datetimefs}   t_pre_datetime t_lpar [year]:t_int t_comma [month]:t_int [c2]:t_comma [day]:t_int [c3]:t_comma  [hour]:t_int [c4]:t_comma [minute]:t_int [c5]:t_comma [second]:t_dec t_rpar |
+                   {datetimefstz} t_pre_datetime t_lpar [year]:t_int t_comma [month]:t_int [c2]:t_comma [day]:t_int [c3]:t_comma  [hour]:t_int [c4]:t_comma [minute]:t_int [c5]:t_comma [second]:t_dec [c6]:t_comma [tzhour]:t_int [c7]:t_comma [tzminute]:t_int t_rpar |
+                   {datetimems}   t_pre_datetime t_lpar [year]:t_int t_comma [month]:t_int [c2]:t_comma [day]:t_int [c3]:t_comma  [hour]:t_int [c4]:t_comma [minute]:t_int [c5]:t_comma [second]:t_int [c6]:t_comma [millisecond]:t_int t_rpar |
+                   {datetimemstz} t_pre_datetime t_lpar [year]:t_int t_comma [month]:t_int [c2]:t_comma [day]:t_int [c3]:t_comma  [hour]:t_int [c4]:t_comma [minute]:t_int [c5]:t_comma [second]:t_int [c6]:t_comma [millisecond]:t_int [c7]:t_comma [tzhour]:t_int [c8]:t_comma [tzminute]:t_int t_rpar |
+
+                   {durationis} t_pre_duration t_lpar [year]:t_int t_comma [month]:t_int [c2]:t_comma [day]:t_int [c3]:t_comma  [hour]:t_int [c4]:t_comma [minute]:t_int [c5]:t_comma [second]:t_int t_rpar |
+                   {durationfs} t_pre_duration t_lpar [year]:t_int t_comma [month]:t_int [c2]:t_comma [day]:t_int [c3]:t_comma  [hour]:t_int [c4]:t_comma [minute]:t_int [c5]:t_comma [second]:t_dec t_rpar |
+                   {durationms} t_pre_duration t_lpar [year]:t_int t_comma [month]:t_int [c2]:t_comma [day]:t_int [c3]:t_comma  [hour]:t_int [c4]:t_comma [minute]:t_int [c5]:t_comma [second]:t_int [c6]:t_comma [millisecond]:t_int t_rpar |
+                   {daytimedurationfs} t_pre_daytimeduration t_lpar [day]:t_int t_comma [hour]:t_int [c2]:t_comma [minute]:t_int [c3]:t_comma  [second]:t_dec t_rpar |
+                   {daytimedurationms} t_pre_daytimeduration t_lpar [day]:t_int t_comma [hour]:t_int [c2]:t_comma [minute]:t_int [c3]:t_comma  [second]:t_int [c4]:t_comma [millisecond]:t_int t_rpar |
+                   {yearmonthduration} t_pre_yearmonthduration t_lpar [year]:t_int t_comma [month]:t_int t_rpar |
+                   
+                   {gday} t_pre_gday t_lpar t_int  t_rpar |
+                   {gmonth} t_pre_gmonth t_lpar t_int  t_rpar |
+                   {gyear} t_pre_gyear t_lpar t_int  t_rpar |
+                   {gyearmonth} t_pre_gyearmonth t_lpar intlist  t_rpar |
+                   {gmonthday} t_pre_gmonthday t_lpar intlist  t_rpar |
+                   
+                   {base64binary} t_pre_base64 t_lpar t_str t_rpar |
+                   {hexbinary} t_pre_hex t_lpar t_str t_rpar |
+                   
+                   {xmlliteral} t_pre_xmlliteral t_lpar [string]:t_str t_rpar |
+                   {xmlliterallang} t_pre_xmlliteral t_lpar [string]:t_str t_comma [lang]:t_str t_rpar |
+                   {plainliteral} t_pre_plainliteral t_lpar [string]:t_str t_comma [lang]:t_str t_rpar;
+                   
+    builtin =	   {binary}[first]:term t_bin_op [second]:term |
+                   {equals}[first]:term t_eq [second]:term |
+                   {ternary}[first]:term t_ter_op [second]:term t_eq [third]:term;
+	

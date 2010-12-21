@@ -1,0 +1,14 @@
+// Test program for performance harness
+// ====================================
+// Generate a relation with 450 tuples (1-450) and do a cartesian product (202,500 tuples)
+// Add in a locally stratified rule pair and see how this affects evaluation.
+
+p(1).
+p(?n) :- p(?x), ?x + 1 = ?n, ?n <= 450.
+
+r(?x, ?y) :- p(?x), p(?y).
+
+q(1,?x) :- p(?x), not r(2, ?y).
+r(?x, ?y) :- q(?x, ?y).
+
+?- q(?x, ?y).

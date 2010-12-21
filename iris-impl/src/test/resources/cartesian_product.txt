@@ -1,0 +1,8 @@
+// Test program for performance harness
+// ====================================
+// Generate a relation with 500 tuples (1-500) and do a cartesian product (250,000 tuples)
+
+p(1).
+p(?n) :- p(?x), ?x + 1 = ?n, ?n <= 500.
+q(?x, ?y) :- p(?x), p(?y).
+?- q(?x, ?y). 

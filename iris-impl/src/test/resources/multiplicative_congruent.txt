@@ -1,0 +1,54 @@
+// Test program for performance harness
+// ====================================
+// Prove that if a1 congruent b1 mod n and
+// a2 congruent b2 mod n then
+// a1.b1 congruent a2.b2 mod n
+// for all a1, b1, a2, b2, where 0 <= a1, b1, a2, b2 < 20
+// and for all moduli n, where 1 <= n <= 20
+
+
+// 1. Generate all combinations of triples x, y, z
+//    such that 0 <= x, y < 20 and 0 < z <= 20
+//    i.e. the first 8000 unique triples
+
+triple(0,0,0,1).
+triple(?n, ?x, ?y, ?z) :-
+    triple(?n1, ?x1, ?y1, ?z1),
+    ?n1 +  1 = ?n,
+    ?n / 400 = ?x,
+    ?n % 400 = ?y2,
+    ?y2 / 20 = ?y,
+    ?n  % 20 = ?zz,
+    ?zz +  1 = ?z,
+    ?n < 8000.
+
+// 2. get all those triples where a % n = b % n
+//    (definition of congruent)
+
+congruent( ?a, ?b, ?n ) :-
+    triple(?k, ?a, ?b, ?n ),
+    ?a % ?n = ?amodn,
+    ?b % ?n = ?bmodn,
+    ?amodn = ?bmodn.
+
+
+// 3. Multiply all combinations of a1.b1 and a2.b2
+// where a1 congruent a2 and b1 congruent b2 for each n
+
+mul( ?a1b1, ?a2b2, ?n ) :-
+    congruent( ?a1, ?a2, ?n ),
+    congruent( ?b1, ?b2, ?n ),
+    ?a1 * ?b1 = ?a1b1,
+    ?a2 * ?b2 = ?a2b2.
+
+// 4. The multiplied triples where the congruency rule does not hold.
+
+exceptions_to_rule( ?x,?y,?n ) :-
+    mul( ?x,?y,?n),
+    ?x % ?n = ?xmodn,
+    ?y % ?n = ?ymodn,
+    ?xmodn != ?ymodn.
+
+// 5. This should be empty if the congruency rule is correct:
+
+?-exceptions_to_rule( ?a1b1,?a2b2,?n ).

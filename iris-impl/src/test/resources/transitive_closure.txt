@@ -1,0 +1,14 @@
+// Test program for performance harness
+// ====================================
+// Create 200 pairs of x and y, where 0 <= x < 200
+// and y = x + 1
+// Then compute all possible paths by the recursive
+// joining of all pairs (20503).
+
+p(0, 1).
+p(?x1, ?y1) :- p(?x, ?y), ?x + 1 = ?x1, ?y + 1 = ?y1, ?x < 200.
+
+path(?x, ?y) :- p(?x, ?y).
+path(?x, ?y) :- path(?x, ?z), path(?z, ?y).
+
+?- path(?x,?y).

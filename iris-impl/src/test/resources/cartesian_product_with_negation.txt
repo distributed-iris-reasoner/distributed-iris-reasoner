@@ -1,0 +1,21 @@
+// Test program for performance harness
+// ====================================
+// Generate two relations each with 400 tuples and do a cartesian product (160,000 tuples each)
+// Then subtract one from the other (negation) to get 70000 tuples
+
+// p( 1-400 )
+p(1).
+p(?n) :- p(?x), ?x + 1 = ?n, ?n <= 400.
+
+// p2 - 160000 tuples
+p2(?x, ?y) :- p(?x), p(?y).
+
+// q2( 101-500 )
+q(101).
+q(?n) :- q(?x), ?x + 1 = ?n, ?n <= 500.
+
+q2(?x, ?y) :- q(?x), q(?y).
+
+p2_minus_q2( ?x, ?y) :- q2(?x, ?y), not p2(?x, ?y). 
+
+?- p2_minus_q2( ?x, ?y).
