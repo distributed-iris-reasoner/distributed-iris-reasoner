@@ -66,7 +66,7 @@ public class EqualBuiltin extends ArithmeticBuiltin {
 	}
 
 	/** The predicate defining this built-in. */
-	private static final IPredicate PREDICATE = BASIC.createPredicate("EQUAL",
+	public static final IPredicate PREDICATE = BASIC.createPredicate("EQUAL",
 			2);
 	
 	protected boolean checkTypes(int missingTermIndex, ITerm[] terms, 

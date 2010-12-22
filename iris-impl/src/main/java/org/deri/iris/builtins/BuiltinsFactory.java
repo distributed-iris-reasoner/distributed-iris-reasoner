@@ -107,18 +107,35 @@ import org.deri.iris.builtins.date.YearMonthDurationMultiplyBuiltin;
 import org.deri.iris.builtins.date.YearMonthDurationSubtractBuiltin;
 import org.deri.iris.builtins.date.YearPartBuiltin;
 import org.deri.iris.builtins.date.YearsFromDurationBuiltin;
-import org.deri.iris.builtins.numeric.NumericIntegerDivideBuiltin;
+import org.deri.iris.builtins.list.AppendBuiltin;
+import org.deri.iris.builtins.list.ConcatenateBuiltin;
+import org.deri.iris.builtins.list.CountListBuiltin;
+import org.deri.iris.builtins.list.DistinctValuesBuiltin;
+import org.deri.iris.builtins.list.ExceptBuiltin;
+import org.deri.iris.builtins.list.GetBuiltin;
+import org.deri.iris.builtins.list.IndexOfBuiltin;
+import org.deri.iris.builtins.list.InsertBeforeBuiltin;
+import org.deri.iris.builtins.list.IntersectBuiltin;
+import org.deri.iris.builtins.list.ListContainsBuiltin;
+import org.deri.iris.builtins.list.MakeListBuiltin;
+import org.deri.iris.builtins.list.RemoveBuiltin;
+import org.deri.iris.builtins.list.ReverseBuiltin;
+import org.deri.iris.builtins.list.SubListFromBuiltin;
+import org.deri.iris.builtins.list.SubListFromToBuiltin;
+import org.deri.iris.builtins.list.UnionBuiltin;
 import org.deri.iris.builtins.numeric.NumericAddBuiltin;
 import org.deri.iris.builtins.numeric.NumericDivideBuiltin;
 import org.deri.iris.builtins.numeric.NumericEqualBuiltin;
 import org.deri.iris.builtins.numeric.NumericGreaterBuiltin;
 import org.deri.iris.builtins.numeric.NumericGreaterEqualBuiltin;
+import org.deri.iris.builtins.numeric.NumericIntegerDivideBuiltin;
 import org.deri.iris.builtins.numeric.NumericLessBuiltin;
 import org.deri.iris.builtins.numeric.NumericLessEqualBuiltin;
 import org.deri.iris.builtins.numeric.NumericMultiplyBuiltin;
 import org.deri.iris.builtins.numeric.NumericNotEqualBuiltin;
 import org.deri.iris.builtins.numeric.NumericSubtractBuiltin;
 import org.deri.iris.builtins.string.LangFromPlainLiteralBuiltin;
+import org.deri.iris.builtins.string.MatchesLanguageRangeBuiltin;
 import org.deri.iris.builtins.string.PlainLiteralCompareBuiltin;
 import org.deri.iris.builtins.string.PlainLiteralFromStringBuiltin;
 import org.deri.iris.builtins.string.PlainLiteralFromStringLangBuiltin;
@@ -270,6 +287,7 @@ public class BuiltinsFactory implements IBuiltinsFactory {
 		return new StringToLowerBuiltin(terms);
 	}
 
+	@Deprecated
 	public IBuiltinAtom createStringUriEncode(ITerm... terms) {
 		return new StringUriEncodeBuiltin(terms);
 	}
@@ -336,6 +354,10 @@ public class BuiltinsFactory implements IBuiltinsFactory {
 		} else {
 			return new StringMatchesBuiltin(terms);
 		}
+	}
+
+	public IBuiltinAtom createEncodeForUri(ITerm... terms) {
+		return new EncodeForUriBuiltin(terms);
 	}
 
 	public IBuiltinAtom createYearPart(ITerm... terms) {
@@ -412,6 +434,10 @@ public class BuiltinsFactory implements IBuiltinsFactory {
 
 	public IBuiltinAtom createToDateTime(ITerm... terms) {
 		return new ToDateTimeBuiltin(terms);
+	}
+
+	public IBuiltinAtom createToDateTimeStamp(ITerm... terms) {
+		return new ToDateTimeStampBuiltin(terms);
 	}
 
 	public IBuiltinAtom createToDayTimeDuration(ITerm... terms) {
@@ -590,6 +616,10 @@ public class BuiltinsFactory implements IBuiltinsFactory {
 		return new IsLanguageBuiltin(terms);
 	}
 
+	public IBuiltinAtom createIsList(ITerm... terms) {
+		return new IsListBuiltin(terms);
+	}
+
 	public IBuiltinAtom createIsLong(ITerm... terms) {
 		return new IsLongBuiltin(terms);
 	}
@@ -740,6 +770,10 @@ public class BuiltinsFactory implements IBuiltinsFactory {
 
 	public IBuiltinAtom createIsNotLanguage(ITerm... terms) {
 		return new IsNotLanguageBuiltin(terms);
+	}
+
+	public IBuiltinAtom createIsNotList(ITerm... terms) {
+		return new IsNotListBuiltin(terms);
 	}
 
 	public IBuiltinAtom createIsNotLong(ITerm... terms) {
@@ -1265,6 +1299,206 @@ public class BuiltinsFactory implements IBuiltinsFactory {
 	@Override
 	public IBuiltinAtom createUnequal(ITerm... terms) {
 		return new NotEqualBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createToByte(ITerm... terms) {
+		return new ToByteBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createToInt(ITerm... terms) {
+		return new ToIntBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createToLong(ITerm... terms) {
+		return new ToLongBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createToNegativeInteger(ITerm... terms) {
+		return new ToNegativeIntegerBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createToNonNegativeInteger(ITerm... terms) {
+		return new ToNonNegativeIntegerBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createToNonPositiveInteger(ITerm... terms) {
+		return new ToNonPositiveIntegerBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createToPositiveInteger(ITerm... terms) {
+		return new ToPositiveIntegerBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createToShort(ITerm... terms) {
+		return new ToShortBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createToUnsignedByte(ITerm... terms) {
+		return new ToUnsignedByteBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createToUnsignedInt(ITerm... terms) {
+		return new ToUnsignedIntBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createToUnsignedLong(ITerm... terms) {
+		return new ToUnsignedLongBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createToUnsignedShort(ITerm... terms) {
+		return new ToUnsignedShortBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createToAnyURI(ITerm... terms) {
+		return new ToAnyURIBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createAppend(ITerm... terms) {
+		return new AppendBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createConcatenate(ITerm... terms) {
+		return new ConcatenateBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createCount(ITerm... terms) {
+		return new CountListBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createDistinctValues(ITerm... terms) {
+		return new DistinctValuesBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createExcept(ITerm... terms) {
+		return new ExceptBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createget(ITerm... terms) {
+		return new GetBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createIndexOf(ITerm... terms) {
+		return new IndexOfBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createInsertBefore(ITerm... terms) {
+		return new InsertBeforeBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createIntersect(ITerm... terms) {
+		return new IntersectBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createListContains(ITerm... terms) {
+		return new ListContainsBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createMakeList(ITerm... terms) {
+		return new MakeListBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createRemove(ITerm... terms) {
+		return new RemoveBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createReverse(ITerm... terms) {
+		return new ReverseBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createSubListFrom(ITerm... terms) {
+		return new SubListFromBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createSubListFromTo(ITerm... terms) {
+		return new SubListFromToBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createUnion(ITerm... terms) {
+		return new UnionBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createMatchesLanguageRange(ITerm... terms) {
+		return new MatchesLanguageRangeBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createToNormalizedString(ITerm... terms) {
+		return new ToNormalizedStringBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createToLanguage(ITerm... terms) {
+		return new ToLanguageBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createToToken(ITerm... terms) {
+		return new ToTokenBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createToID(ITerm... terms) {
+		return new ToIDBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createToIDREF(ITerm... terms) {
+		return new ToIDREFBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createToName(ITerm... terms) {
+		return new ToNameBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createToNCName(ITerm... terms) {
+		return new ToNCNameBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createToQName(ITerm... terms) {
+		return new ToQNameBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createToENTITY(ITerm... terms) {
+		return new ToENTITYBuiltin(terms);
+	}
+
+	@Override
+	public IBuiltinAtom createToNMTOKEN(ITerm... terms) {
+		return new ToNMTokenBuiltin(terms);
 	}
 
 }

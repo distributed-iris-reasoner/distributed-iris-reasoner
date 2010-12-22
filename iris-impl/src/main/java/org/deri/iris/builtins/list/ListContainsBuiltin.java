@@ -20,60 +20,48 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
  * MA  02110-1301, USA.
  */
-package org.deri.iris.builtins;
+package org.deri.iris.builtins.list;
 
 import static org.deri.iris.factory.Factory.BASIC;
 
 import org.deri.iris.api.basics.IPredicate;
-import org.deri.iris.api.terms.IConcreteTerm;
-import org.deri.iris.api.terms.IStringTerm;
 import org.deri.iris.api.terms.ITerm;
-import org.deri.iris.utils.equivalence.IEquivalentTerms;
+import org.deri.iris.builtins.BooleanBuiltin;
 
 /**
  * <p>
- * Represents the RIF built-in predicate func:iri-string.
+ * Represents the RIF built-in predicate pred:list-contains.
  * </p>
+ * <p>
+ * Checks if a given <code>Object</code> is in a <code>List</code>
+ * </p>
+ * see <A HREF=
+ * "http://www.w3.org/2005/rules/wiki/DTB#Functions_and_Predicates_on_RIF_Lists"
+ * >http://www.w3.org/2005/rules/wiki/DTB#Functions_and_Predicates_on_RIF_Lists
+ * 
  */
-public class IriStringBuiltin extends BooleanBuiltin {
+public class ListContainsBuiltin extends BooleanBuiltin {
 
 	/** The predicate defining this built-in. */
 	private static final IPredicate PREDICATE = BASIC.createPredicate(
-			"IRI_STRING", 2);
+			"LIST_CONTAINS", 2);
 
 	/**
 	 * Creates the built-in for the specified terms.
 	 * 
-	 * @param terms The terms.
-	 * @throws NullPointerException If one of the terms is <code>null</code>.
-	 * @throws IllegalArgumentException If the number of terms submitted is not
-	 *             2 .
+	 * @param terms
+	 *            The terms.
+	 * @throws NullPointerException
+	 *             If one of the terms is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             If the number of terms submitted is not 1.
 	 */
-	public IriStringBuiltin(ITerm... terms) {
+	public ListContainsBuiltin(ITerm... terms) {
 		super(PREDICATE, terms);
 	}
 
-	@Override
-	protected boolean computeResult(ITerm[] terms) {
-		IEquivalentTerms equivalentTerms = getEquivalenceClasses();
-		
-		// Check if the two terms are equivalent.
-		if (equivalentTerms != null) {
-			if (equivalentTerms.areEquivalent(terms[0], terms[1])) {
-				return true;
-			}
-		}
-		
-		// Assuming the IRI is represented by some concrete term.
-		if (terms[0] instanceof IConcreteTerm
-				&& terms[1] instanceof IStringTerm) {
-			IConcreteTerm iri = (IConcreteTerm) terms[0];
-			IStringTerm string = (IStringTerm) terms[1];
-
-			return iri.toCanonicalString().equals(string.toCanonicalString());
-		}
-
-		return false;
+	protected boolean computeResult(ITerm [] terms){
+		return ListBuiltinHelper.listContains(terms);
 	}
 
 }

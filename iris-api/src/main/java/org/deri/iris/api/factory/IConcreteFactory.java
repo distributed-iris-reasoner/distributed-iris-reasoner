@@ -26,6 +26,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
 
+import org.deri.iris.api.terms.IConcreteTerm;
 import org.deri.iris.api.terms.concrete.IAnyURI;
 import org.deri.iris.api.terms.concrete.IBase64Binary;
 import org.deri.iris.api.terms.concrete.IBooleanTerm;
@@ -50,6 +51,8 @@ import org.deri.iris.api.terms.concrete.IIntTerm;
 import org.deri.iris.api.terms.concrete.IIntegerTerm;
 import org.deri.iris.api.terms.concrete.IIri;
 import org.deri.iris.api.terms.concrete.ILanguage;
+import org.deri.iris.api.terms.concrete.IList;
+import org.deri.iris.api.terms.concrete.ILocal;
 import org.deri.iris.api.terms.concrete.ILongTerm;
 import org.deri.iris.api.terms.concrete.INCName;
 import org.deri.iris.api.terms.concrete.INMTOKEN;
@@ -525,6 +528,25 @@ public interface IConcreteFactory {
 	 */
 	public ILanguage createLanguage(String language);
 
+	/**
+	 * Create a new list containing the specified {@link IConcreteTerm}s.
+	 * 
+	 * @param terms The terms for the list.
+	 * @return A new list containing the specified {@link IConcreteTerm}s.
+	 */
+	public IList createList(IConcreteTerm... terms);
+
+	/**
+	 * Create a new constant symbol corresponding to rif:local that is not
+	 * visible outside of the specified context in which it occurs. Corresponds
+	 * to rif:local.
+	 * 
+	 * @param value The string representing the rif:local.
+	 * @param context The context in which the rif:local is visible.
+	 * @return A new rif:local which is visible in the specified context.
+	 */
+	public ILocal createLocal(String value, Object context);
+	
 	/**
 	 * <p>
 	 * Create a new term representing a xs:long.

@@ -675,6 +675,19 @@ public interface IBuiltinsFactory {
 	 * @throws IllegalArgumentException if t is <code>null</code>
 	 */
 	public IBuiltinAtom createStringMatches(ITerm... terms);
+	
+	/**
+	 * Creates the builtin representing RIF built-in func:encode-for-uri.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If any of the terms is <code>null</code>
+	 * @throws IllegalArgumentException If one of the terms is {@code null}.
+	 * @throws IllegalArgumentException If the number of terms submitted is not
+	 *             correct.
+	 * @throws IllegalArgumentException If terms is <code>null</code>.
+	 */
+	public IBuiltinAtom createEncodeForUri(ITerm... terms);
 
 	/*
 	 * Date built-ins.
@@ -1694,11 +1707,39 @@ public interface IBuiltinsFactory {
 	 *             correct.
 	 */
 	public IBuiltinAtom createXMLLiteralNotEqual(ITerm... terms);
+	
+	/*
+	 * PlainLiteral built-ins.
+	 */
+	
+	/**
+	 * Creates the MatchesLanguageRange builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createMatchesLanguageRange(ITerm... terms);
 
 	/*
 	 * Data type conversion built-ins.
 	 */
 
+	/**
+	 * Creates the ToAnyURI builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createToAnyURI(ITerm... terms);
+	
 	/**
 	 * Creates ToBase64Binary builtin.
 	 * 
@@ -1726,6 +1767,18 @@ public interface IBuiltinsFactory {
 	public IBuiltinAtom createToBoolean(ITerm... terms);
 
 	/**
+	 * Creates the ToByte builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createToByte(ITerm... terms);
+	
+	/**
 	 * Creates ToDate builtin.
 	 * 
 	 * @param terms The terms.
@@ -1751,6 +1804,19 @@ public interface IBuiltinsFactory {
 	 */
 	public IBuiltinAtom createToDateTime(ITerm... terms);
 
+	/**
+	 * Creates the ToDateTimeStamp builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin
+	 * @throws NullPointerException if any of the terms is <code>null</code>
+	 * @throws IllegalArgumentException if one of the terms is {@code null}
+	 * @throws IllegalArgumentException if the number of terms submitted is not
+	 *             correct
+	 * @throws IllegalArgumentException if terms is <code>null</code>
+	 */
+	public IBuiltinAtom createToDateTimeStamp(ITerm... terms);
+	
 	/**
 	 * Creates ToDayTimeDuration builtin.
 	 * 
@@ -1803,6 +1869,19 @@ public interface IBuiltinsFactory {
 	 */
 	public IBuiltinAtom createToDuration(ITerm... terms);
 
+	/**
+	 * Creates ToENTITIY builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException if any of the terms is <code>null</code>
+	 * @throws IllegalArgumentException if one of the terms is {@code null}
+	 * @throws IllegalArgumentException if the number of terms submitted is not
+	 *             correct
+	 * @throws IllegalArgumentException if t is <code>null</code>
+	 */
+	public IBuiltinAtom createToENTITY(ITerm... terms);
+	
 	/**
 	 * Creates ToFloat builtin.
 	 * 
@@ -1895,6 +1974,19 @@ public interface IBuiltinsFactory {
 	public IBuiltinAtom createToHexBinary(ITerm... terms);
 
 	/**
+	 * Creates the ToInt builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return the builtin
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createToInt(ITerm... terms);
+
+	
+	/**
 	 * Creates ToInteger builtin.
 	 * 
 	 * @param terms The terms.
@@ -1908,6 +2000,32 @@ public interface IBuiltinsFactory {
 	public IBuiltinAtom createToInteger(ITerm... terms);
 
 	/**
+	 * Creates ToID builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return the builtin
+	 * @throws NullPointerException if any of the terms is <code>null</code>
+	 * @throws IllegalArgumentException if one of the terms is {@code null}
+	 * @throws IllegalArgumentException if the number of terms submitted is not
+	 *             correct
+	 * @throws IllegalArgumentException if t is <code>null</code>
+	 */
+	public IBuiltinAtom createToID(ITerm... terms);
+	
+	/**
+	 * Creates ToIDREF builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return the builtin
+	 * @throws NullPointerException if any of the terms is <code>null</code>
+	 * @throws IllegalArgumentException if one of the terms is {@code null}
+	 * @throws IllegalArgumentException if the number of terms submitted is not
+	 *             correct
+	 * @throws IllegalArgumentException if t is <code>null</code>
+	 */
+	public IBuiltinAtom createToIDREF(ITerm... terms);
+	
+	/**
 	 * Creates ToIRI builtin.
 	 * 
 	 * @param terms The terms.
@@ -1919,7 +2037,151 @@ public interface IBuiltinsFactory {
 	 * @throws IllegalArgumentException if t is <code>null</code>
 	 */
 	public IBuiltinAtom createToIRI(ITerm... terms);
+	
+	/**
+	 * Creates the ToLanguage builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createToLanguage(ITerm... terms);
 
+	/**
+	 * Creates the ToLong builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createToLong(ITerm... terms);
+	
+	/**
+	 * Creates the ToNegativeInteger builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createToNegativeInteger(ITerm... terms);
+	
+	/**
+	 * Creates the ToName builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createToName(ITerm... terms);
+	
+	/**
+	 * Creates the ToNCName builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createToNCName(ITerm... terms);
+	
+	/**
+	 * Creates the ToNMTOKEN builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createToNMTOKEN(ITerm... terms);
+	
+	/**
+	 * Creates the ToNonNegativeInteger builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createToNonNegativeInteger(ITerm... terms);
+	
+	/**
+	 * Creates the ToNonPositiveInteger builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createToNonPositiveInteger(ITerm... terms);
+	
+	/**
+	 * Creates the ToNormalizedString builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createToNormalizedString(ITerm... terms);
+	
+	/**
+	 * Creates the ToPositiveInteger builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createToPositiveInteger(ITerm... terms);
+	
+	/**
+	 * Creates the ToQName builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createToQName(ITerm... terms);
+	
+	/**
+	 * Creates the ToShort builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createToShort(ITerm... terms);
+	
 	/**
 	 * Creates ToString builtin.
 	 * 
@@ -1958,7 +2220,67 @@ public interface IBuiltinsFactory {
 	 * @throws IllegalArgumentException if t is <code>null</code>
 	 */
 	public IBuiltinAtom createToTime(ITerm... terms);
+	
+	/**
+	 * Creates the ToToken builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createToToken(ITerm... terms);
+	
+	/**
+	 * Creates the ToUnsignedByte builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createToUnsignedByte(ITerm... terms);
 
+	/**
+	 * Creates the ToUnsignedInt builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createToUnsignedInt(ITerm... terms);
+	
+	/**
+	 * Creates the ToUnsignedLong builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createToUnsignedLong(ITerm... terms);
+	
+	/**
+	 * Creates the ToUnsignedShort builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createToUnsignedShort(ITerm... terms);
+	
 	/**
 	 * Creates ToXMLLiteral builtin.
 	 * 
@@ -2418,6 +2740,17 @@ public interface IBuiltinsFactory {
 	 */
 	public IBuiltinAtom createIsToken(ITerm... terms);
 
+	/**
+	 * Creates the IsList built-in.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If any of the terms is <code>null</code>.
+	 * @throws IllegalArgumentException If the number of terms submitted is not
+	 *             correct.
+	 */
+	public IBuiltinAtom createIsList(ITerm...terms);
+	
 	/**
 	 * Creates the IsLanguage built-in.
 	 * 
@@ -2896,6 +3229,17 @@ public interface IBuiltinsFactory {
 	public IBuiltinAtom createIsNotLanguage(ITerm... terms);
 
 	/**
+	 * Creates the IsNotList built-in.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If any of the terms is <code>null</code>.
+	 * @throws IllegalArgumentException If the number of terms submitted is not
+	 *             correct.
+	 */
+	public IBuiltinAtom createIsNotList(ITerm...terms);
+	
+	/**
 	 * Creates the IsNotName built-in.
 	 * 
 	 * @param terms The terms.
@@ -3019,5 +3363,201 @@ public interface IBuiltinsFactory {
 	 *             correct.
 	 */
 	public IBuiltinAtom createIriString(ITerm... terms);
+	
+	/*
+	 * List built-ins.
+	 */
 
+	/**
+	 * Creates the Append builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createAppend(ITerm... terms);
+	
+	/**
+	 * Creates the Concatenate builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createConcatenate(ITerm... terms);
+	
+	/**
+	 * Creates the Count builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createCount(ITerm... terms);
+	
+	/**
+	 * Creates the DistinctValues builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createDistinctValues(ITerm... terms);
+	
+	/**
+	 * Creates the Except builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createExcept(ITerm... terms);
+	
+	/**
+	 * Creates the Get builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createget(ITerm... terms);
+	
+	/**
+	 * Creates the IndexOf builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createIndexOf(ITerm... terms);
+	
+	/**
+	 * Creates the InsertBefore builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createInsertBefore(ITerm... terms);
+	
+	/**
+	 * Creates the Intersect builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createIntersect(ITerm... terms);
+	
+	/**
+	 * Creates the Contains builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createListContains(ITerm... terms);
+	
+	/**
+	 * Creates the MakeList builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createMakeList(ITerm... terms);
+	
+	/**
+	 * Creates the Remove builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createRemove(ITerm... terms);
+	
+	/**
+	 * Creates the Reverse builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createReverse(ITerm... terms);
+	
+	/**
+	 * Creates the SubListFrom builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createSubListFrom(ITerm... terms);
+	
+	/**
+	 * Creates the SubListFromTo builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createSubListFromTo(ITerm... terms);
+	
+	/**
+	 * Creates the Union builtin.
+	 * 
+	 * @param terms The terms.
+	 * @return The builtin.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the number of terms is not correct.
+	 */
+	public IBuiltinAtom createUnion(ITerm... terms);
+	
 }

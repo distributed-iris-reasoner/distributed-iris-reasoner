@@ -20,60 +20,50 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
  * MA  02110-1301, USA.
  */
-package org.deri.iris.builtins;
+package org.deri.iris.builtins.datatype;
 
 import static org.deri.iris.factory.Factory.BASIC;
 
 import org.deri.iris.api.basics.IPredicate;
-import org.deri.iris.api.terms.IConcreteTerm;
-import org.deri.iris.api.terms.IStringTerm;
 import org.deri.iris.api.terms.ITerm;
-import org.deri.iris.utils.equivalence.IEquivalentTerms;
+import org.deri.iris.api.terms.concrete.IQName;
 
 /**
- * <p>
- * Represents the RIF built-in predicate func:iri-string.
- * </p>
+ * Represents a data type conversion function, which converts supported data
+ * type instances to {@link IQName} instances. The following data types are
+ * supported:
+ * <ul>
+ * <li>QName</li>
+ * </ul>
  */
-public class IriStringBuiltin extends BooleanBuiltin {
+public class ToQNameBuiltin extends ConversionBuiltin {
 
-	/** The predicate defining this built-in. */
 	private static final IPredicate PREDICATE = BASIC.createPredicate(
-			"IRI_STRING", 2);
+			"TO_QNAME", 2);
 
 	/**
-	 * Creates the built-in for the specified terms.
+	 * Creates a new instance of this builtin.
 	 * 
-	 * @param terms The terms.
-	 * @throws NullPointerException If one of the terms is <code>null</code>.
-	 * @throws IllegalArgumentException If the number of terms submitted is not
-	 *             2 .
+	 * @param terms An array of terms, where first one is the term to convert
+	 *            and the last term represents the result of this data type
+	 *            conversion.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the length of the terms and the arity
+	 *             of the predicate do not match.
 	 */
-	public IriStringBuiltin(ITerm... terms) {
+	public ToQNameBuiltin(ITerm... terms) {
 		super(PREDICATE, terms);
 	}
 
 	@Override
-	protected boolean computeResult(ITerm[] terms) {
-		IEquivalentTerms equivalentTerms = getEquivalenceClasses();
-		
-		// Check if the two terms are equivalent.
-		if (equivalentTerms != null) {
-			if (equivalentTerms.areEquivalent(terms[0], terms[1])) {
-				return true;
-			}
-		}
-		
-		// Assuming the IRI is represented by some concrete term.
-		if (terms[0] instanceof IConcreteTerm
-				&& terms[1] instanceof IStringTerm) {
-			IConcreteTerm iri = (IConcreteTerm) terms[0];
-			IStringTerm string = (IStringTerm) terms[1];
-
-			return iri.toCanonicalString().equals(string.toCanonicalString());
+	protected IQName convert(ITerm term) {
+		if (term instanceof IQName) {
+			return (IQName) term;
 		}
 
-		return false;
+		return null;
 	}
 
 }

@@ -27,6 +27,7 @@ import java.math.BigInteger;
 import java.net.URI;
 
 import org.deri.iris.api.factory.IConcreteFactory;
+import org.deri.iris.api.terms.IConcreteTerm;
 import org.deri.iris.api.terms.concrete.IAnyURI;
 import org.deri.iris.api.terms.concrete.IBase64Binary;
 import org.deri.iris.api.terms.concrete.IBooleanTerm;
@@ -51,6 +52,8 @@ import org.deri.iris.api.terms.concrete.IIntTerm;
 import org.deri.iris.api.terms.concrete.IIntegerTerm;
 import org.deri.iris.api.terms.concrete.IIri;
 import org.deri.iris.api.terms.concrete.ILanguage;
+import org.deri.iris.api.terms.concrete.IList;
+import org.deri.iris.api.terms.concrete.ILocal;
 import org.deri.iris.api.terms.concrete.ILongTerm;
 import org.deri.iris.api.terms.concrete.INCName;
 import org.deri.iris.api.terms.concrete.INMTOKEN;
@@ -265,7 +268,19 @@ public class ConcreteFactory implements IConcreteFactory {
 	public ILanguage createLanguage(String language) {
 		return new Language(language);
 	}
+	
+	public IList createList(IConcreteTerm... terms) {
+		if (terms == null) {
+			return new List();
+		} else {
+			return new List(terms);
+		}
+	}
 
+	public ILocal createLocal(String value, Object context) {
+		return new Local(value, context);
+	}
+	
 	public ILongTerm createLong(long value) {
 		return new LongTerm(value);
 	}

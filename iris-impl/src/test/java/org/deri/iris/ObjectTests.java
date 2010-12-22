@@ -160,13 +160,13 @@ public final class ObjectTests {
 		if ((basic == null) || (equal == null) || (more == null)) {
 			throw new NullPointerException("The objects must not be null");
 		}
-		Assert.assertTrue("Something wrong with compareTo", basic
+		Assert.assertTrue("Something wrong with compareTo: (basic).compareTo(greater) !< 0 !", basic
 				.compareTo(more) < 0);
 
-		Assert.assertTrue("Something wrong with compareTo", basic
+		Assert.assertTrue("Something wrong with compareTo: (basic).compareTo(equal) != 0 !", basic
 				.compareTo(equal) == 0);
 
-		Assert.assertTrue("Something wrong with compareTo", more
+		Assert.assertTrue("Something wrong with compareTo: (greater).compareTo(basic) !> 0 !", more
 				.compareTo(basic) > 0);
 	}
 

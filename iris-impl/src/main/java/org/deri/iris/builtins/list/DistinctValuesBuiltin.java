@@ -20,60 +20,55 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
  * MA  02110-1301, USA.
  */
-package org.deri.iris.builtins;
+package org.deri.iris.builtins.list;
 
 import static org.deri.iris.factory.Factory.BASIC;
 
 import org.deri.iris.api.basics.IPredicate;
-import org.deri.iris.api.terms.IConcreteTerm;
-import org.deri.iris.api.terms.IStringTerm;
 import org.deri.iris.api.terms.ITerm;
-import org.deri.iris.utils.equivalence.IEquivalentTerms;
+import org.deri.iris.builtins.AbstractBuiltin;
 
 /**
  * <p>
- * Represents the RIF built-in predicate func:iri-string.
+ * Represents the RIF built-in function func:distinct-values
  * </p>
+ * <p>
+ * Returns a list which contains exactly those items which are in
+ * <code>list</code>, in the order of first appearance, except that all except
+ * the first occurrence of any item are deleted.
+ * </p>
+ * see <A HREF=
+ * "http://www.w3.org/2005/rules/wiki/DTB#Functions_and_Predicates_on_RIF_Lists"
+ * >http://www.w3.org/2005/rules/wiki/DTB#Functions_and_Predicates_on_RIF_Lists
+ * 
  */
-public class IriStringBuiltin extends BooleanBuiltin {
+public class DistinctValuesBuiltin extends AbstractBuiltin {
 
 	/** The predicate defining this built-in. */
 	private static final IPredicate PREDICATE = BASIC.createPredicate(
-			"IRI_STRING", 2);
+			"DISTINCT_VALUES", 1);
 
 	/**
 	 * Creates the built-in for the specified terms.
 	 * 
-	 * @param terms The terms.
-	 * @throws NullPointerException If one of the terms is <code>null</code>.
-	 * @throws IllegalArgumentException If the number of terms submitted is not
-	 *             2 .
+	 * @param terms
+	 *            The terms.
+	 * @throws NullPointerException
+	 *             If one of the terms is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             If the number of terms submitted is not 1.
 	 */
-	public IriStringBuiltin(ITerm... terms) {
+	public DistinctValuesBuiltin(ITerm... terms) {
 		super(PREDICATE, terms);
 	}
+	protected ITerm evaluateTerms( ITerm[] terms, int[] variableIndexes )
+	{
+		assert variableIndexes.length == 0;
+		return computeResult(terms);
+	}
 
-	@Override
-	protected boolean computeResult(ITerm[] terms) {
-		IEquivalentTerms equivalentTerms = getEquivalenceClasses();
-		
-		// Check if the two terms are equivalent.
-		if (equivalentTerms != null) {
-			if (equivalentTerms.areEquivalent(terms[0], terms[1])) {
-				return true;
-			}
-		}
-		
-		// Assuming the IRI is represented by some concrete term.
-		if (terms[0] instanceof IConcreteTerm
-				&& terms[1] instanceof IStringTerm) {
-			IConcreteTerm iri = (IConcreteTerm) terms[0];
-			IStringTerm string = (IStringTerm) terms[1];
-
-			return iri.toCanonicalString().equals(string.toCanonicalString());
-		}
-
-		return false;
+	protected ITerm computeResult(ITerm... terms) {
+		return ListBuiltinHelper.distinct_values(terms[0]);
 	}
 
 }

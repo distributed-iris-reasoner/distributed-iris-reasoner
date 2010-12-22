@@ -31,85 +31,75 @@ import org.deri.iris.api.basics.IPredicate;
 import org.deri.iris.api.terms.INumericTerm;
 import org.deri.iris.api.terms.IStringTerm;
 import org.deri.iris.api.terms.ITerm;
-import org.deri.iris.api.terms.concrete.IBooleanTerm;
-import org.deri.iris.api.terms.concrete.IIntegerTerm;
+import org.deri.iris.api.terms.concrete.INegativeInteger;
 
 /**
  * Represents a data type conversion function, which converts supported data
- * type instances to Integer instances. The following data types are supported:
+ * type instances to {@link INegativeInteger} instances. The following data
+ * types are supported:
  * <ul>
- * <li>Decimal</li>
- * <li>Double</li>
- * <li>Float</li>
- * <li>Integer</li>
+ * <li>Numeric</li>
  * <li>String</li>
  * </ul>
  */
-public class ToIntegerBuiltin extends ConversionBuiltin {
+public class ToNegativeIntegerBuiltin extends ConversionBuiltin {
 
 	private static final IPredicate PREDICATE = BASIC.createPredicate(
-			"TO_INTEGER", 2);
+			"TO_NEGATIVEINTEGER", 2);
 
 	/**
 	 * Creates a new instance of this builtin.
 	 * 
-	 * @param terms The term representing the data type instance to be
-	 *            converted.
+	 * @param terms An array of terms, where first one is the term to convert
+	 *            and the last term represents the result of this data type
+	 *            conversion.
+	 * @throws NullPointerException If <code>terms</code> is <code>null</code>.
+	 * @throws NullPointerException If the terms contain a <code>null</code>
+	 *             value.
+	 * @throws IllegalArgumentException If the length of the terms and the arity
+	 *             of the predicate do not match.
 	 */
-	public ToIntegerBuiltin(ITerm... terms) {
+	public ToNegativeIntegerBuiltin(ITerm... terms) {
 		super(PREDICATE, terms);
 	}
 
 	@Override
-	protected IIntegerTerm convert(ITerm term) {
-		if (term instanceof IIntegerTerm) {
-			return (IIntegerTerm) term;
-		} else if (term instanceof IBooleanTerm) {
-			return toInteger((IBooleanTerm) term);
+	protected INegativeInteger convert(ITerm term) {
+		if (term instanceof INegativeInteger) {
+			return (INegativeInteger) term;
 		} else if (term instanceof INumericTerm) {
-			return toInteger((INumericTerm) term);
+			return toNegativeInteger((INumericTerm) term);
 		} else if (term instanceof IStringTerm) {
-			return toInteger((IStringTerm) term);
+			return toNegativeInteger((IStringTerm) term);
 		}
 
 		return null;
 	}
 
 	/**
-	 * Converts a Boolean term to an Integer term. A Boolean term representing
-	 * the value "True" is converted to an Integer term representing "1". A
-	 * Boolean term representing the value "False" is converted to an Integer
-	 * term representing "0".
+	 * Converts a {@link INumericTerm} term to a {@link INegativeInteger} term.
 	 * 
-	 * @param term The Boolean term to be converted.
-	 * @return A new Integer term representing the result of the conversion.
+	 * @param term The {@link INumericTerm} term to be converted.
+	 * @return A new {@link INegativeInteger} term representing the result of
+	 *         the conversion, or <code>null</code> if the conversion fails.
 	 */
-	public static IIntegerTerm toInteger(IBooleanTerm term) {
-		if (term.getValue()) {
-			return CONCRETE.createInteger(1);
+	public static INegativeInteger toNegativeInteger(INumericTerm term) {
+		try {
+			return CONCRETE.createNegativeInteger(term.getValue()
+					.toBigInteger());
+		} catch (IllegalArgumentException e) {
+			return null;
 		}
-
-		return CONCRETE.createInteger(0);
 	}
 
 	/**
-	 * Converts a Numeric term to an Integer term.
+	 * Converts a {@link IStringTerm} term to a {@link INegativeInteger} term.
 	 * 
-	 * @param term The Numeric term to be converted.
-	 * @return A new Integer term representing the result of the conversion.
+	 * @param term The {@link IStringTerm} term to be converted.
+	 * @return A new {@link INegativeInteger} term representing the result of
+	 *         the conversion, or <code>null</code> if the conversion fails.
 	 */
-	public static IIntegerTerm toInteger(INumericTerm term) {
-		return CONCRETE.createInteger(term.getValue().toBigInteger());
-	}
-
-	/**
-	 * Converts a String term to an Integer term.
-	 * 
-	 * @param term The String term to be converted.
-	 * @return A new Integer term representing the result of the conversion, or
-	 *         <code>null</code> if the conversion fails.
-	 */
-	public static IIntegerTerm toInteger(IStringTerm term) {
+	public static INegativeInteger toNegativeInteger(IStringTerm term) {
 		try {
 			String string = term.getValue();
 
@@ -118,8 +108,10 @@ public class ToIntegerBuiltin extends ConversionBuiltin {
 				string = string.substring(0, indexOfDot);
 			}
 
-			return CONCRETE.createInteger(new BigInteger(string));
+			return CONCRETE.createNegativeInteger(new BigInteger(string));
 		} catch (NumberFormatException e) {
+			return null;
+		} catch (IllegalArgumentException e) {
 			return null;
 		}
 	}
