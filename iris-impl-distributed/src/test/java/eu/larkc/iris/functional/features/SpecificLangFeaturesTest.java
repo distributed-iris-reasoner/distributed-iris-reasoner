@@ -3,8 +3,6 @@
  */
 package eu.larkc.iris.functional.features;
 
-import org.deri.iris.functional.Helper;
-
 /**
  * Tests basic features of predicate and propositional logic that can be
  * expressed in Datalog.
