@@ -22,6 +22,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.deri.iris.api.basics.IAtom;
+import org.deri.iris.api.basics.IPredicate;
 
 import cascading.tap.Tap;
 import cascading.tap.hadoop.TapCollector;
@@ -44,20 +45,24 @@ public class FactsTap extends Tap {
 	private static final long serialVersionUID = -5174403815272616996L;
 	
 	private String factsConfigurationClass = null;
+	private IPredicate[] predicates= null;
 	private IAtom atom = null;
 	private String storageId;
 	
 	private FactsScheme factsScheme = null;
 	
-	FactsTap(String factsConfigurationClass, String storageId, IAtom atom) {
-		this(factsConfigurationClass, storageId, null, atom);
-	}
-	
 	private FactsTap(FactsScheme scheme) {
 		super(scheme);
 		factsScheme = scheme;
 	}
-	
+
+	FactsTap(String factsConfigurationClass, String storageId, IPredicate... predicates) {
+		this(new FactsScheme(storageId, predicates));
+		this.factsConfigurationClass = factsConfigurationClass;
+		this.predicates = predicates;
+		this.storageId = storageId;
+	}
+
 	FactsTap(String factsConfigurationClass, String storageId, FieldsVariablesMapping fieldsVariablesMapping, IAtom atom) {
 		this(new FactsScheme(storageId, fieldsVariablesMapping, atom));
 		this.factsConfigurationClass = factsConfigurationClass;
@@ -75,8 +80,16 @@ public class FactsTap extends Tap {
 	public Path getPath() {
 		if (atom != null) {
 			return new Path(storageId + "/" + atom.getPredicate().getPredicateSymbol());
-		} 		
-		else {
+		} else if (predicates != null && predicates.length > 0) {
+			StringBuilder sb = new StringBuilder();
+			for (IPredicate predicate : predicates) {
+				if (sb.length() > 0) {
+					sb.append(";");
+				}
+				sb.append(storageId + "/" + predicate.getPredicateSymbol());
+			}
+			return new Path(sb.toString());
+		} else {
 			return new Path(storageId);
 		}
 	}
@@ -113,7 +126,7 @@ public class FactsTap extends Tap {
 
 	@Override
 	public boolean isSink() {
-		return atom == null;
+		return atom == null && predicates == null;
 	}
 
 	@Override
@@ -127,8 +140,20 @@ public class FactsTap extends Tap {
 		FileInputFormat.setInputPaths(jobConf, getPath());
 
 		jobConf.set(IFactsConfiguration.FACTS_CONFIGURATION_CLASS, factsConfigurationClass);
-		if (isSource() && atom != null) {
-			jobConf.set(IFactsConfiguration.PREDICATE_FILTER, atom.getPredicate().getPredicateSymbol());
+		if (isSource()) {
+			StringBuilder sb = new StringBuilder();
+			if (atom != null) {
+				sb.append(atom.getPredicate().getPredicateSymbol());
+			}
+			if (predicates != null && predicates.length > 0) {
+				for (IPredicate predicate : predicates) {
+					if (sb.length() > 0) {
+						sb.append(",");
+					}
+					sb.append(predicate.getPredicateSymbol());
+				}
+			}
+			jobConf.set(IFactsConfiguration.PREDICATE_FILTER, sb.toString());
 		}
 		
 		IFactsConfiguration factsConfiguration = FactsConfigurationFactory.getFactsConfiguration(jobConf);
@@ -161,6 +186,12 @@ public class FactsTap extends Tap {
 		sb.append((storageId == null ? "" : ("store:" + storageId)));
 		if (atom != null) {
 			sb.append(", " + "predicate:" + atom.getPredicate().getPredicateSymbol());
+		}
+		if (predicates != null && predicates.length > 0) {
+			//sb.append(", " + "predicate:" + predicates[0].getPredicateSymbol());
+			for (IPredicate predicate : predicates) {
+				sb.append(", " + "predicate:" + predicate.getPredicateSymbol());
+			}
 		}
 		sb.append("]");
 		return sb.toString();

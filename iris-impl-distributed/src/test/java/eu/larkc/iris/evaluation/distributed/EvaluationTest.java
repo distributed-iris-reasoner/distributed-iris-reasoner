@@ -53,10 +53,6 @@ public abstract class EvaluationTest extends TestCase {
 		// Set up the knowledge base consisting of a set of facts and a set of
 		// rules.
 
-		// Create the default configuration.
-		defaultConfiguration = new eu.larkc.iris.Configuration();
-		defaultConfiguration.evaluationStrategyFactory = new DistributedBottomUpEvaluationStrategyFactory(new DistributedNaiveEvaluatorFactory());
-		
 		createFacts();
 		
 		// Create the rules.
@@ -66,35 +62,35 @@ public abstract class EvaluationTest extends TestCase {
 		queries = createQueries();
 	}
 
-	protected abstract void createFacts() throws IOException;
-
 	protected abstract List<IRule> createRules();
 
 	protected abstract List<IQuery> createQueries();
 
-	protected IRelation evaluate(FactsFactory facts, IQuery query) throws Exception {
+	protected abstract void createFacts() throws IOException;
+	
+	protected IRelation evaluate(IQuery query) throws Exception {
 		// Use default configuration.
-		return evaluate(facts, query, new ArrayList<IVariable>(), defaultConfiguration);
+		return evaluate(query, new ArrayList<IVariable>(), defaultConfiguration);
 	}
 
 	protected IRelation evaluate(FactsFactory facts, IQuery query, eu.larkc.iris.Configuration configuration)
 			throws Exception {
-		return evaluate(facts, query, new ArrayList<IVariable>(), configuration);
+		return evaluate(query, new ArrayList<IVariable>(), configuration);
 	}
 
 	protected IRelation evaluate(FactsFactory facts, IQuery query, List<IVariable> outputVariables)
 			throws Exception {
 		// Use default configuration.
-		return evaluate(facts, query, outputVariables, defaultConfiguration);
+		return evaluate(query, outputVariables, defaultConfiguration);
 	}
 
-	protected IRelation evaluate(FactsFactory facts, IQuery query, List<IVariable> outputVariables,
+	protected IRelation evaluate(IQuery query, List<IVariable> outputVariables,
 			eu.larkc.iris.Configuration configuration) throws Exception {
 		// Create strategy using factory.
 		long begin = System.currentTimeMillis();
 		//FIXME create a factory for the distributed environment without the facts parameter
 		IEvaluationStrategy strategy = configuration.evaluationStrategyFactory
-				.createEvaluator(facts, rules, configuration); 
+				.createEvaluator(rules, configuration); 
 
 		IRelation relation = strategy.evaluateQuery(query, outputVariables);
 

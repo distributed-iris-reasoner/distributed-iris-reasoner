@@ -18,11 +18,15 @@ package eu.larkc.iris.evaluation;
 import java.util.Map;
 import java.util.Set;
 
+import org.deri.iris.api.terms.ITerm;
+import org.deri.iris.api.terms.concrete.IIri;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 import cascading.tuple.TupleEntry;
+import eu.larkc.iris.storage.IRIWritable;
 
 /**
  * This filters according to constants in rules and is set-up during
@@ -65,7 +69,14 @@ public class ConstantFilter extends BaseOperation implements Filter {
 		Set<Integer> positions = mExpectedconstants.keySet();	
 		for (Integer pos : positions) {
 			//we only need to find one value that does not match the constant
-			if(!arguments.get(pos).equals(mExpectedconstants.get(pos))) {
+			Object compareTo = null;
+			Object expected = mExpectedconstants.get(pos);
+			if (expected instanceof IIri) {
+				compareTo = new IRIWritable((IIri) expected);
+			} else {
+				compareTo = ((ITerm) expected).getValue();
+			}
+			if(!arguments.get(pos).equals(compareTo)) {
 				remove = true;
 				break;
 			}

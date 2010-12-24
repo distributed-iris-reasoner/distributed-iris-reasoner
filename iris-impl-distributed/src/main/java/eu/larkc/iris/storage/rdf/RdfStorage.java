@@ -16,6 +16,8 @@
 
 package eu.larkc.iris.storage.rdf;
 
+import java.util.StringTokenizer;
+
 import org.deri.iris.api.basics.IAtom;
 import org.deri.iris.api.factory.IBasicFactory;
 import org.deri.iris.api.factory.IConcreteFactory;
@@ -25,13 +27,9 @@ import org.deri.iris.basics.BasicFactory;
 import org.deri.iris.terms.TermFactory;
 import org.deri.iris.terms.concrete.ConcreteFactory;
 import org.ontoware.aifbcommons.collection.ClosableIterator;
-import org.ontoware.rdf2go.model.Model;
+import org.ontoware.rdf2go.model.ModelSet;
 import org.ontoware.rdf2go.model.Statement;
-import org.ontoware.rdf2go.model.impl.TriplePatternImpl;
-import org.ontoware.rdf2go.model.node.NodeOrVariable;
 import org.ontoware.rdf2go.model.node.Resource;
-import org.ontoware.rdf2go.model.node.ResourceOrVariable;
-import org.ontoware.rdf2go.model.node.impl.URIImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,25 +43,39 @@ public class RdfStorage implements FactsStorage {
 
 	private static final Logger logger = LoggerFactory.getLogger(RdfStorage.class);
 	
-	private Model model;
+	private long limit;
+	private long offset;
+	
+	private ModelSet model;
 	private String predicateFilter;
 
 	private ClosableIterator<Statement> iterator;
 	
 	@Override
 	public IAtom next() {
-		logger.info("get next atom from storage for predicateFilter : " + predicateFilter);
 		if (!model.isOpen()) {
 			model.open();
 		}
 		if (iterator == null) {
-			if (predicateFilter != null) {
-				iterator = model.findStatements(new TriplePatternImpl((ResourceOrVariable) null, new URIImpl(predicateFilter), (NodeOrVariable) null));
-			} else {
-				iterator = model.iterator();
+			StringBuilder sb = new StringBuilder();
+			sb.append(" CONSTRUCT {?s ?p ?o} ");
+			sb.append(" WHERE {?s ?p ?o. ");
+			if (predicateFilter != null && !"".equals(predicateFilter)) {
+				sb.append(" FILTER (");
+				sb.append(" 1 = 0 ");
+				StringTokenizer st = new StringTokenizer(predicateFilter, ",");
+				while (st.hasMoreTokens()) {
+					sb.append(" || ?p = <" + st.nextToken() + "> ");
+				}
+				sb.append(")");
 			}
+			sb.append("}");
+			sb.append(" LIMIT " + limit + " OFFSET " + offset);
+			logger.info("sparql : " + sb.toString());
+			iterator = model.sparqlConstruct(sb.toString()).iterator();
 		}
 		if (!iterator.hasNext()) {
+			//iterator.close();
 			if (model.isOpen()) {
 				model.close();
 			}
@@ -80,17 +92,19 @@ public class RdfStorage implements FactsStorage {
 		} else {
 			object = termFactory.createString(statement.getObject().toString());
 		}
-		RdfAtom rdfAtom = new RdfAtom(basicFactory.createPredicate(statement.getPredicate().toString(), 2), 
-				concreteFactory.createIri(statement.getSubject().toString()), object);
-		logger.info("returning atom : " + rdfAtom);
-		return rdfAtom;
+		IAtom atom = basicFactory.createAtom(basicFactory.createPredicate(statement.getPredicate().toString(), 2), 
+				basicFactory.createTuple(concreteFactory.createIri(statement.getSubject().toString()), object));
+		if (logger.isInfoEnabled()) {
+			logger.info("returning atom : " + atom);
+		}
+		return atom;
 	}
 
-	public Model getModel() {
+	public ModelSet getModel() {
 		return model;
 	}
 
-	public void setModel(Model model) {
+	public void setModel(ModelSet model) {
 		this.model = model;
 	}
 
@@ -100,6 +114,22 @@ public class RdfStorage implements FactsStorage {
 
 	public void setPredicateFilter(String predicatefilter) {
 		this.predicateFilter = predicatefilter;
+	}
+
+	public long getLimit() {
+		return limit;
+	}
+
+	public void setLimit(long limit) {
+		this.limit = limit;
+	}
+
+	public long getOffset() {
+		return offset;
+	}
+
+	public void setOffset(long offset) {
+		this.offset = offset;
 	}
 	
 }

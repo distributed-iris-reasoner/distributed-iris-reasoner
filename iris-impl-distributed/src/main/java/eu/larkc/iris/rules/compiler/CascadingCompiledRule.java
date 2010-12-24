@@ -15,18 +15,11 @@
  */
 package eu.larkc.iris.rules.compiler;
 
-import java.io.IOException;
-
 import org.apache.commons.lang.NotImplementedException;
-import org.deri.iris.Configuration;
 import org.deri.iris.EvaluationException;
 import org.deri.iris.api.basics.IPredicate;
 import org.deri.iris.facts.IFacts;
 import org.deri.iris.storage.IRelation;
-
-import cascading.flow.Flow;
-import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntryIterator;
 
 /**
  * CascadingCompiledRule encapsulates a rule that has been translated from the IRIS internal representation to a suitable cascading workflow.
@@ -41,7 +34,7 @@ public class CascadingCompiledRule implements IDistributedCompiledRule {
 	
 	public CascadingCompiledRule(IPredicate headPredicate, FlowAssembly flowAssembly, eu.larkc.iris.Configuration configuration){
 		this.mHeadPredicate = headPredicate;
-		this.mFlowAssembly = flowAssembly;
+		this.flowAssembly = flowAssembly;
 		this.mConfiguration = configuration;
 	}
 
@@ -53,12 +46,9 @@ public class CascadingCompiledRule implements IDistributedCompiledRule {
 	public boolean evaluate() throws EvaluationException {
 		
 		//start returns immediately		
-		if(mFlowAssembly == null) {
+		if(flowAssembly == null) {
 			throw new IllegalArgumentException("Flow assembly must not be null");
 		}
-		String flowName = "flow" + System.currentTimeMillis();
-		Flow flow = mFlowAssembly.createFlow(flowName);
-		flow.complete();
 		
 		//TODO: jobconf is constructed within the rule compiler right now, which is likely not the right place.
 		//this should either happen here or in a custom evaluator implementation		
@@ -71,27 +61,11 @@ public class CascadingCompiledRule implements IDistributedCompiledRule {
 		//Naive evaluation will terminate when evaluate returns null.
 		//Until recursion is supported this code will work fine, then a more complex solution is needed.
 		
-		return hasNewInferences(flow);
-	}
-
-	/*
-	 * Check if new inferences have been generated with the last evaluation
-	 */
-	private boolean hasNewInferences(Flow flow) throws EvaluationException {
-		boolean hasNewInferences = false;
-		try {
-			TupleEntryIterator iterator = flow.openSink(mConfiguration.DELTA_TAIL_NAME);
-			while (iterator.hasNext()) {
-				Tuple tuple = iterator.next().getTuple();
-				String delta = tuple.getString(0);
-				if (Integer.valueOf(delta) > 0) {
-					hasNewInferences = true;
-				}
-			}
-		} catch (IOException e) {
-			throw new EvaluationException("unable to open delta tail");
-		}
-		return hasNewInferences;
+		//return mFlowAssembly.hasNewInferences(flow);
+		
+		flowAssembly.evaluate();
+		
+		return flowAssembly.hasNewInferences();
 	}
 	
 	/*
@@ -113,7 +87,15 @@ public class CascadingCompiledRule implements IDistributedCompiledRule {
 		return mHeadPredicate;
 	}
 	
-	
+	/*
+	 * (non-Javadoc)
+	 * @see eu.larkc.iris.rules.compiler.IDistributedCompiledRule#getFlowAssembly()
+	 */
+	public FlowAssembly getFlowAssembly() {
+		return flowAssembly;
+	}
+
+
 	private final eu.larkc.iris.Configuration mConfiguration;
 	
 	/**
@@ -124,6 +106,6 @@ public class CascadingCompiledRule implements IDistributedCompiledRule {
 	/**
 	 * The internal representation as a cascading flow of this rule.
 	 */
-	private final FlowAssembly mFlowAssembly;
+	private final FlowAssembly flowAssembly;
 
 }

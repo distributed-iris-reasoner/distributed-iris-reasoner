@@ -19,9 +19,10 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.hadoop.io.WritableComparable;
 import org.deri.iris.api.terms.concrete.IIri;
-import org.deri.iris.terms.concrete.ConcreteFactory;
 
 /**
  * @author vroman
@@ -29,18 +30,21 @@ import org.deri.iris.terms.concrete.ConcreteFactory;
  */
 public class IRIWritable implements WritableComparable<IRIWritable> {
 
-	private IIri iri;
+	private String iri;
 	
 	public IRIWritable() {
-		ConcreteFactory.getInstance().createIri("");
 	}
 	
 	public IRIWritable(IIri iri) {
-		this.iri = iri;
+		this.iri = iri.getValue();
 	}
 	
-	public IIri getValue() {
+	public String getValue() {
 		return iri;
+	}
+
+	public void setValue(String value) {
+		this.iri = value;
 	}
 
 	@Override
@@ -50,22 +54,41 @@ public class IRIWritable implements WritableComparable<IRIWritable> {
 
 	@Override
 	public void write(DataOutput out) throws IOException {
-		out.writeUTF(iri.getValue());
+		out.writeUTF(iri);
 	}
 
 	@Override
 	public void readFields(DataInput in) throws IOException {
-		iri = ConcreteFactory.getInstance().createIri(in.readUTF());
+		iri = in.readUTF();
 	}
 	
 	public static IRIWritable read(DataInput in) throws IOException {
-		IRIWritable iriWritable = new IRIWritable(ConcreteFactory.getInstance().createIri(in.readUTF()));
+		IRIWritable iriWritable = new IRIWritable();
+		String iri = in.readUTF();
+		iriWritable.iri = iri;
 		return iriWritable;
 	}
 
 	@Override
 	public String toString() {
-		return "iri[" + iri.getValue() + "]";
+		return "iri[" + iri + "]";
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (!(obj instanceof IRIWritable)) {
+			return false;
+		}
+		IRIWritable i = (IRIWritable) obj;
+		return new EqualsBuilder().append(iri, i.iri).isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder().append(iri).hashCode();
 	}
 
 }

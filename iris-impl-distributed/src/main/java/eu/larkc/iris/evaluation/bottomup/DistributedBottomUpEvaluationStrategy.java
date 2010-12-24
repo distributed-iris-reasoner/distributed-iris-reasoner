@@ -1,5 +1,4 @@
 /*
- * Copyright 2010 Softgress - http://www.softgress.com/
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,14 +30,9 @@ import org.deri.iris.evaluation.stratifiedbottomup.EvaluationUtilities;
 import org.deri.iris.storage.IRelation;
 
 import eu.larkc.iris.evaluation.PredicateCounts;
-import eu.larkc.iris.evaluation.bottomup.naive.DistributedNaiveEvaluator;
-import eu.larkc.iris.rules.IRecursiveRulePreProcessor;
-import eu.larkc.iris.rules.NonOptimizingRecursiveRulePreProcessor;
 import eu.larkc.iris.rules.compiler.CascadingRuleCompiler;
 import eu.larkc.iris.rules.compiler.IDistributedCompiledRule;
 import eu.larkc.iris.rules.compiler.IDistributedRuleCompiler;
-import eu.larkc.iris.storage.FactsFactory;
-import eu.larkc.iris.storage.FactsTap;
 
 /**
  * For now we can choose the standard interface of IEvaluation Strategy as
@@ -64,9 +58,8 @@ public class DistributedBottomUpEvaluationStrategy implements
 	 * @param rules
 	 * @param facts
 	 */
-	public DistributedBottomUpEvaluationStrategy(FactsFactory facts, eu.larkc.iris.Configuration configuration,
+	public DistributedBottomUpEvaluationStrategy(eu.larkc.iris.Configuration configuration,
 			IDistributedRuleEvaluatorFactory ruleEvaluatorFactory, List<IRule> rules) {
-		this.mFacts = facts;
 		this.mRuleEvaluatorFactory = ruleEvaluatorFactory;
 		this.mConfiguration = configuration;
 		this.mRules = rules;
@@ -130,12 +123,12 @@ public class DistributedBottomUpEvaluationStrategy implements
 		List<List<IRule>> stratifiedRules = utils.stratify(safeRules);
 
 		// compile to cascading
-		IDistributedRuleCompiler rc = new CascadingRuleCompiler(mConfiguration, mFacts);
+		IDistributedRuleCompiler rc = new CascadingRuleCompiler(mConfiguration);
 
 		IDistributedRuleEvaluator evaluator = mRuleEvaluatorFactory.createEvaluator();
 		
 		
-		PredicateCounts predicateCounts = PredicateCounts.getInstance(mConfiguration, mFacts);
+		PredicateCounts predicateCounts = PredicateCounts.getInstance(mConfiguration);
 		
 		// for each rule layer, reorder and optimize, compile, evaluate
 		for (List<IRule> stratum : stratifiedRules) {
@@ -144,7 +137,7 @@ public class DistributedBottomUpEvaluationStrategy implements
 				ListIterator<ILiteral> iterator = rule.getBody().listIterator();
 				while (iterator.hasNext()) {
 					ILiteral literal = iterator.next();
-					Long count = predicateCounts.getCount(literal.getAtom());
+					//Long count = predicateCounts.getCount(literal.getAtom());
 				}
 			}
 
@@ -157,6 +150,45 @@ public class DistributedBottomUpEvaluationStrategy implements
 					.applyRuleOptimisers(reorderedRules);
 
 			List<IDistributedCompiledRule> compiledRules = new ArrayList<IDistributedCompiledRule>();
+
+			//extract all predicates, used to load all data into HFS
+			/*
+			Set<IPredicate> predicates = new HashSet<IPredicate>();
+			for (IRule rule : optimisedRules) {
+				predicates.add(rule.getHead().get(0).getAtom().getPredicate());
+				for (ILiteral literal : rule.getBody()) {
+					IPredicate predicate = literal.getAtom().getPredicate();
+					predicates.add(predicate);
+				}
+			}
+			FactsTap source = mFacts.getFacts(predicates.toArray(new IPredicate[0]));
+			//FactsTap source = mFacts.getFacts(optimisedRules.get(0).getHead().get(0).getAtom());
+			
+			String output = mConfiguration.HADOOP_HFS_PATH + "/" + mFacts.getStorageId();
+			Tap sink = new Hfs(source.getSourceFields(), output , true );
+
+			//String output1 = mConfiguration.HADOOP_HFS_PATH + "/" + mFacts.getStorageId() + "1";
+			//Tap sink1 = new Hfs( source.getSourceFields(), output1 , true );
+
+			Map<String, Tap> sources = new HashMap<String, Tap>();
+			sources.put("source", source);
+
+			Map<String, Tap> sinks = new HashMap<String, Tap>();
+			sinks.put("sink", sink);
+			//sinks.put("sink1", sink1);
+
+			Pipe sourcePipe = new Pipe("source");
+			sourcePipe = new Each(sourcePipe, source.getSourceFields(), new Identity(source.getSourceFields()));
+			Pipe identity = new Pipe("sink", sourcePipe);
+			//identity = new Each(identity, source.getSourceFields(), new Identity(source.getSourceFields()));
+			//Pipe identity1 = new Pipe("sink1", sourcePipe);
+			//identity1 = new Each(identity1, source.getSourceFields(), new Identity(source.getSourceFields()));
+			
+			//Flow aFlow = new FlowConnector(mConfiguration.flowProperties).connect(sources, sink, identity);
+			Flow aFlow = new FlowConnector(mConfiguration.flowProperties).connect(sources, sinks, identity);
+			aFlow.complete();
+			*/
+			//~
 
 			// TODO (fisf, optimization): essentially each rule is compiled
 			// independently and than evaluated by the naive evaluator
@@ -178,8 +210,6 @@ public class DistributedBottomUpEvaluationStrategy implements
 
 	protected final IDistributedRuleEvaluatorFactory mRuleEvaluatorFactory;
 
-	protected final FactsFactory mFacts;
-	
 	protected final List<IRule> mRules;
 
 	protected final eu.larkc.iris.Configuration mConfiguration;

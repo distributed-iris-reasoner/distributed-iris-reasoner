@@ -22,14 +22,47 @@ import java.io.IOException;
 
 import org.apache.hadoop.mapred.InputSplit;
 
-public abstract class FactsInputSplit implements InputSplit {
+public class FactsInputSplit implements InputSplit {
+
+	private long offset = 0;
+	private long limit = 0;
 
 	public FactsInputSplit() {
+	}
+		
+	public FactsInputSplit(long limit, long offset) {
+		this.limit = limit;
+		this.offset = offset;
 	}
 	
 	/** {@inheritDoc} */
 	public String[] getLocations() throws IOException {
 		return new String[] {};
+	}
+
+	public long getLimit() {
+		return limit;
+	}
+
+	public long getOffset() {
+		return offset;
+	}
+
+	@Override
+	public long getLength() throws IOException {
+		return limit;
+	}
+
+	@Override
+	public void write(DataOutput out) throws IOException {
+		out.writeLong(limit);
+		out.writeLong(offset);
+	}
+
+	@Override
+	public void readFields(DataInput in) throws IOException {
+		limit = in.readLong();
+		offset = in.readLong();
 	}
 
 }

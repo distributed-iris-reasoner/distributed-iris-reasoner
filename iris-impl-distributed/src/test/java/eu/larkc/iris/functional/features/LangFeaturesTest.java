@@ -4,24 +4,17 @@
 package eu.larkc.iris.functional.features;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
 import org.deri.iris.api.basics.IQuery;
 import org.deri.iris.api.basics.IRule;
-import org.deri.iris.api.terms.IVariable;
 import org.deri.iris.compiler.Parser;
-import org.deri.iris.compiler.ParserException;
-import org.deri.iris.storage.IRelation;
 
-import eu.larkc.iris.CascadingTest;
 import eu.larkc.iris.evaluation.distributed.EvaluationTest;
 import eu.larkc.iris.rules.compiler.CascadingRuleCompiler;
 import eu.larkc.iris.rules.compiler.IDistributedCompiledRule;
 import eu.larkc.iris.rules.compiler.IDistributedRuleCompiler;
-import eu.larkc.iris.storage.FactsConfigurationFactory;
 import eu.larkc.iris.storage.FactsFactory;
 
 /**
@@ -90,7 +83,7 @@ public class LangFeaturesTest extends EvaluationTest {
 	protected void compile() throws Exception {
 		
 		// compile to cascading
-		IDistributedRuleCompiler rc = new CascadingRuleCompiler(defaultConfiguration, facts);
+		IDistributedRuleCompiler rc = new CascadingRuleCompiler(defaultConfiguration);
 		for (IRule rule : rules) {
 			IDistributedCompiledRule compiledRule = rc.compile(rule);
 		}	

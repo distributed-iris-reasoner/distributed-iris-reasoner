@@ -19,12 +19,19 @@
 
 package eu.larkc.iris.rules.compiler;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
+
+import org.deri.iris.EvaluationException;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.pipe.Pipe;
+import cascading.tap.Hfs;
 import cascading.tap.Tap;
+import cascading.tuple.Fields;
+import cascading.tuple.TupleEntryIterator;
 import eu.larkc.iris.Configuration;
 
 /**
@@ -35,25 +42,61 @@ public class FlowAssembly {
 
 	private Configuration mConfiguration;
 	
-	private Map<String, Tap> sources;
+	private Tap source;
 	private Map<String, Tap> sinks;
 	private Pipe[] pipes;
 	
-	public FlowAssembly (Configuration configuration, Map<String, Tap> sources, Map<String, Tap> sinks, Pipe... pipes) {
+	private Flow flow = null;
+	
+	public FlowAssembly (Configuration configuration, Tap source, Map<String, Tap> sinks, Pipe... pipes) {
 		this.mConfiguration = configuration;
-		this.sources = sources;
+		this.source = source;
 		this.sinks = sinks;
 		this.pipes = pipes;
 	}
 	
-	public Flow createFlow(String flowName) {
+	private Flow createFlow(String flowName) {
 
-		Flow flow = new FlowConnector(mConfiguration.flowProperties).connect(flowName, sources, sinks, pipes);
+		Map<String, Tap> sinks = new HashMap<String, Tap>();
+		sinks.putAll(this.sinks);
+		String output = mConfiguration.project + "/results/result" + System.currentTimeMillis();
+		Tap headSink = new Hfs(Fields.ALL, output, true );
+		sinks.put("resultTail", headSink);
+		
+		Flow flow = new FlowConnector(mConfiguration.flowProperties).connect(flowName, source, sinks, pipes);
 		
 		if(flow != null) {
 			flow.writeDOT("flow.dot");
 		}
 		
 		return flow;
+	}
+	
+	public void evaluate() {
+		String flowName = "flow" + System.currentTimeMillis();
+		flow = createFlow(flowName);
+		flow.complete();
+	}
+	
+	/*
+	 * Check if new inferences have been generated with the last evaluation
+	 */
+	public boolean hasNewInferences() throws EvaluationException {
+		try {
+			TupleEntryIterator iterator = flow.openSink("resultTail");
+			while (iterator.hasNext()) {
+				return true;
+			}
+		} catch (IOException e) {
+			throw new EvaluationException("unable to open result tail");
+		}
+		return false;
+	}
+
+	public TupleEntryIterator openSink() throws IOException {
+		if (flow == null) {
+			return null;
+		}
+		return flow.openSink();
 	}
 }

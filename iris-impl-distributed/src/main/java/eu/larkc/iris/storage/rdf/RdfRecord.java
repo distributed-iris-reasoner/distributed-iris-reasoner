@@ -16,12 +16,7 @@
 
 package eu.larkc.iris.storage.rdf;
 
-import org.deri.iris.api.basics.IAtom;
-import org.deri.iris.api.basics.IPredicate;
-import org.deri.iris.api.terms.IStringTerm;
-import org.deri.iris.api.terms.ITerm;
-import org.deri.iris.api.terms.concrete.IIri;
-import org.ontoware.rdf2go.model.Model;
+import org.ontoware.rdf2go.model.ModelSet;
 import org.ontoware.rdf2go.model.Statement;
 import org.ontoware.rdf2go.model.node.Node;
 import org.ontoware.rdf2go.model.node.Resource;
@@ -51,16 +46,19 @@ public class RdfRecord extends AtomRecord {
 	@Override
 	public void write(FactsStorage storage) {
 		RdfStorage rdfStorage = (RdfStorage) storage;
-		Model model = rdfStorage.getModel();
-		URI predicate = new URIImpl(((PredicateWritable) tuple.get(0)).getValue().getPredicateSymbol());
-		Resource subject = new URIImpl(((IRIWritable) tuple.get(1)).getValue().getValue());
+		ModelSet model = rdfStorage.getModel();
+		if (!model.isOpen()) {
+			model.open();
+		}
+		URI predicate = new URIImpl(((PredicateWritable) tuple.get(0)).getURI());
+		Resource subject = new URIImpl(((IRIWritable) tuple.get(1)).getValue());
 		Class[] types = tuple.getTypes();
 		//String objectTuple = null;
 		Node object = null;
 		if (types[2].isAssignableFrom(StringTermWritable.class)) {
-			object = new PlainLiteralImpl(((StringTermWritable) tuple.get(2)).getValue().getValue());
+			object = new PlainLiteralImpl(((StringTermWritable) tuple.get(2)).getValue());
 		} else {
-			object = new URIImpl(((IRIWritable) tuple.get(2)).getValue().getValue());
+			object = new URIImpl(((IRIWritable) tuple.get(2)).getValue());
 		}
 		
 		/*
@@ -72,23 +70,8 @@ public class RdfRecord extends AtomRecord {
 		*/
 		Statement statement = model.createStatement(subject, predicate, object);
 		model.addStatement(statement);
-		logger.info("added statement " + statement + " on contextURI " + model.getContextURI());
+		logger.info("added statement " + statement);
 		model.commit();
-	}
-
-	@Override
-	public void read(IAtom atom) {
-		RdfAtom rdfAtom = (RdfAtom) atom;
-		tuple = new Tuple();
-		tuple.add(new PredicateWritable(rdfAtom.getPredicate()));
-		for(int i= 0 ; i < rdfAtom.getTuple().size(); i++) {
-			ITerm term = rdfAtom.getTuple().get(i);
-			if (term instanceof IIri) {
-				tuple.add(new IRIWritable((IIri) term));
-			} else {
-				tuple.add(new StringTermWritable((IStringTerm) term));
-			}
-		}
 	}
 
 }

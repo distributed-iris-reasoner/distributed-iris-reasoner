@@ -57,7 +57,7 @@
 		<dependency>
     		<groupId>cascading-core</groupId>
     		<artifactId>cascading-core</artifactId>
-    		<version>1.1.2</version>
+    		<version>1.2.0</version>
     		<scope>compile</scope>
     		<type>jar</type>    	
 		</dependency>	
@@ -65,7 +65,7 @@
 		<dependency>
     		<groupId>cascading-core</groupId>
     		<artifactId>cascading-core</artifactId>
-    		<version>1.1.2</version>
+    		<version>1.2.0</version>
     		<scope>compile</scope>
     		<type>jar</type>
     		<classifier>sources</classifier>
@@ -74,7 +74,7 @@
 		<dependency>
     		<groupId>cascading-xml</groupId>
     		<artifactId>cascading-xml</artifactId>
-    		<version>1.1.2</version>
+    		<version>1.2.0</version>
     		<scope>compile</scope>
     		<type>jar</type>
 		</dependency>	
@@ -82,7 +82,7 @@
 		<dependency>
     		<groupId>cascading-xml</groupId>
     		<artifactId>cascading-xml</artifactId>
-    		<version>1.1.2</version>
+    		<version>1.2.0</version>
     		<scope>compile</scope>
     		<type>jar</type>
     		<classifier>sources</classifier>
@@ -91,7 +91,7 @@
 		<dependency>
     		<groupId>cascading-test</groupId>
     		<artifactId>cascading-test</artifactId>
-    		<version>1.1.2</version>
+    		<version>1.2.0</version>
     		<scope>compile</scope>
     		<type>jar</type>
 		</dependency>
@@ -99,7 +99,7 @@
 		<dependency>
     		<groupId>cascading-test</groupId>
     		<artifactId>cascading-test</artifactId>
-    		<version>1.1.2</version>
+    		<version>1.2.0</version>
     		<scope>compile</scope>
     		<type>jar</type>
     		<classifier>sources</classifier>

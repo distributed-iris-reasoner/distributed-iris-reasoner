@@ -40,16 +40,13 @@ public class FactsConfigurationFactory {
 	public static String STORAGE_PROPERTIES = "/facts-storage-configuration.properties";
 	
 	public static IFactsConfiguration getFactsConfiguration(JobConf jobConf) {
-		if (factsConfigurations.containsKey(jobConf.get(IFactsConfiguration.FACTS_CONFIGURATION_CLASS))) {
-			return factsConfigurations.get(jobConf.get(IFactsConfiguration.FACTS_CONFIGURATION_CLASS));
+		if (factsConfigurations.containsKey(jobConf)) {
+			return factsConfigurations.get(jobConf);
 		}
 		return createFactsConfiguration(jobConf);
 	}
 	
 	public static IFactsConfiguration createFactsConfiguration(JobConf jobConf) {
-		if (factsConfigurations.containsKey(jobConf)) {
-			return factsConfigurations.get(jobConf);
-		}
 		String factsConfigurationClass = jobConf.get(IFactsConfiguration.FACTS_CONFIGURATION_CLASS);
 		Class<? extends IFactsConfiguration> clazz = null;
 		try {

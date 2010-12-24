@@ -47,21 +47,25 @@ public class Predicate implements IPredicate {
 	private final int arity;
 	
 	Predicate(final String symbol, final int arity) {
-		this.symbol = symbol;
+		String aSymbol = null;
+		if (symbol.equals("subClassOf") || symbol.equals("p") || symbol.equals("q") || symbol.equals("r") || symbol.equals("s") || symbol.equals("name")) {
+			aSymbol = "http://www.w3.org/2000/01/rdf-schema#" + symbol;
+		} else if (symbol.equals("type")) {
+			aSymbol = "http://www.w3.org/1999/02/22-rdf-syntax-ns#" + symbol;
+		} else {
+			aSymbol = symbol;
+		}
+		this.symbol = aSymbol;
 		this.arity = arity;
 		
 		StringBuilder b = new StringBuilder();
 		
-		b.append( symbol ).append( '$' ).append( arity );
+		b.append( this.symbol ).append( '$' ).append( this.arity );
 		symbolPlusArity = b.toString();
 	}
 
 	public String getPredicateSymbol() {
-		if (symbol.startsWith("http://")) {
-			return symbol;
-		} else {
-			return "http://www.w3.org/2000/01/rdf-schema#" + symbol;
-		}
+		return symbol;
 	}
 
 	public int getArity() {
@@ -89,6 +93,6 @@ public class Predicate implements IPredicate {
 	}
 
 	public String toString() {
-		return symbol;
+		return symbolPlusArity;
 	}
 }

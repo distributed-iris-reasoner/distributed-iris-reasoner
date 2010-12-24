@@ -48,4 +48,6 @@ public interface IDistributedCompiledRule {
 	 */
 	IPredicate headPredicate();
 	
+	public FlowAssembly getFlowAssembly();
+	
 }

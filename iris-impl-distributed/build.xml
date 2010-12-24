@@ -55,11 +55,11 @@
   <property name="cascading.lib.test" value="${cascading.path}/${cascading.filename.test}"/>
 
   <property name="src.dir" location="${basedir}/src/main/java"/>
-  <property name="src.test" location="${basedir}/src/test/java"/>
+  <!-- property name="src.test" location="${basedir}/src/test/java"/ -->
   <property name="resources.dir" location="${basedir}/src/main/resources"/>
 	
   <available file="${src.dir}" type="dir" property="main.available"/>
-  <available file="${src.test}" type="dir" property="test.available"/>
+  <!-- available file="${src.test}" type="dir" property="test.available"/ -->
 
   <property name="conf.dir" location="${hadoop.home}/conf"/>
 
@@ -139,15 +139,15 @@
       </fileset>
     </copy>
 
-    <javac srcdir="${src.test}" destdir="${build.test}" verbose="off" debug="${javac.debug}">
+    <!-- javac srcdir="${src.test}" destdir="${build.test}" verbose="off" debug="${javac.debug}">
       <classpath refid="project.class.path"/>
-    </javac>
+    </javac -->
 
-    <copy todir="${build.test}">
+    <!-- copy todir="${build.test}">
       <fileset dir="${src.test}">
         <exclude name="**/*.java"/>
       </fileset>
-    </copy>
+    </copy -->
 
     <copy todir="${build.classes}">
       <fileset dir="${resources.dir}" />
@@ -199,12 +199,12 @@
       </classpath>
       <formatter type="plain" usefile="true"/>
 
-      <test name="${testcase}" todir="${test.results}" if="testcase" haltonfailure="${test.haltonerror}"/>
-      <batchtest todir="${test.results}" haltonfailure="${test.haltonerror}" unless="testcase">
+      <!-- test name="${testcase}" todir="${test.results}" if="testcase" haltonfailure="${test.haltonerror}"/ -->
+      <!-- batchtest todir="${test.results}" haltonfailure="${test.haltonerror}" unless="testcase">
         <fileset dir="${src.test}">
           <include name="**/*Test.java"/>
         </fileset>
-      </batchtest>
+      </batchtest -->
     </junit>
 
   </target>

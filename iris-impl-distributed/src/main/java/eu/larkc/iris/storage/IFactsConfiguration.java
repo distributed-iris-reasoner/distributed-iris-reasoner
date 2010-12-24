@@ -16,14 +16,11 @@
 
 package eu.larkc.iris.storage;
 
-import java.io.Serializable;
 import java.util.Properties;
 
 import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputFormat;
-
-import cascading.tuple.Tuple;
 
 
 /**
@@ -34,8 +31,12 @@ import cascading.tuple.Tuple;
  * @author Valer Roman
  *
  */
-public interface IFactsConfiguration extends Serializable {
+public interface IFactsConfiguration {
 
+	public static final String FACTS_STORAGE_TYPE = "facts.storage.type";
+	
+	public static final String FACTS_STORAGE_ID = "facts.storage.id";
+	
 	public static final String FACTS_CONFIGURATION_CLASS = "facts.configuration.class";
 	
 	public static final String PREDICATE_FILTER = "facts.predicate.filter";
@@ -70,7 +71,5 @@ public interface IFactsConfiguration extends Serializable {
 	public Class<? extends InputFormat> getInputFormat();
 	
 	public Class<? extends OutputFormat> getOutputFormat();
-	
-	public AtomRecord newRecordInstance(Tuple tuple);
 	
 }

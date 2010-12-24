@@ -15,23 +15,23 @@
  */
 package eu.larkc.iris.functional;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.deri.iris.storage.IRelation;
-import org.ontoware.aifbcommons.collection.ClosableIterator;
-import org.ontoware.rdf2go.model.ModelSet;
-import org.ontoware.rdf2go.model.Statement;
-import org.ontoware.rdf2go.model.impl.QuadPatternImpl;
-import org.ontoware.rdf2go.model.node.NodeOrVariable;
-import org.ontoware.rdf2go.model.node.ResourceOrVariable;
-import org.ontoware.rdf2go.model.node.impl.URIImpl;
+import org.apache.hadoop.fs.FileUtil;
+import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleEntryIterator;
 import eu.larkc.iris.CascadingTest;
-import eu.larkc.iris.storage.FactsFactory;
+import eu.larkc.iris.imports.Importer;
+import eu.larkc.iris.rules.compiler.CascadingRuleCompiler;
+import eu.larkc.iris.rules.compiler.FlowAssembly;
+import eu.larkc.iris.rules.compiler.IDistributedCompiledRule;
 
 /**
  * 
@@ -42,23 +42,29 @@ public class CascadingRuleCompilerTest extends CascadingTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(CascadingRuleCompilerTest.class);
 
-	private ModelSet model = createStorage("default");
-	
 	public CascadingRuleCompilerTest(String name) {
 		super(name, true);
 	}
 	
 	@Override
 	protected  void createFacts() throws IOException {
-		model.open();
-		model.readFrom(this.getClass().getResourceAsStream("/input/default.rdf"));
-		model.commit();
+		defaultConfiguration.project = "test";
+		if (enableCluster) {
+			new Importer().importFromFile(defaultConfiguration, defaultConfiguration.project, this.getClass().getResource("/input/default.nt").getPath(), "import");
+		} else {
+			new Importer().processNTriple(defaultConfiguration, this.getClass().getResource("/input/default.nt").getPath(), defaultConfiguration.project, "import");
+		}		
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
-		model.close();
+		
+		if (enableCluster) {
+			fileSys.delete(new Path("test/results"), true);
+		} else {
+			FileUtil.fullyDelete(new File("test/results"));
+		}
 	}
 
 	@Override
@@ -71,23 +77,19 @@ public class CascadingRuleCompilerTest extends CascadingTest {
 	}
 
 	public void testAvoidOldInferencedData() throws Exception {
-		IRelation relation = evaluate(FactsFactory.getInstance("default"), "?- p(?X, ?Y).");
+		CascadingRuleCompiler crc = new CascadingRuleCompiler(defaultConfiguration);
+		IDistributedCompiledRule dcr = crc.compile(rules.get(0));
+		dcr.evaluate();
+		FlowAssembly fa = dcr.getFlowAssembly();
 		
-		model.open();
-		try {
-			ClosableIterator<Statement> iterator = model.findStatements(new QuadPatternImpl(null, (ResourceOrVariable) null, 
-					new URIImpl("http://www.w3.org/2000/01/rdf-schema#p"), (NodeOrVariable) null));
-			assertTrue("no data", iterator.hasNext());
-			int size = 0;
-			while (iterator.hasNext()) {
-				Statement statement = iterator.next();
-				size++;
-				logger.info("result : " + statement);
-			}
-			assertEquals(2, size);
-		} finally {
-			model.close();
+		TupleEntryIterator tei = fa.openSink();
+		int size = 0;
+		while (tei.hasNext()) {
+			TupleEntry te = tei.next();
+			logger.info(te.getTuple().toString());
+			size++;
 		}
+		assertEquals(1, size);
 	}
 
 }

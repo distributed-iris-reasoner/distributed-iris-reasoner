@@ -23,9 +23,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.deri.iris.api.basics.IAtom;
-import org.deri.iris.api.basics.ITuple;
-import org.deri.iris.api.terms.ITerm;
-import org.deri.iris.api.terms.IVariable;
+import org.deri.iris.api.basics.IPredicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +33,7 @@ import cascading.tap.TapException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import eu.larkc.iris.storage.rdf.RdfRecord;
+import eu.larkc.iris.Utils;
 
 /**
  * Scheme used with a facts tap the source fields are the variable names of the
@@ -55,41 +53,39 @@ public class FactsScheme extends Scheme {
 
 	private static final Logger logger = LoggerFactory.getLogger(FactsScheme.class);
 	
+	private Class<? extends AtomRecord> inputClass = null;
+	
 	private String storageId;
+	private IPredicate[] predicates = null;
 	private IAtom atom = null;
 	
 	public FactsScheme(String storageId) {
 		this.storageId = storageId;
 	}
 
+	public FactsScheme(String storageId, IPredicate... predicates) {
+		this(storageId);
+		this.predicates = predicates;		
+		int arity = -1;
+		for (IPredicate predicate : predicates) {
+			int aArity = predicate.getArity();
+			if (arity != -1 && arity != aArity) {
+				throw new RuntimeException("Different arity predicates!");
+			}
+			arity = aArity;
+		}
+		Fields sourceFields = new Fields("PREDICATE");
+		for (int i = 0; i < arity; i++) {
+			sourceFields = sourceFields.append(new Fields("TERM" + (i+1)));
+		}
+		setSourceFields(sourceFields);
+	}
+	
 	public FactsScheme(String storageId, FieldsVariablesMapping fieldsVariablesMapping, IAtom atom) {
 		this(storageId);
 		this.atom = atom;
-		ITuple tuple = atom.getTuple();
-		Fields sourceFields = new Fields();
-		if (fieldsVariablesMapping != null) {
-			sourceFields = sourceFields.append(new Fields(fieldsVariablesMapping.getField(atom, atom.getPredicate())));
-		} else {
-			sourceFields = sourceFields.append(new Fields(atom.getPredicate().getPredicateSymbol()));
-		}
-		for (int i = 0; i < tuple.size(); i++) {
-			ITerm term = tuple.get(i);
-			String field = null;
-			if (fieldsVariablesMapping != null) {
-				field = fieldsVariablesMapping.getField(atom, term);
-			} else {
-				//when no field variable mapping is not give (normally this should not happen in real distributed iris usage)
-				if (term instanceof IVariable) {
-					field = ((IVariable) term).getValue();
-				} else {
-					field ="CNST";
-				}
-			}
-			// TODO check which types can the value have. also decide what field
-			// name should we give for constants
-			sourceFields = sourceFields.append(new Fields(field));
-		}
-		setSourceFields(sourceFields);
+
+		setSourceFields(Utils.getFieldsForAtom(fieldsVariablesMapping, atom));
 		//setSinkFields(sourceFields); // TODO the sink fields I guess will be the
 										// variables of the head of the rule
 	}
@@ -111,6 +107,11 @@ public class FactsScheme extends Scheme {
 			return new EqualsBuilder().appendSuper(super.equals(obj)).append(
 					storageId, rhs.storageId).append(
 					atom, rhs.atom).isEquals();
+		} else if (predicates != null) {
+			FactsScheme rhs = (FactsScheme) obj;
+			return new EqualsBuilder().appendSuper(super.equals(obj)).append(
+					storageId, rhs.storageId).append(
+					predicates, rhs.predicates).isEquals();
 		} else {
 			FactsScheme rhs = (FactsScheme) obj;
 			return new EqualsBuilder().appendSuper(super.equals(obj)).append(
@@ -122,6 +123,12 @@ public class FactsScheme extends Scheme {
 	public int hashCode() {
 		if (atom != null) {
 			return new HashCodeBuilder().appendSuper(super.hashCode()).append(storageId.hashCode()).append(atom.hashCode()).toHashCode();
+		} else if (predicates != null) {
+			HashCodeBuilder hab = new HashCodeBuilder().appendSuper(super.hashCode()).append(storageId.hashCode());
+			for (IPredicate predicate : predicates) {
+				hab.append(predicate.hashCode());
+			}
+			return hab.toHashCode();
 		} else {
 			return super.hashCode();
 		}
@@ -136,12 +143,13 @@ public class FactsScheme extends Scheme {
 
 	@Override
 	public void sinkInit(Tap tap, JobConf jobConf) throws IOException {
-		if (atom != null)
+		if (atom != null || predicates != null)
 			throw new TapException("cannot sink to this Scheme");
 
 		IFactsConfiguration factsConfiguration = FactsConfigurationFactory
 				.getFactsConfiguration(jobConf);
 		factsConfiguration.configureOutput();
+		inputClass = factsConfiguration.getInputClass();
 	}
 
 	@Override
@@ -161,7 +169,15 @@ public class FactsScheme extends Scheme {
 		
 		logger.info("output : " + result);
 		
-		outputCollector.collect(new RdfRecord(result), null); //FIXME abstract RdfRecord class
+		AtomRecord atomRecord = null;
+		try {
+			atomRecord = inputClass.newInstance();
+		} catch (Exception e) {
+			logger.error("exception", e);
+			return;
+		}
+		atomRecord.setTuple(result);
+		outputCollector.collect(atomRecord, null); //FIXME abstract RdfRecord class
 	}
 
 }

@@ -22,8 +22,6 @@ import org.deri.iris.EvaluationException;
 import org.deri.iris.api.basics.IRule;
 import org.deri.iris.evaluation.IEvaluationStrategy;
 
-import eu.larkc.iris.storage.FactsFactory;
-
 public interface IDistributedEvaluationStrategyFactory {
 
 	/**
@@ -32,6 +30,6 @@ public interface IDistributedEvaluationStrategyFactory {
 	 * @param rules The rule-set to be used for evaluation.
 	 * @return The new evaluator instance.
 	 */
-	IEvaluationStrategy createEvaluator( FactsFactory facts, List<IRule> rules, eu.larkc.iris.Configuration configuration ) throws EvaluationException;
+	IEvaluationStrategy createEvaluator( List<IRule> rules, eu.larkc.iris.Configuration configuration ) throws EvaluationException;
 
 }

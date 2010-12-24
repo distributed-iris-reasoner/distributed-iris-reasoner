@@ -34,16 +34,18 @@ import eu.larkc.iris.evaluation.bottomup.naive.DistributedNaiveEvaluatorFactory;
  */
 public class Configuration extends org.deri.iris.Configuration
 {
+	
+	public String project;
+	
+	public org.apache.hadoop.conf.Configuration hadoopConfiguration = null;
+	
 	public Map<Object, Object> flowProperties = new HashMap<Object, Object>();
 	
 	public final String DELTA_TAIL_NAME = "deltaTail";
 	
-	private final String HADOOP_HFS_PATH = "build/test";
-	//private final String HADOOP_HFS_PATH = "";
+	public final String DELTA_TAIL_HFS_PATH = "tmp/delta";
 	
-	public final String DELTA_TAIL_HFS_PATH = HADOOP_HFS_PATH + "/delta";
-	
-	public final String PREDICATE_COUNT_TAIL_HFS_ROOT_PATH = HADOOP_HFS_PATH + "/predicate_count";
+	public final String PREDICATE_COUNT_TAIL_HFS_ROOT_PATH = "tmp/predicate_count";
 	
 	/** The evaluation strategy to use. */
 	public IDistributedEvaluationStrategyFactory evaluationStrategyFactory = new DistributedBottomUpEvaluationStrategyFactory( new DistributedNaiveEvaluatorFactory() );

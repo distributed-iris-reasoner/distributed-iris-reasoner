@@ -39,7 +39,7 @@ The tests are located in the in src/test/java folder in the
 eu.larkc.iris.rdf.storage folder
 Currently there is one test in the rdf subpackage named RdfFactsTapTest
 
-To run test tight-clink on the RdfFactsTapTest and choose Run as JUnit Test
+To run test right-click on the RdfFactsTapTest and choose Run as JUnit Test
 
 If you get an error like the following one, when running the test, please do a Clean of all the projects Project/Clean/Clean All Projects
 java.lang.NullPointerException
@@ -47,3 +47,12 @@ java.lang.NullPointerException
 	at java.util.Properties.load0(Properties.java:337)
 	at java.util.Properties.load(Properties.java:325)
 	at eu.larkc.iris.storage.FactsFactory.<init>(FactsFactory.java:48)
+
+	
+Execution
+=========
+
+./bin/hadoop jar /home/valer/Projects/eu.larkc.reasoner/workspace/distributed-iris-reasoner/iris-impl-distributed/build/iris-impl-distributed-0.0.1.jar eu.larkc.iris.Main dbpedia -process
+./bin/hadoop jar /home/valer/Projects/eu.larkc.reasoner/workspace/distributed-iris-reasoner/iris-impl-distributed/build/iris-impl-distributed-0.0.1.jar eu.larkc.iris.Main dbpedia -importNTriple /home/valer/Tasks/iris_distributed_reasoner/instance_types_en.nt instance-types
+./bin/hadoop jar /home/valer/Projects/eu.larkc.reasoner/workspace/distributed-iris-reasoner/iris-impl-distributed/build/iris-impl-distributed-0.0.1.jar eu.larkc.iris.Main dbpedia -importRdf default ontology
+./bin/hadoop jar /home/valer/Projects/eu.larkc.reasoner/workspace/distributed-iris-reasoner/iris-impl-distributed/build/iris-impl-distributed-0.0.1.jar eu.larkc.iris.Main dbpedia -test 

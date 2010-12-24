@@ -17,6 +17,9 @@
 package eu.larkc.iris.storage;
 
 import org.deri.iris.api.basics.IAtom;
+import org.deri.iris.api.terms.IStringTerm;
+import org.deri.iris.api.terms.ITerm;
+import org.deri.iris.api.terms.concrete.IIri;
 
 import cascading.tuple.Tuple;
 
@@ -32,10 +35,25 @@ public abstract class AtomRecord {
 	
 	public abstract void write(FactsStorage storage);
 	
-	public abstract void read(IAtom atom);
+	public void read(IAtom atom) {
+		tuple = new Tuple();
+		tuple.add(new PredicateWritable(atom.getPredicate()));
+		for(int i= 0 ; i < atom.getTuple().size(); i++) {
+			ITerm term = atom.getTuple().get(i);
+			if (term instanceof IIri) {
+				tuple.add(new IRIWritable((IIri) term));
+			} else {
+				tuple.add(new StringTermWritable((IStringTerm) term));
+			}
+		}
+	}
 
 	public Tuple getTuple() {
 		return tuple;
 	}
 
+	public void setTuple(Tuple tuple) {
+		this.tuple = tuple;
+	}
+	
 }

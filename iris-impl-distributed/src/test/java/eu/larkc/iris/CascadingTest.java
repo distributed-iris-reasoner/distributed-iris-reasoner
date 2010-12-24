@@ -10,6 +10,8 @@ import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FileUtil;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MiniMRCluster;
@@ -24,8 +26,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cascading.flow.Flow;
+import cascading.flow.FlowConnector;
 import cascading.flow.MultiMapReducePlanner;
+import cascading.operation.DebugLevel;
 import cascading.tuple.TupleEntryIterator;
+import eu.larkc.iris.evaluation.bottomup.DistributedBottomUpEvaluationStrategyFactory;
+import eu.larkc.iris.evaluation.bottomup.naive.DistributedNaiveEvaluatorFactory;
 import eu.larkc.iris.evaluation.distributed.ProgramEvaluationTest;
 import eu.larkc.iris.storage.FactsConfigurationFactory;
 import eu.larkc.iris.storage.FactsFactory;
@@ -42,13 +48,12 @@ public abstract class CascadingTest extends ProgramEvaluationTest {
 	private static final Logger logger = LoggerFactory.getLogger(CascadingTest.class);
 	
 	transient private static MiniDFSCluster dfs;
-	transient private static FileSystem fileSys;
+	protected static FileSystem fileSys;
 	transient private static MiniMRCluster mr;
-	transient private static JobConf jobConf;
-	transient private static Map<Object, Object> properties = new HashMap<Object, Object>();
-	transient private boolean enableCluster;
+	protected JobConf jobConf;
+	protected boolean enableCluster;
 	
-	int numMapTasks = 4;
+	int numMapTasks = 1;
 	int numReduceTasks = 1;
 	
 	private String log;
@@ -80,10 +85,6 @@ public abstract class CascadingTest extends ProgramEvaluationTest {
 		return enableCluster;
 	}
 
-	public Map<Object, Object> getProperties() {
-		return new HashMap<Object, Object>(properties);
-	}
-
 	protected ModelSet createStorage(String storageId) {
 		Repository repository = new SailRepository(new MemoryStore());
 		try {
@@ -100,8 +101,10 @@ public abstract class CascadingTest extends ProgramEvaluationTest {
 
 	@Override
 	protected void setUp() throws Exception {
-		super.setUp();
-		
+		// Create the default configuration.
+		defaultConfiguration = new eu.larkc.iris.Configuration();
+		defaultConfiguration.evaluationStrategyFactory = new DistributedBottomUpEvaluationStrategyFactory(new DistributedNaiveEvaluatorFactory());
+
 		if (jobConf != null)
 			return;
 
@@ -113,9 +116,11 @@ public abstract class CascadingTest extends ProgramEvaluationTest {
 			System.setProperty("hadoop.log.dir", "build/test/log");
 			Configuration conf = new Configuration();
 
-			dfs = new MiniDFSCluster(conf, 4, true, null);
+			defaultConfiguration.hadoopConfiguration = conf;
+			
+			dfs = new MiniDFSCluster(conf, 1, true, null);
 			fileSys = dfs.getFileSystem();
-			mr = new MiniMRCluster(4, fileSys.getUri().toString(), 1);
+			mr = new MiniMRCluster(1, fileSys.getUri().toString(), 1);
 
 			jobConf = mr.createJobConf();
 
@@ -124,20 +129,35 @@ public abstract class CascadingTest extends ProgramEvaluationTest {
 			jobConf.setReduceSpeculativeExecution(false);
 	    }
 	    
+	    jobConf.setBoolean("mapred.input.dir.recursive", true);
 		jobConf.setNumMapTasks(numMapTasks);
 		jobConf.setNumReduceTasks(numReduceTasks);
 
+		defaultConfiguration.flowProperties.put("cascading.serialization.tokens", "130=eu.larkc.iris.storage.IRIWritable,131=eu.larkc.iris.storage.PredicateWritable,132=eu.larkc.iris.storage.StringTermWritable");
 	    if( log != null )
-	        properties.put( "log4j.logger", log );
+	    	defaultConfiguration.flowProperties.put( "log4j.logger", log );
 
-		Flow.setJobPollingInterval(properties, 500); // should speed up tests
-
-		MultiMapReducePlanner.setJobConf( properties, jobConf );
+		Flow.setJobPollingInterval(defaultConfiguration.flowProperties, 500); // should speed up tests
+		FlowConnector.setDebugLevel(defaultConfiguration.flowProperties, DebugLevel.VERBOSE);
+		MultiMapReducePlanner.setJobConf( defaultConfiguration.flowProperties, jobConf );
 		
 		FactsFactory.PROPERTIES = "/facts-configuration-test.properties";
 		
 		FactsConfigurationFactory.STORAGE_PROPERTIES = "/facts-storage-configuration-test.properties";
+		
+		super.setUp();
 	}
+
+	  protected void copyFromLocal( String inputFile, String toFile ) throws IOException
+	    {
+	    if( !enableCluster )
+	      return;
+
+	    Path path = new Path( toFile );
+
+	    if( !fileSys.exists( path ) )
+	      FileUtil.copy( new File( inputFile ), fileSys, path, false, jobConf );
+	    }
 
 	protected void verifySink(Flow flow, int expects) throws IOException {
 		int count = 0;

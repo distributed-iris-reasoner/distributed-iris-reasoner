@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 Softgress - http://www.softgress.com/
+D * Copyright 2010 Softgress - http://www.softgress.com/
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,11 +36,12 @@ import org.deri.iris.api.builtins.IBuiltinAtom;
 import org.deri.iris.api.terms.IConstructedTerm;
 import org.deri.iris.api.terms.ITerm;
 import org.deri.iris.api.terms.IVariable;
+import org.deri.iris.api.terms.concrete.IIri;
+import org.deri.iris.terms.concrete.Iri;
 import org.deri.iris.utils.TermMatchingAndSubstitution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cascading.operation.Debug;
 import cascading.operation.Identity;
 import cascading.operation.Insert;
 import cascading.operation.aggregator.Count;
@@ -55,10 +56,11 @@ import cascading.pipe.cogroup.LeftJoin;
 import cascading.tap.Hfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
-import eu.larkc.iris.Main;
+import eu.larkc.iris.Utils;
 import eu.larkc.iris.evaluation.ConstantFilter;
-import eu.larkc.iris.storage.FactsFactory;
+import eu.larkc.iris.evaluation.NTriplePredicateFilter;
 import eu.larkc.iris.storage.FieldsVariablesMapping;
+import eu.larkc.iris.storage.IRIWritable;
 import eu.larkc.iris.storage.PredicateWritable;
 
 /**
@@ -78,8 +80,6 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 */
 	private static final String HEAD_PREDICATE_FIELD = "HPF";
 
-	private static final String DELTA_FIELD = "DELTA";
-
 	/**
 	 * Sets up a CascadingRuleCompiler with a specific configuration, taking
 	 * relevant datasources for rule execution into account.
@@ -87,8 +87,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 * @param configuration
 	 * @param facts
 	 */
-	public CascadingRuleCompiler(eu.larkc.iris.Configuration configuration, FactsFactory facts) {
-		this.mFacts = facts;
+	public CascadingRuleCompiler(eu.larkc.iris.Configuration configuration) {
 		this.mConfiguration = configuration;
 	}
 
@@ -137,10 +136,12 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 * @param bodyLiterals
 	 * @return
 	 */
-	protected PipeFielded compileBody(FieldsVariablesMapping fieldsVariableMapping, IAtom head, Collection<ILiteral> bodyLiterals) {
+	protected PipeFielded compileBody(FieldsVariablesMapping fieldsVariablesMapping, IAtom head, Collection<ILiteral> bodyLiterals) {
 		List<ILiteral> literals = new ArrayList<ILiteral>(bodyLiterals);
 		Map<IAtom, Pipe> subGoals = new HashMap<IAtom, Pipe>();
 
+		mainPipe = new Pipe("main");
+		
 		PipeFielded result;
 		for (int l = 0; l < literals.size(); ++l) {
 			ILiteral literal = literals.get(l);
@@ -154,8 +155,8 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 
 			IAtom atom = literal.getAtom(); // get predicate and tuple
 			
-			fieldsVariableMapping.loadAtom(atom);
-			
+			fieldsVariablesMapping.loadAtom(atom);
+
 			// (variables and constants)
 			if (atom instanceof IBuiltinAtom) {
 				processBuiltin((IBuiltinAtom) atom);
@@ -166,7 +167,16 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 				// IRelation relation = mFacts.get(predicate);
 				// ITuple viewCriteria = atom.getTuple();
 
-				Pipe pipe = new Pipe(atom.toString());
+				Pipe pipe = new Pipe(atom.toString(), mainPipe);
+				Fields atomFields = Utils.getFieldsForAtom(fieldsVariablesMapping, atom);
+				//int[] groups = {2, 1, 3};
+				//RegexParser parser = new RegexParser(atomFields, "^(<[^\\s]+>)\\s*(<[^\\s]+>)\\s*([<\"].*[^\\s])\\s*.\\s*$", groups);
+				//pipe = new Each(pipe, new Fields("line"), parser);
+				//pipe = new Each(pipe, Fields.ALL, new Identity(atomFields));
+				//pipe = new Each(pipe, Utils.getFieldsForAtom(fieldsVariablesMapping, atom), new PredicateFilter(fieldsVariablesMapping.getField(atom, atom.getPredicate()), atom.getPredicate()));
+				pipe = new Each(pipe, Fields.ALL, new Identity(atomFields));
+				pipe = new Each(pipe, atomFields, new NTriplePredicateFilter(fieldsVariablesMapping.getField(atom, atom.getPredicate()), atom.getPredicate()));
+				
 				ITuple tuple = atom.getTuple();
 				// filter for constants
 				pipe = filterConstants(pipe, tuple);
@@ -177,7 +187,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 			}
 		}
 
-		result = setupJoins(fieldsVariableMapping, head, subGoals);
+		result = setupJoins(fieldsVariablesMapping, head, subGoals);
 
 		return result;
 	}
@@ -229,10 +239,22 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 			AtomsCommonFields headCommonFields = new AtomsCommonFields(fieldsVariablesMapping, lhsJoin.getFields(), head);
 			Fields lhsFields = headCommonFields.getLhsFields().getFields();
 			Fields rhsFields = headCommonFields.getRhsFields().getFields();
-			Pipe headPipe = new Pipe(head.toString()); //FIXME (val) the pipe name should be identified by tuples variables also
+			//Pipe headPipe = new Pipe(head.toString());
+			Pipe headPipe = new Pipe(head.toString(), mainPipe);
+			//headPipe = new Each(headPipe, Fields.ALL, new Identity(Utils.getFieldsForAtom(fieldsVariablesMapping, head)));
+			Fields headFields = Utils.getFieldsForAtom(fieldsVariablesMapping, head);
+			//int[] groups = {2, 1, 3};
+			//RegexParser parser = new RegexParser(headFields, "^(<[^\\s]+>)\\s*(<[^\\s]+>)\\s*([<\"].*[^\\s])\\s*.\\s*$", groups);
+			//headPipe = new Each(headPipe, new Fields("line"), parser);
+			
+			headPipe = new Each(headPipe, Fields.ALL, new Identity(headFields));
+			headPipe = new Each(headPipe, headFields, new NTriplePredicateFilter(fieldsVariablesMapping.getField(head, head.getPredicate()), head.getPredicate()));
+			
 			leftJoin = new CoGroup(lhsJoin.getPipe(), lhsFields, headPipe, rhsFields, new LeftJoin());
 			leftJoin = new Each( leftJoin, rhsFields, new FilterNotNull());	// outgoing -> "keepField"
 			leftJoin = new Each( leftJoin, lhsJoin.getFields().getFields(), new Identity());	// outgoing -> "keepField"
+			
+			//leftJoin = new Each(leftJoin, new Debug(true));
 		}
 		return leftJoin;
 		//
@@ -284,8 +306,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		
 		FieldsList keepFieldsList = fieldsToKeep(fieldsVariablesMapping, outputFieldsList);
 		join = new Each( join, keepFieldsList.getFields(), new Identity());	// outgoing -> "keepField"
-		//join = new Each( join, new Debug(true));
-		
+				
 		PipeFielded pipeFielded = new PipeFielded(fieldsVariablesMapping, join, keepFieldsList);
 		return buildJoin(fieldsVariablesMapping, head, leftJoinApplied, pipeFielded, subgoalsIterator);
 	}
@@ -341,7 +362,12 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 
 			// not a variable, we filter the tuples
 			if (term.isGround()) {
-				constantTerms.put(i + 1, term.getValue()); //added one because of the predicate field
+				if (term instanceof Iri) {
+					constantTerms.put(i + 1, (IIri) term); //added one because of the predicate field
+				} else {
+					constantTerms.put(i + 1, term.getValue()); //added one because of the predicate field
+				}
+					
 			}
 		}
 
@@ -396,15 +422,12 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 
 		Pipe rulePipe = rulePipeFielded.getPipe();
 		
-		Map<String, Tap> sources = new HashMap<String, Tap>();
-		Map<String, Tap> sinks = new HashMap<String, Tap>();
+		//Map<String, Tap> sources = new HashMap<String, Tap>();
+		//Map<String, Tap> sinks = new HashMap<String, Tap>();
 		
-		List<ILiteral> lits = originalRule.getBody();
-		for (ILiteral literal : lits) {
-			IAtom atom = literal.getAtom();
-			Tap tap = mFacts.getFacts(fieldsVariablesMapping, atom);
-			sources.put(atom.toString(), tap);
-		}
+		String input = mConfiguration.project;
+		Tap source = new Hfs(Fields.ALL, input, true );
+		//sources.put("main", source);
 
 		List<ILiteral> head = originalRule.getHead();
 		// Only one literal in head
@@ -414,64 +437,38 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 							+ originalRule.toString());
 		}
 
-		// TODO: here we could filter/do projection for the rule head. this is
-		// not too important for now.
-		// For that purpose we need 1.) take a look at the variables in the
-		// head, 2.) determine the indices they have after the body has been
-		// compiled
-		// For now (debugging, testing) we return the complete result
-		// bodyPipe = new Each( bodyPipe, new Fields(1, 2, 3), new Identity(),
-		// Fields.RESULTS );
-
-		/*
-		rulePipe = new Each( rulePipe, new Insert( new Fields("P3"), 
-				"http://larkc.eu/" + head.get(0).getAtom().getPredicate().getPredicateSymbol()), new Fields("P3", "X1", "Y1"));
-				*/
-		//rulePipe = new Each( rulePipe , new Fields("P3", "X1", "Y1"), new Identity(new Fields( "P3", "X1", "Y1" )));
-
-		//rulePipe = new Each( rulePipe, new Insert(Fields.size(1), head.get(0).getAtom().getPredicate().getPredicateSymbol()));
-		//rulePipe = new Each( rulePipe, new Fields(2, 3, 7), new Identity(), Fields.RESULTS );
-		
-		//rulePipe = new Each( rulePipe, new Fields(1, 2, 3), new Identity(), Fields.RESULTS );
-		
 		IAtom headAtom = head.get(0).getAtom();
-		Tap headTap = mFacts.getFacts(fieldsVariablesMapping, headAtom);
-		sources.put(headAtom.toString(), headTap);
 
 		Pipe resultPipe = new Pipe("resultTail", rulePipe);
-		resultPipe = new Each( resultPipe, new Insert( new Fields(HEAD_PREDICATE_FIELD), 
-				new PredicateWritable(headAtom.getPredicate())), Fields.ALL );
-		
+
 		FieldsList headFieldsList = identifyHeadVariableFields(fieldsVariablesMapping, headAtom, rulePipeFielded.getFields());
+		
+		resultPipe = new GroupBy(resultPipe, headFieldsList.getFields()); //eliminate duplicates
+		resultPipe = new Every(resultPipe, new Count());
+
+		//resultPipe = new Each( resultPipe, new Insert( new Fields(HEAD_PREDICATE_FIELD), new PredicateWritable(headAtom.getPredicate())), Fields.ALL );
+		//resultPipe = new Each( resultPipe, new Insert( new Fields(HEAD_PREDICATE_FIELD), "<" + headAtom.getPredicate() + ">"), Fields.ALL );
+		resultPipe = new Each( resultPipe, new Insert( new Fields(HEAD_PREDICATE_FIELD), new PredicateWritable(headAtom.getPredicate())), Fields.ALL );
+		
 		headFieldsList.add(0, HEAD_PREDICATE_FIELD);
 		Fields headFields = headFieldsList.getFields();
-
-		resultPipe = new Each( resultPipe, headFields, new Identity(headFields));
-
-		//this should go by ordinal
-		//IAtom headAtom = head.get(0).getAtom();
-		//Tap headSink = mFacts.getFacts(headAtom);
-		Tap headSink = mFacts.getFacts();
 		
+		resultPipe = new Each( resultPipe, headFields, new Identity(headFields));
+		
+		//Pipe storageResultPipe = new Pipe("storageResultTail", resultPipe);
+		//storageResultPipe = new Each( storageResultPipe, headFields, new Identity(headFields));
+		
+		/*
 		Pipe countPipe = new Pipe(mConfiguration.DELTA_TAIL_NAME, resultPipe);
 		countPipe = new GroupBy(countPipe, new Fields(HEAD_PREDICATE_FIELD));
 		countPipe = new Every(countPipe, new Count(new Fields(DELTA_FIELD)));
-		//countPipe = new Each(countPipe, new Debug(true)); //FIXME debug the group by generates as many rows s input, optimize to just one
 		countPipe = new Each( countPipe, new Fields(DELTA_FIELD), new Identity());
-		Tap countSink = new Hfs(new Fields(DELTA_FIELD), mConfiguration.DELTA_TAIL_HFS_PATH, true);
-		
-		sinks.put(resultPipe.getName(), headSink);
-		sinks.put(countPipe.getName(), countSink);
-
-		/*
-		Flow flow = new FlowConnector().connect(flowName, sources, sinks, resultPipe, countPipe);
-		
-		if(flow != null) {
-			flow.writeDOT("flow.dot");
-		}
+		Tap deltaSink = new Hfs(new Fields(DELTA_FIELD), mConfiguration.DELTA_TAIL_HFS_PATH, SinkMode.REPLACE);
 		*/
-		
-		FlowAssembly flowAssembly = new FlowAssembly(mConfiguration, sources, sinks, resultPipe, countPipe);
+		Map<String, Tap> sinks = new HashMap<String, Tap>();
+		//sinks.put(countPipe.getName(), deltaSink);
+
+		FlowAssembly flowAssembly = new FlowAssembly(mConfiguration, source, sinks, resultPipe);//, countPipe);
 		return flowAssembly;
 	}
 
@@ -496,16 +493,12 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		}
 		return headFieldsList;
 	}
-	
-	/**
-	 * The knowledge-base facts used to attach to the compiled rule elements.
-	 * This keeps encapsulates the access to external datasources and results in
-	 * corresponding Cascading Taps.
-	 */
-	private final FactsFactory mFacts;
 
 	/**
 	 * Central configuration object
 	 */
 	private final eu.larkc.iris.Configuration mConfiguration;
+	
+	private Pipe mainPipe = null;
+	
 }

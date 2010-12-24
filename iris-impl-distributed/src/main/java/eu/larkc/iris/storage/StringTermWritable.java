@@ -19,9 +19,10 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.hadoop.io.WritableComparable;
 import org.deri.iris.api.terms.IStringTerm;
-import org.deri.iris.terms.TermFactory;
 
 /**
  * @author vroman
@@ -29,32 +30,37 @@ import org.deri.iris.terms.TermFactory;
  */
 public class StringTermWritable implements WritableComparable<StringTermWritable> {
 
-	private IStringTerm stringTerm;
+	private String stringTerm;
 	
 	public StringTermWritable() {
-		TermFactory.getInstance().createString("");
 	}
 	
 	public StringTermWritable(IStringTerm stringTerm) {
-		this.stringTerm = stringTerm;
+		this.stringTerm = stringTerm.getValue();
 	}
 	
-	public IStringTerm getValue() {
+	public String getValue() {
 		return stringTerm;
+	}
+
+	public void setValue(String value) {
+		this.stringTerm = value;
 	}
 
 	@Override
 	public void write(DataOutput out) throws IOException {
-		out.writeUTF(stringTerm.getValue());
+		out.writeUTF(stringTerm);
 	}
 
 	@Override
 	public void readFields(DataInput in) throws IOException {
-		stringTerm = TermFactory.getInstance().createString(in.readUTF());
+		stringTerm = in.readUTF();
 	}
 
 	public static StringTermWritable read(DataInput in) throws IOException {
-		StringTermWritable stringTermWritable = new StringTermWritable(TermFactory.getInstance().createString(in.readUTF()));
+		StringTermWritable stringTermWritable = new StringTermWritable();
+		String stringTerm = in.readUTF();
+		stringTermWritable.stringTerm = stringTerm;
 		return stringTermWritable;
 	}
 
@@ -65,7 +71,24 @@ public class StringTermWritable implements WritableComparable<StringTermWritable
 
 	@Override
 	public String toString() {
-		return "stringTerm[" + stringTerm.getValue() + "]";
+		return "stringTerm[" + stringTerm + "]";
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (!(obj instanceof StringTermWritable)) {
+			return false;
+		}
+		StringTermWritable i = (StringTermWritable) obj;
+		return new EqualsBuilder().append(stringTerm, i.stringTerm).isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder().append(stringTerm).hashCode();
 	}
 
 }

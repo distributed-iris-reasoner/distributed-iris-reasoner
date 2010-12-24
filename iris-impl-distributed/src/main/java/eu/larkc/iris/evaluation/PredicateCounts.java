@@ -29,8 +29,6 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
 import eu.larkc.iris.Configuration;
-import eu.larkc.iris.storage.FactsFactory;
-import eu.larkc.iris.storage.FactsTap;
 
 /**
  * @author valer
@@ -40,24 +38,24 @@ public class PredicateCounts {
 
 	private static final Logger logger = LoggerFactory.getLogger(PredicateCounts.class);
 	
-	private static Map<FactsFactory, PredicateCounts> predicateCounts = new HashMap<FactsFactory, PredicateCounts>();
+	private static Map<String, PredicateCounts> predicateCounts = new HashMap<String, PredicateCounts>();
 	
 	private Configuration mConfiguration;
-	private FactsFactory mFactsFactory;
+	private String project;
 	private List<IRule> mRules;
 	private Map<IPredicate, Long> counts = new HashMap<IPredicate, Long>();
 	
-	public static PredicateCounts getInstance(Configuration configuration, FactsFactory factsFactory) {
-		if (predicateCounts.containsKey(factsFactory)) {
-			return predicateCounts.get(factsFactory);
+	public static PredicateCounts getInstance(Configuration configuration) {
+		if (predicateCounts.containsKey(configuration.project)) {
+			return predicateCounts.get(configuration.project);
 		}
-		predicateCounts.put(factsFactory, new PredicateCounts(configuration, factsFactory));
-		return predicateCounts.get(factsFactory);
+		predicateCounts.put(configuration.project, new PredicateCounts(configuration, configuration.project));
+		return predicateCounts.get(configuration.project);
 	}
 
-	private PredicateCounts(Configuration configuration, FactsFactory factsFactory) {
+	private PredicateCounts(Configuration configuration, String project) {
 		this.mConfiguration = configuration;
-		this.mFactsFactory = factsFactory;
+		this.project = project;
 	}
 	
 	private void compute() {
@@ -65,7 +63,7 @@ public class PredicateCounts {
 			ListIterator<ILiteral> iterator = rule.getBody().listIterator();
 			while (iterator.hasNext()) {
 				ILiteral literal = iterator.next();
-				FactsTap facts = mFactsFactory.getFacts(literal.getAtom());
+				//Tap facts = mFactsFactory.getFacts(literal.getAtom());
 			}
 		}
 
@@ -74,8 +72,7 @@ public class PredicateCounts {
 	private void compute(IAtom atom) {
 		String predicateSymbol = atom.getPredicate().getPredicateSymbol();
 		
-		String path = mConfiguration.PREDICATE_COUNT_TAIL_HFS_ROOT_PATH + "/" + mFactsFactory.getStorageId() + 
-			"/" + predicateSymbol.replace("/", "").replace(":", "");
+		String path = mConfiguration.PREDICATE_COUNT_TAIL_HFS_ROOT_PATH + "/" + predicateSymbol.replace("/", "").replace(":", "");
 		Hfs sink = new Hfs(new Fields(predicateSymbol, "count"), path, true);
 		
 		Long count = findPredicate(sink, predicateSymbol, new JobConf());		
@@ -84,7 +81,7 @@ public class PredicateCounts {
 			return;
 		}
 		
-		FactsTap facts = mFactsFactory.getFacts(atom);
+		Tap facts = null; //mFactsFactory.getFacts(atom);
 		
 		Pipe countPipe = new Pipe("predicate_count");
 		countPipe = new GroupBy(countPipe, new Fields(predicateSymbol));

@@ -22,7 +22,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordWriter;
 import org.apache.hadoop.util.Progressable;
-import org.ontoware.rdf2go.model.Model;
+import org.ontoware.rdf2go.model.ModelSet;
 
 import eu.larkc.iris.storage.AtomRecord;
 import eu.larkc.iris.storage.FactsConfigurationFactory;
@@ -44,7 +44,7 @@ public class RdfOutputFormat<K extends AtomRecord, V> extends FactsOutputFormat<
 	public RecordWriter<K, V> getRecordWriter(FileSystem filesystem,
 			JobConf job, String name, Progressable progress) throws IOException {
 		RdfFactsConfiguration rdfFactsConfiguration = (RdfFactsConfiguration) FactsConfigurationFactory.getFactsConfiguration(job);
-		Model model = rdfFactsConfiguration.getModelSet(false).getDefaultModel();
+		ModelSet model = rdfFactsConfiguration.getModelSet(false);
 		return new RdfRecordWriter(model);
 	}
 

@@ -40,10 +40,10 @@ public class DistributedBottomUpEvaluationStrategyFactory implements
 	 * @see org.deri.iris.evaluation.IEvaluationStrategyFactory#createEvaluator(org.deri.iris.facts.IFacts, java.util.List, org.deri.iris.Configuration)
 	 */
 	@Override
-	public IEvaluationStrategy createEvaluator(FactsFactory facts, List<IRule> rules,
+	public IEvaluationStrategy createEvaluator(List<IRule> rules,
 			eu.larkc.iris.Configuration configuration) throws EvaluationException {
 		
-		return new DistributedBottomUpEvaluationStrategy(facts, configuration, mRuleEvaluatorFactory, rules);		
+		return new DistributedBottomUpEvaluationStrategy(configuration, mRuleEvaluatorFactory, rules);		
 	}
 	
 	private final IDistributedRuleEvaluatorFactory mRuleEvaluatorFactory;

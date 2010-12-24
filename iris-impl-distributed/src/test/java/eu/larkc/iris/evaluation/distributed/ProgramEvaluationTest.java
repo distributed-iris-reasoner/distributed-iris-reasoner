@@ -85,8 +85,8 @@ public abstract class ProgramEvaluationTest extends EvaluationTest {
 		return null;
 	}
 
-	protected IRelation evaluate(FactsFactory facts, String query) throws Exception {
-		return evaluate(facts, parseQuery(query));
+	protected IRelation evaluate(String query) throws Exception {
+		return evaluate(parseQuery(query));
 	}
 
 	protected IRelation evaluate(FactsFactory facts, String query, eu.larkc.iris.Configuration configuration)
@@ -101,7 +101,7 @@ public abstract class ProgramEvaluationTest extends EvaluationTest {
 
 	protected IRelation evaluate(FactsFactory facts, String query, List<IVariable> outputVariables,
 			eu.larkc.iris.Configuration configuration) throws Exception {
-		return evaluate(facts, parseQuery(query), outputVariables, configuration);
+		return evaluate(parseQuery(query), outputVariables, configuration);
 	}
 
 	/**

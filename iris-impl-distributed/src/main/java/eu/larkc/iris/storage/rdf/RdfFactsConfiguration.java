@@ -166,11 +166,6 @@ public class RdfFactsConfiguration extends FactsConfiguration {
 		return RdfOutputFormat.class;
 	}
 
-	@Override
-	public AtomRecord newRecordInstance(Tuple tuple) {
-		return new RdfRecord(tuple);
-	}
-
 	public String getContextURI() {
 		return jobConf.get(RdfFactsConfiguration.CONTEXT_URI_PROPERTY, null);
 	}
