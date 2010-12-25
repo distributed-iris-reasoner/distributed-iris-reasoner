@@ -50,6 +50,7 @@ import org.deri.iris.api.terms.concrete.IDoubleTerm;
 import org.deri.iris.api.terms.concrete.IDuration;
 import org.deri.iris.api.terms.concrete.IFloatTerm;
 import org.deri.iris.api.terms.concrete.IIntegerTerm;
+import org.deri.iris.api.terms.concrete.IList;
 import org.deri.iris.api.terms.concrete.ITime;
 import org.deri.iris.api.terms.concrete.IYearMonthDuration;
 import org.deri.iris.builtins.datatype.ToDayTimeDurationBuiltin;
@@ -231,15 +232,21 @@ public class BuiltinHelper {
 		assert t0 != null;
 		assert t1 != null;
 
+		// Also take the term equivalence into account, when comparing two terms
+		// for equality.
 		if (equivalenceClasses.areEquivalent(t0, t1)) {
 			return true;
+		}
+		
+		// If the terms are ILists, we also use the equivalent classes when
+		// checking for equality of the elements of the list.
+		if (t0 instanceof IList && t1 instanceof IList) {
+			return ((IList) t0).equals(t1, equivalenceClasses);
 		}
 		
 		if ((t0 instanceof INumericTerm) && (t1 instanceof INumericTerm))
 			return numbersEqual((INumericTerm) t0, (INumericTerm) t1);
 		
-		// Also take the term equivalence into account, when comparing two terms
-		// for equality.
 		return t0.equals(t1);
 	}
 	
@@ -375,11 +382,11 @@ public class BuiltinHelper {
 		
 		
 		return CONCRETE.createDayTimeDuration(
-				dtd.getSign() >= 0, 
+				d.getSign() >= 0, 
 				dtd.getDays(),
-				dtd.getHours(),
-				dtd.getMinutes(),
-				((BigDecimal) dtd.getField(DatatypeConstants.SECONDS))
+				d.getHours(),
+				d.getMinutes(),
+				((BigDecimal) d.getField(DatatypeConstants.SECONDS))
 						.doubleValue());
 	}
 

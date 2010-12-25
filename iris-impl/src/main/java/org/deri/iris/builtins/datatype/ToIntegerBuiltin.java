@@ -61,8 +61,10 @@ public class ToIntegerBuiltin extends ConversionBuiltin {
 	}
 
 	@Override
-	protected ITerm convert(ITerm term) {
-		if (term instanceof IBooleanTerm) {
+	protected IIntegerTerm convert(ITerm term) {
+		if (term instanceof IIntegerTerm) {
+			return (IIntegerTerm) term;
+		} else if (term instanceof IBooleanTerm) {
 			return toInteger((IBooleanTerm) term);
 		} else if (term instanceof INumericTerm) {
 			return toInteger((INumericTerm) term);
@@ -118,8 +120,7 @@ public class ToIntegerBuiltin extends ConversionBuiltin {
 
 			return CONCRETE.createInteger(new BigInteger(string));
 		} catch (NumberFormatException e) {
-			throw new IllegalArgumentException(
-					"The specified string can not be cast to integer", e);
+			return null;
 		}
 	}
 

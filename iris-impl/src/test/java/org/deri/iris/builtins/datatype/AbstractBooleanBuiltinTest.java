@@ -174,6 +174,7 @@ public abstract class AbstractBooleanBuiltinTest extends TestCase {
 		list.add(IsIntegerBuiltin.class.getName());
 		list.add(IsIriBuiltin.class.getName());
 		list.add(IsLanguageBuiltin.class.getName());
+		list.add(IsListBuiltin.class.getName());
 		list.add(IsLongBuiltin.class.getName());
 		list.add(IsNameBuiltin.class.getName());
 		list.add(IsNCNameBuiltin.class.getName());
@@ -231,6 +232,7 @@ public abstract class AbstractBooleanBuiltinTest extends TestCase {
 		list.add(IsNotIntegerBuiltin.class.getName());
 		list.add(IsNotIriBuiltin.class.getName());
 		list.add(IsNotLanguageBuiltin.class.getName());
+		list.add(IsNotListBuiltin.class.getName());
 		list.add(IsNotLongBuiltin.class.getName());
 		list.add(IsNotNameBuiltin.class.getName());
 		list.add(IsNotNCNameBuiltin.class.getName());

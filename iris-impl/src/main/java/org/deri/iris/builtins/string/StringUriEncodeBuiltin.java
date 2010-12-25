@@ -28,12 +28,16 @@ import org.deri.iris.EvaluationException;
 import org.deri.iris.api.basics.IPredicate;
 import org.deri.iris.api.terms.IStringTerm;
 import org.deri.iris.api.terms.ITerm;
+import org.deri.iris.builtins.EncodeForUriBuiltin;
 import org.deri.iris.builtins.FunctionalBuiltin;
 import org.deri.iris.factory.Factory;
 
 /**
  * Represents a string URI encode operation.
+ * 
+ * @deprecated Replaced by {@link EncodeForUriBuiltin}.
  */
+@Deprecated
 public class StringUriEncodeBuiltin extends FunctionalBuiltin {
 
 	/** The predicate defining this built-in. */

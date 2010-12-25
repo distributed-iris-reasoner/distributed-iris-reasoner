@@ -28,6 +28,7 @@ import org.deri.iris.api.basics.IPredicate;
 import org.deri.iris.api.terms.IConcreteTerm;
 import org.deri.iris.api.terms.IStringTerm;
 import org.deri.iris.api.terms.ITerm;
+import org.deri.iris.utils.equivalence.IEquivalentTerms;
 
 /**
  * <p>
@@ -54,6 +55,15 @@ public class IriStringBuiltin extends BooleanBuiltin {
 
 	@Override
 	protected boolean computeResult(ITerm[] terms) {
+		IEquivalentTerms equivalentTerms = getEquivalenceClasses();
+		
+		// Check if the two terms are equivalent.
+		if (equivalentTerms != null) {
+			if (equivalentTerms.areEquivalent(terms[0], terms[1])) {
+				return true;
+			}
+		}
+		
 		// Assuming the IRI is represented by some concrete term.
 		if (terms[0] instanceof IConcreteTerm
 				&& terms[1] instanceof IStringTerm) {
