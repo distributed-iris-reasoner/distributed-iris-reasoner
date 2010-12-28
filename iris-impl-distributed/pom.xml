@@ -42,11 +42,6 @@
 			<artifactId>iris-impl</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		
-
-
-
-
 
 		<dependency>
 			<groupId>commons-httpclient</groupId>
@@ -120,6 +115,57 @@
     		<scope>compile</scope>
     		<type>jar</type>
 		</dependency>		
+		
+		<dependency>
+    		<groupId>at.sti2.rif4j</groupId>
+    		<artifactId>rif4j-impl</artifactId>    		  
+    		<version>1.0.0-SNAPSHOT</version>    			
+    		<scope>compile</scope>
+    		<type>jar</type>
+		</dependency>		
+
+		<dependency>    		
+    		<groupId>at.sti2.rif4j</groupId>
+    		<artifactId>rif4j-impl</artifactId>    	
+    		<version>1.0.0-SNAPSHOT</version>
+    		<scope>compile</scope>
+    		<type>jar</type>
+    		<classifier>sources</classifier>
+		</dependency>		
+		
+		<dependency>
+    		<groupId>at.sti2.rif4j</groupId>
+    		<artifactId>rif4j-parser</artifactId>    		  
+    		<version>1.0.0-SNAPSHOT</version>    			
+    		<scope>compile</scope>
+    		<type>jar</type>
+		</dependency>		
+
+		<dependency>    		
+    		<groupId>at.sti2.rif4j</groupId>
+    		<artifactId>rif4j-parser</artifactId>    	
+    		<version>1.0.0-SNAPSHOT</version>
+    		<scope>compile</scope>
+    		<type>jar</type>
+    		<classifier>sources</classifier>
+		</dependency>		
+		
+		<dependency>
+    		<groupId>at.sti2.rif4j</groupId>
+    		<artifactId>rif4j-iris</artifactId>    		  
+    		<version>1.0.0-SNAPSHOT</version>    			
+    		<scope>compile</scope>
+    		<type>jar</type>
+		</dependency>		
+
+		<dependency>    		
+    		<groupId>at.sti2.rif4j</groupId>
+    		<artifactId>rif4j-iris</artifactId>    	
+    		<version>1.0.0-SNAPSHOT</version>
+    		<scope>compile</scope>
+    		<type>jar</type>
+    		<classifier>sources</classifier>
+		</dependency>	
 		
 		<dependency>
     		<groupId>hadoop-common</groupId>
