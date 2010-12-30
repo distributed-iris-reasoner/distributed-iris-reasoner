@@ -20,6 +20,8 @@ import org.deri.iris.api.basics.IPredicate;
 import org.deri.iris.facts.IFacts;
 import org.deri.iris.storage.IRelation;
 
+import eu.larkc.iris.evaluation.EvaluationContext;
+
 /**
  * @author valer.roman@softgress.com
  *
@@ -31,7 +33,7 @@ public interface IDistributedCompiledRule {
 	 * @return The result relation for this rule.
 	 * @throws EvaluationException 
 	 */
-	boolean evaluate() throws EvaluationException;
+	boolean evaluate(EvaluationContext evaluationContext) throws EvaluationException;
 
 	/**
 	 * Evaluate the rule using deltas (see semi-naive evaluation) to more intelligently seek out

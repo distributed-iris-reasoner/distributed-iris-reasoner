@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryIterator;
 import eu.larkc.iris.CascadingTest;
+import eu.larkc.iris.evaluation.EvaluationContext;
 import eu.larkc.iris.imports.Importer;
 import eu.larkc.iris.rules.compiler.CascadingRuleCompiler;
 import eu.larkc.iris.rules.compiler.FlowAssembly;
@@ -79,7 +80,7 @@ public class CascadingRuleCompilerTest extends CascadingTest {
 	public void testAvoidOldInferencedData() throws Exception {
 		CascadingRuleCompiler crc = new CascadingRuleCompiler(defaultConfiguration);
 		IDistributedCompiledRule dcr = crc.compile(rules.get(0));
-		dcr.evaluate();
+		dcr.evaluate(new EvaluationContext(1, 1));
 		FlowAssembly fa = dcr.getFlowAssembly();
 		
 		TupleEntryIterator tei = fa.openSink();

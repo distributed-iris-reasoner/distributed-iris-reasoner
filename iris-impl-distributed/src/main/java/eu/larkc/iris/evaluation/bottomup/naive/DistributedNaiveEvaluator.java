@@ -16,31 +16,84 @@
 
 package eu.larkc.iris.evaluation.bottomup.naive;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.deri.iris.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.deri.iris.EvaluationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import cascading.tap.Hfs;
+import cascading.tap.Tap;
+import cascading.tuple.Fields;
+import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleEntryCollector;
+import cascading.tuple.TupleEntryIterator;
+import eu.larkc.iris.evaluation.EvaluationContext;
 import eu.larkc.iris.evaluation.bottomup.IDistributedRuleEvaluator;
 import eu.larkc.iris.rules.compiler.IDistributedCompiledRule;
 
 public class DistributedNaiveEvaluator implements IDistributedRuleEvaluator {
 
+	private static final Logger logger = LoggerFactory.getLogger(DistributedNaiveEvaluator.class);
+	
 	@Override
-	public void evaluateRules(List<IDistributedCompiledRule> rules, Configuration configuration)
+	public void evaluateRules(List<IDistributedCompiledRule> rules, eu.larkc.iris.Configuration configuration)
 			throws EvaluationException {
+		int iterationNumber = 1;
 		boolean cont = true;
 		while( cont )
 		{
 			cont = false;
 			
+			int ruleNumber = 1;
 			// For each rule in the collection (stratum)
 			for (final IDistributedCompiledRule rule : rules )
 			{
-				boolean delta = rule.evaluate(); 
-				cont = delta;
+				boolean delta = rule.evaluate(new EvaluationContext(iterationNumber, ruleNumber));
+				cont = delta ?  delta : cont;
+				ruleNumber++;
 			}
+			iterationNumber++;
 		}
+
+		String outputPath = null;
+		if (configuration.keepResults) {
+			outputPath = configuration.project + "/data/inferences/" + configuration.resultsName;
+		} else {
+			outputPath = configuration.project + "/inferences/" + configuration.resultsName;
+		}
+		Hfs hfs = new Hfs(Fields.ALL, outputPath);
+		try {
+			TupleEntryCollector tec = hfs.openForWrite(configuration.jobConf);
+			List<String> pathstoDelete = new ArrayList<String>();
+			for (int i = 1; i < iterationNumber; i++) {
+				for (int j = 1; j <= rules.size(); j++) {
+					String flowIdentificator = "_" + i + "_" + j;
+					String inputPath = configuration.project + "/data/inferences/tmp/" + configuration.resultsName + flowIdentificator;
+					Tap source = new Hfs(Fields.ALL, inputPath);
+					TupleEntryIterator iterator = source.openForRead(configuration.jobConf);
+					while(iterator.hasNext()) {
+						TupleEntry te = iterator.next();
+						//logger.info("add : " + te.getTuple());
+						tec.add(te);
+					}
+					pathstoDelete.add(inputPath);
+				}
+			}
+			tec.close();
+			FileSystem fs = FileSystem.get(configuration.hadoopConfiguration);
+			for (String inputPath : pathstoDelete) {
+				fs.delete(new Path(inputPath), true);
+			}
+		} catch (IOException e) {
+			logger.error("io exception", e);
+			throw new RuntimeException("io exception", e);
+		}				
+
 	}
 
 }

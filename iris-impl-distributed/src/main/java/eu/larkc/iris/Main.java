@@ -3,6 +3,10 @@
  */
 package eu.larkc.iris;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,7 +40,6 @@ import cascading.tuple.TupleEntryIterator;
 import eu.larkc.iris.evaluation.bottomup.DistributedBottomUpEvaluationStrategyFactory;
 import eu.larkc.iris.evaluation.bottomup.naive.DistributedNaiveEvaluatorFactory;
 import eu.larkc.iris.imports.Importer;
-import eu.larkc.iris.storage.FactsFactory;
 
 /**
  * @author valer
@@ -45,6 +48,11 @@ import eu.larkc.iris.storage.FactsFactory;
 public class Main extends Configured implements Tool {
 
 	private static final Logger logger = LoggerFactory.getLogger(Main.class);
+	
+	public enum RULES_TYPE {
+		DATALOG,
+		RIF
+	}
 	
 	private String project;
 	
@@ -64,6 +72,12 @@ public class Main extends Configured implements Tool {
 	//test args
 	private String sourcePath = null;
 	
+	private RULES_TYPE rulesType;
+	private String rulesFile;
+	private boolean keepResults = false;
+	private String resultsName;
+	private String outputStorageId;
+	
 	private eu.larkc.iris.Configuration defaultConfiguration;
 	//transient private static Map<Object, Object> properties = new HashMap<Object, Object>();
 	
@@ -72,8 +86,9 @@ public class Main extends Configured implements Tool {
 	protected List<IRule> rules;
 	
 	private void printUsage() {
-		System.out.println("<project_name> <-importRdf storage_id import_name | -importNTriple path_to_file import_name | -process> ");
+		System.out.println("<project_name> <-importRdf storage_id import_name | -importNTriple path_to_file import_name | -process rules_type:<DATALOG|RIF> rules_file_path keep_results:<true:false> results_name output_storage_id > ");
 	}
+	
 	private void processUserArguments(String[] args) {
 		if (args.length == 0) {
 			printUsage();
@@ -93,13 +108,22 @@ public class Main extends Configured implements Tool {
 			importName = args[3];
 		} else if (operation.equalsIgnoreCase("-process")) {
 			processer = true;
+			rulesType = RULES_TYPE.valueOf(args[2].toUpperCase());
+			rulesFile = args[3];
+			if (args[4] != null && !"".equals(args[4])) {
+				keepResults = Boolean.valueOf(args[4]);
+				resultsName = args[5];
+				if (args.length > 6) {
+					outputStorageId = args[6];
+				}
+			}
 		} else if (operation.equals("-test")) {
 			tester = true;
 			sourcePath = args[2];
 		}
 	}
 	
-	private void setupJob(Configuration conf) {
+	private JobConf setupJob(Configuration conf) {
 		JobConf jobConf = new JobConf(conf, Main.class); 
 	    // run the job here.
 		
@@ -117,10 +141,12 @@ public class Main extends Configured implements Tool {
 		jobConf.setNumMapTasks(8);
 		jobConf.setNumReduceTasks(2);
 
-		MultiMapReducePlanner.setJobConf( defaultConfiguration.flowProperties, jobConf );
 		FlowConnector.setDebugLevel(defaultConfiguration.flowProperties, DebugLevel.VERBOSE);
+		MultiMapReducePlanner.setJobConf( defaultConfiguration.flowProperties, jobConf );
 		
 		//Flow.setJobPollingInterval(defaultConfiguration.flowProperties, 500);
+		
+		return jobConf;
 	}
 	
 	public int doRdfImport(eu.larkc.iris.Configuration configuration) {
@@ -133,17 +159,17 @@ public class Main extends Configured implements Tool {
 		return 0;
 	}
 
-	public int doTester() {
+	public int doTester(eu.larkc.iris.Configuration configuration) {
 		logger.info("do tester ...");
 		
-		JobConf jobConf = new JobConf();
-		jobConf.set("cascading.serialization.tokens", "130=eu.larkc.iris.storage.IRIWritable,131=eu.larkc.iris.storage.PredicateWritable,132=eu.larkc.iris.storage.StringTermWritable");
-		jobConf.setBoolean("mapred.input.dir.recursive", true);
+		//JobConf jobConf = new JobConf();
+		//jobConf.set("cascading.serialization.tokens", "130=eu.larkc.iris.storage.IRIWritable,131=eu.larkc.iris.storage.PredicateWritable,132=eu.larkc.iris.storage.StringTermWritable");
+		//jobConf.setBoolean("mapred.input.dir.recursive", true);
 		
 		Tap source = new Hfs(Fields.ALL, project + "/" + sourcePath);
 		TupleEntryIterator tei = null;
 		try {
-			tei = source.openForRead(jobConf);
+			tei = source.openForRead(configuration.jobConf);
 		} catch (IOException e) {
 			logger.error("io exception", e);
 			return -1;
@@ -159,10 +185,14 @@ public class Main extends Configured implements Tool {
 	
 	public int doProcess() {
 		defaultConfiguration.project = project;
+		defaultConfiguration.keepResults = keepResults;
+		defaultConfiguration.resultsName = resultsName;
+		defaultConfiguration.outputStorageId = outputStorageId;
 		try {
-			evaluate(FactsFactory.getInstance(), parseQuery("?- subClassOf(?X, ?Y)."), new ArrayList<IVariable>(), defaultConfiguration);
+			evaluate(null, new ArrayList<IVariable>(), defaultConfiguration);
 		} catch (EvaluationException e) {
 			logger.error("evaluation exception", e);
+			return -1;
 		}
 
 	    return 0; 		
@@ -175,16 +205,33 @@ public class Main extends Configured implements Tool {
 
 		processUserArguments(gop.getRemainingArgs());
 		
-		Configuration hadoopConf = gop.getConfiguration();
-		setupJob(hadoopConf);
-		defaultConfiguration.hadoopConfiguration = hadoopConf;
+		Collection<String> expressions = createExpressions();
+		parser = new Parser();
+		StringBuffer buffer = new StringBuffer();
+
+		for (String expression : expressions) {
+			buffer.append(expression);
+		}
+
+		try {
+			parser.parse(buffer.toString());
+		} catch (ParserException e) {
+			logger.error("rules parser exception", e);
+			throw new RuntimeException("rules parser exception", e);
+		}
 		
+		rules = parser.getRules();
+
+		Configuration hadoopConf = gop.getConfiguration();
+		defaultConfiguration.hadoopConfiguration = hadoopConf;
+		defaultConfiguration.jobConf = setupJob(hadoopConf);
+
 		if (rdfImporter) {
 			return doRdfImport(defaultConfiguration);
 		} else if (ntripleImporter) {
 			return doNTripleImport(defaultConfiguration);
 		} else if (tester) {
-			return doTester();
+			return doTester(defaultConfiguration);
 		} else if (processer) {
 			return doProcess();
 		}
@@ -194,13 +241,33 @@ public class Main extends Configured implements Tool {
 
 	protected Collection<String> createExpressions() {
 		Collection<String> expressions = new ArrayList<String>();
-
-		expressions.add("subClassOf( ?X, ?Z ) :- subClassOf( ?X, ?Y ), subClassOf( ?Y, ?Z ).");
-		//expressions.add("type( ?X, ?Z ) :- type( ?X, ?Y ), subClassOf( ?Y, ?Z ).");
-
+		if (rulesType == RULES_TYPE.DATALOG) {
+			try {
+				BufferedReader br = new BufferedReader(new FileReader(new File(rulesFile)));
+				String line = null;
+				while ((line = br.readLine()) != null) {
+					logger.info(line);
+					expressions.add(line);
+				}
+			} catch (FileNotFoundException e) {
+				logger.error("the rules files can not be located", e);
+				throw new RuntimeException("the rules files can not be located", e);
+			} catch (IOException e) {
+				logger.error("io exception reading the rules files", e);
+				throw new RuntimeException("io exception reading the rules files", e);
+			}
+			//expressions.add("subClassOf( ?X, ?Z ) :- subClassOf( ?X, ?Y ), subClassOf( ?Y, ?Z ).");
+			//expressions.add("type( ?X, ?Z ) :- type( ?X, ?Y ), subClassOf( ?Y, ?Z ).");
+		}
+		
+		if (rulesType == RULES_TYPE.RIF) {
+			
+		}
+		
 		return expressions;
 	}
 
+	//parseQuery("?- subClassOf(?X, ?Y).")
 	private IQuery parseQuery(String query) {
 		Parser parser = new Parser();
 		try {
@@ -220,49 +287,25 @@ public class Main extends Configured implements Tool {
 	public Main() {
 		logger.info("start iris distributed reasoner ...");
 		
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		
 		org.apache.hadoop.conf.Configuration configuration = new org.apache.hadoop.conf.Configuration();
 		setConf(configuration);
 		
 		defaultConfiguration = new eu.larkc.iris.Configuration();
 		defaultConfiguration.evaluationStrategyFactory = new DistributedBottomUpEvaluationStrategyFactory(new DistributedNaiveEvaluatorFactory());
-		
-		Collection<String> expressions = createExpressions();
-		parser = new Parser();
-		StringBuffer buffer = new StringBuffer();
-
-		for (String expression : expressions) {
-			buffer.append(expression);
-		}
-
-		try {
-			parser.parse(buffer.toString());
-		} catch (ParserException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		rules = parser.getRules();
 	}
 	
 	public static void main(String[] args) throws Exception {
 		int ret = ToolRunner.run(new Main(), args); // calls your run() method. 
-	    System.exit(ret); 
+	    System.exit(ret);
 	}
 	
-	private void evaluate(FactsFactory facts, IQuery query, List<IVariable> outputVariables,
+	private void evaluate(IQuery query, List<IVariable> outputVariables,
 			eu.larkc.iris.Configuration configuration) throws EvaluationException {
 		//IRelation relation = evaluate(FactsFactory.getInstance("default"), "?- p(?X, ?Y).");
 		
 		IEvaluationStrategy strategy = configuration.evaluationStrategyFactory
 			.createEvaluator(rules, configuration); 
-
+		
 		IRelation relation = strategy.evaluateQuery(query, outputVariables);		
 	}
 	

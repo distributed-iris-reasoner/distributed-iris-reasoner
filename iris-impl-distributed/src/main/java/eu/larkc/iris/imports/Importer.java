@@ -38,7 +38,7 @@ public class Importer {
 	public void importFromRdf(Configuration configuration, String project, String storageId, String importName) {
 		Tap source = FactsFactory.getInstance(storageId).getFacts();
 		
-		Tap sink = new Hfs(source.getSourceFields(), project + "/imports/" + importName, true );
+		Tap sink = new Hfs(source.getSourceFields(), project + "/data/facts/" + importName, true );
 
 		Map<String, Tap> sources = new HashMap<String, Tap>();
 		sources.put("source", source);
@@ -84,7 +84,7 @@ public class Importer {
 	public void processNTriple(Configuration configuration, String inPath, String project, String importName) {
 		Tap source = new Hfs(new TextLine(), inPath);
 
-		Tap sink = new Hfs(Fields.ALL, project + "/imports/" + importName, true );
+		Tap sink = new Hfs(Fields.ALL, project + "/data/facts/" + importName, true );
 
 		int[] groups = {2, 1, 3};
 		RegexParser parser = new RegexParser(new Fields("predicate", "subject", "object"), "^(<[^\\s]+>)\\s*(<[^\\s]+>)\\s*([<\"].*[^\\s])\\s*.\\s*$", groups);

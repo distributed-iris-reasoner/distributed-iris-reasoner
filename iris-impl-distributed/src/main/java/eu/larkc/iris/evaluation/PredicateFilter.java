@@ -31,7 +31,7 @@ import eu.larkc.iris.storage.PredicateWritable;
  * @author Valer Roman
  */
 @SuppressWarnings("rawtypes")
-public class NTriplePredicateFilter extends BaseOperation implements Filter {
+public class PredicateFilter extends BaseOperation implements Filter {
 
 	/**
 	 * 
@@ -43,8 +43,8 @@ public class NTriplePredicateFilter extends BaseOperation implements Filter {
 	/**
 	 * @param expectedConstants Constants in a subgoal.
 	 */
-	public NTriplePredicateFilter(String predicateField, IPredicate predicate) {
-		this.mPredicateField = predicateField;
+	public PredicateFilter(IPredicate predicate) {
+		//this.mPredicateField = predicateField;
 		this.mPredicate = predicate;
 	}
 	
@@ -59,7 +59,7 @@ public class NTriplePredicateFilter extends BaseOperation implements Filter {
 		// filter out the current Tuple if values do not match specified constants
 		boolean remove = true;
 		
-		Comparable comparable = arguments.get(mPredicateField);
+		Comparable comparable = arguments.get(0);
 		if (comparable.equals(new PredicateWritable(mPredicate))) {
 			remove = false;
 		}
@@ -67,6 +67,6 @@ public class NTriplePredicateFilter extends BaseOperation implements Filter {
 		return remove;
 	}
 	
-	private String mPredicateField;
+	//private String mPredicateField;
 	private IPredicate mPredicate;
 }

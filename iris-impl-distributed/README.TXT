@@ -52,7 +52,7 @@ java.lang.NullPointerException
 Execution
 =========
 
-./bin/hadoop jar /home/valer/Projects/eu.larkc.reasoner/workspace/distributed-iris-reasoner/iris-impl-distributed/build/iris-impl-distributed-0.0.1.jar eu.larkc.iris.Main dbpedia -process
+./bin/hadoop jar /home/valer/Projects/eu.larkc.reasoner/workspace/distributed-iris-reasoner/iris-impl-distributed/build/iris-impl-distributed-0.0.1.jar eu.larkc.iris.Main dbpedia -process DATALOG ./rules.txt true subclassof
 ./bin/hadoop jar /home/valer/Projects/eu.larkc.reasoner/workspace/distributed-iris-reasoner/iris-impl-distributed/build/iris-impl-distributed-0.0.1.jar eu.larkc.iris.Main dbpedia -importNTriple /home/valer/Tasks/iris_distributed_reasoner/instance_types_en.nt instance-types
 ./bin/hadoop jar /home/valer/Projects/eu.larkc.reasoner/workspace/distributed-iris-reasoner/iris-impl-distributed/build/iris-impl-distributed-0.0.1.jar eu.larkc.iris.Main dbpedia -importRdf default ontology
 ./bin/hadoop jar /home/valer/Projects/eu.larkc.reasoner/workspace/distributed-iris-reasoner/iris-impl-distributed/build/iris-impl-distributed-0.0.1.jar eu.larkc.iris.Main dbpedia -test 

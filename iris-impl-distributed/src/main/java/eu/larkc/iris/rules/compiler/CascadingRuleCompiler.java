@@ -37,7 +37,6 @@ import org.deri.iris.api.terms.IConstructedTerm;
 import org.deri.iris.api.terms.ITerm;
 import org.deri.iris.api.terms.IVariable;
 import org.deri.iris.api.terms.concrete.IIri;
-import org.deri.iris.terms.concrete.Iri;
 import org.deri.iris.utils.TermMatchingAndSubstitution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,9 +57,8 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import eu.larkc.iris.Utils;
 import eu.larkc.iris.evaluation.ConstantFilter;
-import eu.larkc.iris.evaluation.NTriplePredicateFilter;
+import eu.larkc.iris.evaluation.PredicateFilter;
 import eu.larkc.iris.storage.FieldsVariablesMapping;
-import eu.larkc.iris.storage.IRIWritable;
 import eu.larkc.iris.storage.PredicateWritable;
 
 /**
@@ -162,27 +160,17 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 				processBuiltin((IBuiltinAtom) atom);
 			} else {
 				// construct pipe assembly, one pipe per atom
-				//IPredicate predicate = atom.getPredicate();
-
-				// IRelation relation = mFacts.get(predicate);
-				// ITuple viewCriteria = atom.getTuple();
-
+				/**/
 				Pipe pipe = new Pipe(atom.toString(), mainPipe);
-				Fields atomFields = Utils.getFieldsForAtom(fieldsVariablesMapping, atom);
-				//int[] groups = {2, 1, 3};
-				//RegexParser parser = new RegexParser(atomFields, "^(<[^\\s]+>)\\s*(<[^\\s]+>)\\s*([<\"].*[^\\s])\\s*.\\s*$", groups);
-				//pipe = new Each(pipe, new Fields("line"), parser);
-				//pipe = new Each(pipe, Fields.ALL, new Identity(atomFields));
-				//pipe = new Each(pipe, Utils.getFieldsForAtom(fieldsVariablesMapping, atom), new PredicateFilter(fieldsVariablesMapping.getField(atom, atom.getPredicate()), atom.getPredicate()));
-				pipe = new Each(pipe, Fields.ALL, new Identity(atomFields));
-				pipe = new Each(pipe, atomFields, new NTriplePredicateFilter(fieldsVariablesMapping.getField(atom, atom.getPredicate()), atom.getPredicate()));
+				pipe = new Each(pipe, Fields.ALL, new PredicateFilter(atom.getPredicate()));
 				
-				ITuple tuple = atom.getTuple();
-				// filter for constants
-				pipe = filterConstants(pipe, tuple);
-				// at this point the basic information for a subgoal has been
-				// process and filters for constants are completely set up, only
-				// joins left
+				pipe = filterConstants(pipe, atom.getTuple());
+				/**/
+				//Pipe pipe = AtomPipeFactory.getInstance(mainPipe).getPipe(atom);
+				
+				Fields atomFields = Utils.getFieldsForAtom(fieldsVariablesMapping, atom);
+				pipe = new Each(pipe, Fields.ALL, new Identity(atomFields));
+				
 				subGoals.put(atom, pipe);
 			}
 		}
@@ -247,8 +235,8 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 			//RegexParser parser = new RegexParser(headFields, "^(<[^\\s]+>)\\s*(<[^\\s]+>)\\s*([<\"].*[^\\s])\\s*.\\s*$", groups);
 			//headPipe = new Each(headPipe, new Fields("line"), parser);
 			
+			headPipe = new Each(headPipe, Fields.ALL, new PredicateFilter(head.getPredicate()));
 			headPipe = new Each(headPipe, Fields.ALL, new Identity(headFields));
-			headPipe = new Each(headPipe, headFields, new NTriplePredicateFilter(fieldsVariablesMapping.getField(head, head.getPredicate()), head.getPredicate()));
 			
 			leftJoin = new CoGroup(lhsJoin.getPipe(), lhsFields, headPipe, rhsFields, new LeftJoin());
 			leftJoin = new Each( leftJoin, rhsFields, new FilterNotNull());	// outgoing -> "keepField"
@@ -362,7 +350,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 
 			// not a variable, we filter the tuples
 			if (term.isGround()) {
-				if (term instanceof Iri) {
+				if (term instanceof IIri) {
 					constantTerms.put(i + 1, (IIri) term); //added one because of the predicate field
 				} else {
 					constantTerms.put(i + 1, term.getValue()); //added one because of the predicate field
@@ -425,7 +413,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		//Map<String, Tap> sources = new HashMap<String, Tap>();
 		//Map<String, Tap> sinks = new HashMap<String, Tap>();
 		
-		String input = mConfiguration.project;
+		String input = mConfiguration.project + "/data/";
 		Tap source = new Hfs(Fields.ALL, input, true );
 		//sources.put("main", source);
 

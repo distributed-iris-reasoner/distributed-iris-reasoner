@@ -25,6 +25,8 @@ package eu.larkc.iris;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.hadoop.mapred.JobConf;
+
 import eu.larkc.iris.evaluation.IDistributedEvaluationStrategyFactory;
 import eu.larkc.iris.evaluation.bottomup.DistributedBottomUpEvaluationStrategyFactory;
 import eu.larkc.iris.evaluation.bottomup.naive.DistributedNaiveEvaluatorFactory;
@@ -36,8 +38,12 @@ public class Configuration extends org.deri.iris.Configuration
 {
 	
 	public String project;
-	
+	public boolean keepResults = false;
+	public String resultsName;
+	public String outputStorageId;
+
 	public org.apache.hadoop.conf.Configuration hadoopConfiguration = null;
+	public JobConf jobConf = null;
 	
 	public Map<Object, Object> flowProperties = new HashMap<Object, Object>();
 	

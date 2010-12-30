@@ -13,24 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package eu.larkc.iris.evaluation;
 
-package eu.larkc.iris.evaluation.bottomup;
+/**
+ * 
+ * Maintains information about the evaluation context
+ * For now it stores the iteration number through the set of rules evaluations and the number of rule evaluated in the rules list
+ * 
+ * @author vroman@softgress.com
+ *
+ */
+public class EvaluationContext {
 
-import java.util.List;
-
-import org.deri.iris.EvaluationException;
-
-import eu.larkc.iris.rules.compiler.IDistributedCompiledRule;
-
-public interface IDistributedRuleEvaluator {
-
-	/**
-	 * Evaluate rules.
-	 * @param rules The collection of compiled rules.
-	 * @param facts Where to store the newly deduced tuples.
-	 * @param configuration The knowledge-base configuration object.
-	 * @throws EvaluationException 
-	 */
-	void evaluateRules( List<IDistributedCompiledRule> rules, eu.larkc.iris.Configuration configuration ) throws EvaluationException;
-
+	private int iterationNumber;
+	private int ruleNumber;
+	
+	public EvaluationContext(int iterationNumber, int ruleNumber) {
+		this.iterationNumber = iterationNumber;
+		this.ruleNumber = ruleNumber;
+	}
+	
+	public int getIterationNumber() {
+		return iterationNumber;
+	}
+	public int getRuleNumber() {
+		return ruleNumber;
+	}
+	
 }

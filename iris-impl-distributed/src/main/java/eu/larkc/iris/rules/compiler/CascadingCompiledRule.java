@@ -21,6 +21,8 @@ import org.deri.iris.api.basics.IPredicate;
 import org.deri.iris.facts.IFacts;
 import org.deri.iris.storage.IRelation;
 
+import eu.larkc.iris.evaluation.EvaluationContext;
+
 /**
  * CascadingCompiledRule encapsulates a rule that has been translated from the IRIS internal representation to a suitable cascading workflow.
  * This class also contains the basic logic that triggers a map-reduce computation, which is then simply called by an arbitrary IRuleEvaluator implementation
@@ -40,10 +42,10 @@ public class CascadingCompiledRule implements IDistributedCompiledRule {
 
 	/*
 	 * (non-Javadoc)
-	 * @see eu.larkc.iris.rules.compiler.IDistributedCompiledRule#evaluate()
+	 * @see eu.larkc.iris.rules.compiler.IDistributedCompiledRule#evaluate(eu.larkc.iris.evaluation.EvaluationContext)
 	 */
 	@Override
-	public boolean evaluate() throws EvaluationException {
+	public boolean evaluate(EvaluationContext evaluationContext) throws EvaluationException {
 		
 		//start returns immediately		
 		if(flowAssembly == null) {
@@ -63,7 +65,7 @@ public class CascadingCompiledRule implements IDistributedCompiledRule {
 		
 		//return mFlowAssembly.hasNewInferences(flow);
 		
-		flowAssembly.evaluate();
+		flowAssembly.evaluate(evaluationContext);
 		
 		return flowAssembly.hasNewInferences();
 	}

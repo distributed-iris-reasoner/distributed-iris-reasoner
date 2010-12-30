@@ -40,7 +40,6 @@ import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.MultiMapReducePlanner;
 import cascading.operation.Identity;
-import cascading.operation.text.FieldJoiner;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
 import cascading.tap.Hfs;

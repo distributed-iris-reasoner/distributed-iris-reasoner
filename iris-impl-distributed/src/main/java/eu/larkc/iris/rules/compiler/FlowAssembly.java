@@ -23,16 +23,24 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.deri.iris.EvaluationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.pipe.Pipe;
 import cascading.tap.Hfs;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
+import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import eu.larkc.iris.Configuration;
+import eu.larkc.iris.evaluation.EvaluationContext;
 
 /**
  * @author valer.roman@softgress.com
@@ -40,6 +48,10 @@ import eu.larkc.iris.Configuration;
  */
 public class FlowAssembly {
 
+	private static final Logger logger = LoggerFactory.getLogger(FlowAssembly.class);
+	
+	private static final String RESULT_TAIL = "resultTail";
+	
 	private Configuration mConfiguration;
 	
 	private Tap source;
@@ -55,13 +67,11 @@ public class FlowAssembly {
 		this.pipes = pipes;
 	}
 	
-	private Flow createFlow(String flowName) {
-
+	private Flow createFlow(String flowName, String output) {
 		Map<String, Tap> sinks = new HashMap<String, Tap>();
 		sinks.putAll(this.sinks);
-		String output = mConfiguration.project + "/results/result" + System.currentTimeMillis();
 		Tap headSink = new Hfs(Fields.ALL, output, true );
-		sinks.put("resultTail", headSink);
+		sinks.put(RESULT_TAIL, headSink);
 		
 		Flow flow = new FlowConnector(mConfiguration.flowProperties).connect(flowName, source, sinks, pipes);
 		
@@ -72,25 +82,42 @@ public class FlowAssembly {
 		return flow;
 	}
 	
-	public void evaluate() {
-		String flowName = "flow" + System.currentTimeMillis();
-		flow = createFlow(flowName);
+	public void evaluate(EvaluationContext evaluationContext) {
+		String flowIdentificator = "_" + evaluationContext.getIterationNumber() + "_" + evaluationContext.getRuleNumber();
+		String flowName = "flow" + flowIdentificator;
+		String resultName = mConfiguration.keepResults ? mConfiguration.resultsName : "inference";
+		String output = mConfiguration.project + "/tmp/inferences/" + resultName + flowIdentificator;
+		
+		flow = createFlow(flowName, output);
 		flow.complete();
+		
+		String outputPath = mConfiguration.project + "/data/inferences/tmp/" + mConfiguration.resultsName + flowIdentificator;
+		try {
+			TupleEntryIterator iterator = flow.openSink(RESULT_TAIL);
+			Hfs hfs = new Hfs(Fields.ALL, outputPath);
+			TupleEntryCollector tec = hfs.openForWrite(mConfiguration.jobConf);
+			hasNewInferences = iterator.hasNext();
+			while(iterator.hasNext()) {
+				TupleEntry te = iterator.next();
+				//logger.info("add : " + te.getTuple());
+				tec.add(te);
+			}
+			tec.close();
+			FileSystem fs = FileSystem.get(mConfiguration.hadoopConfiguration);
+			fs.delete(new Path(output), true);
+		} catch (IOException e) {
+			logger.error("io exception", e);
+			throw new RuntimeException("io exception", e);
+		}
 	}
+	
+	private boolean hasNewInferences = true;
 	
 	/*
 	 * Check if new inferences have been generated with the last evaluation
 	 */
 	public boolean hasNewInferences() throws EvaluationException {
-		try {
-			TupleEntryIterator iterator = flow.openSink("resultTail");
-			while (iterator.hasNext()) {
-				return true;
-			}
-		} catch (IOException e) {
-			throw new EvaluationException("unable to open result tail");
-		}
-		return false;
+		return hasNewInferences;
 	}
 
 	public TupleEntryIterator openSink() throws IOException {
