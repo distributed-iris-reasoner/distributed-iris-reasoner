@@ -15,11 +15,7 @@
  */
 package eu.larkc.iris.rules.compiler;
 
-import org.deri.iris.api.basics.IAtom;
-import org.deri.iris.api.terms.ITerm;
-
 import cascading.pipe.Pipe;
-import eu.larkc.iris.storage.FieldsVariablesMapping;
 
 /**
  * @author valer
@@ -30,7 +26,7 @@ public class PipeFielded {
 	private Pipe pipe;
 	private FieldsList fields;
 	
-	public PipeFielded(FieldsVariablesMapping fieldsVariablesMapping, Pipe pipe, FieldsList fields) {
+	public PipeFielded(Pipe pipe, FieldsList fields) {
 		this.pipe = pipe;
 		this.fields = fields;
 	}

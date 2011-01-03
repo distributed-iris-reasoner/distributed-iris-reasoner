@@ -185,7 +185,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 * Remove unwanted fields from the join output fields (predicates, diuplicated variables)
 	 */
 	@SuppressWarnings("rawtypes")
-	private FieldsList fieldsToKeep(FieldsVariablesMapping fieldsVariablesMapping, FieldsList outputFields) {
+	private FieldsList fieldsToKeep(FieldsList outputFields) {
 		FieldsList keepFieldsList = new FieldsList();
 		Set<Comparable> fieldTerms = new HashSet<Comparable>();
 		for (String field : outputFields) {
@@ -206,7 +206,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	/*
 	 * Creates the output fields of the join based on the left join's fields and the new atom to be joined fields
 	 */
-	private FieldsList composeOutputFields(FieldsVariablesMapping fieldsVariablesMapping, FieldsList initialFields, IAtom atom) {
+	private FieldsList composeOutputFields(FieldsList initialFields, IAtom atom) {
 		FieldsList outputFieldsList = new FieldsList(initialFields);
 		outputFieldsList.add(fieldsVariablesMapping.getField(atom, atom.getPredicate()));
 		for (int i = 0; i < atom.getTuple().size(); i++) {
@@ -217,7 +217,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		return outputFieldsList;
 	}
 	
-	private Pipe eliminateOldInferencedData(FieldsVariablesMapping fieldsVariablesMapping, IAtom head, PipeFielded lhsJoin) {
+	private Pipe eliminateOldInferencedData(PipeFielded lhsJoin) {
 		if (lhsJoin == null) {
 			return null;
 		}
@@ -278,14 +278,14 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 			ListIterator<SubGoal> subgoalsIterator) {
 		Pipe leftJoin = null;
 		if (!leftJoinApplied) {
-			leftJoin = eliminateOldInferencedData(fieldsVariablesMapping, head, lhsJoin);
+			leftJoin = eliminateOldInferencedData(lhsJoin);
 			leftJoinApplied = leftJoin != null;
 		}
 		
 		//if not subgoals left return the last join
 		if (!subgoalsIterator.hasNext()) {
 			if (leftJoin != null) {
-				return new PipeFielded(fieldsVariablesMapping, leftJoin, lhsJoin.getFields());
+				return new PipeFielded(leftJoin, lhsJoin.getFields());
 			}
 			return lhsJoin;
 		}
@@ -295,7 +295,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		
 		//first call, create pipe for the first subgoal, nothing to join
 		if (lhsJoin == null) {
-			PipeFielded pipeFielded = new PipeFielded(fieldsVariablesMapping, pipe, Utils.getFieldsFromAtom(fieldsVariablesMapping, atom));
+			PipeFielded pipeFielded = new PipeFielded(pipe, Utils.getFieldsFromAtom(fieldsVariablesMapping, atom));
 			return buildJoin(leftJoinApplied, pipeFielded, subgoalsIterator);
 		}
 
@@ -311,13 +311,13 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		Pipe join = new CoGroup(lhsPipe, lhsFields, pipe, rhsFields, new InnerJoin());
 		
 		//compose the output fields list
-		FieldsList outputFieldsList = composeOutputFields(fieldsVariablesMapping, lhsJoin.getFields(), atom);
+		FieldsList outputFieldsList = composeOutputFields(lhsJoin.getFields(), atom);
 		
-		FieldsList keepFieldsList = fieldsToKeep(fieldsVariablesMapping, outputFieldsList);
+		FieldsList keepFieldsList = fieldsToKeep(outputFieldsList);
 		Fields keepFields = outputFieldsList.getFields(keepFieldsList);
 		join = new Each( join, keepFields, new Identity(keepFields));	// outgoing -> "keepField"
 		
-		PipeFielded pipeFielded = new PipeFielded(fieldsVariablesMapping, join, keepFieldsList);
+		PipeFielded pipeFielded = new PipeFielded(join, keepFieldsList);
 		return buildJoin(leftJoinApplied, pipeFielded, subgoalsIterator);
 	}
 	
