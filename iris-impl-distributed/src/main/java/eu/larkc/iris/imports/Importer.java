@@ -87,7 +87,7 @@ public class Importer {
 		Tap sink = new Hfs(Fields.ALL, project + "/data/facts/" + importName, true );
 
 		int[] groups = {2, 1, 3};
-		RegexParser parser = new RegexParser(new Fields("predicate", "subject", "object"), "^(<[^\\s]+>)\\s*(<[^\\s]+>)\\s*([<\"].*[^\\s])\\s*.\\s*$", groups);
+		RegexParser parser = new RegexParser(Fields.UNKNOWN, "^(<[^\\s]+>)\\s*(<[^\\s]+>)\\s*([<\"].*[^\\s])\\s*.\\s*$", groups);
 		Pipe sourcePipe = new Each("sourcePipe", new Fields("line"), parser);
 		
 		sourcePipe = new Each(sourcePipe, Fields.ALL, new TextImporterFunction());

@@ -65,9 +65,7 @@ public class CascadingCompiledRule implements IDistributedCompiledRule {
 		
 		//return mFlowAssembly.hasNewInferences(flow);
 		
-		flowAssembly.evaluate(evaluationContext);
-		
-		return flowAssembly.hasNewInferences();
+		return flowAssembly.evaluate(evaluationContext);
 	}
 	
 	/*

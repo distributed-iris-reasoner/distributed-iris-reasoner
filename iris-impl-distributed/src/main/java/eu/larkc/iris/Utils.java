@@ -9,6 +9,7 @@ import org.deri.iris.api.terms.ITerm;
 import org.deri.iris.api.terms.IVariable;
 
 import cascading.tuple.Fields;
+import eu.larkc.iris.rules.compiler.FieldsList;
 import eu.larkc.iris.storage.FieldsVariablesMapping;
 
 /**
@@ -44,4 +45,16 @@ public class Utils {
 		}
 		return sourceFields;
 	}
+	
+	public static FieldsList getFieldsFromAtom(FieldsVariablesMapping fieldsVariablesMapping, IAtom atom) {
+		FieldsList alhsFields = new FieldsList();
+		alhsFields.add(fieldsVariablesMapping.getField(atom, atom.getPredicate()));
+		for (int i = 0; i < atom.getTuple().size(); i++) {
+			ITerm term = atom.getTuple().get(i);
+			String field = fieldsVariablesMapping.getField(atom, term);
+			alhsFields.add(field);
+		}
+		return alhsFields;
+	}
+
 }

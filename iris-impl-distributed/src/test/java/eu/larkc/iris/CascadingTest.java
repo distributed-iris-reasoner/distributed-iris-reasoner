@@ -108,15 +108,15 @@ public abstract class CascadingTest extends ProgramEvaluationTest {
 		if (jobConf != null)
 			return;
 
+		Configuration conf = new Configuration();
+		defaultConfiguration.hadoopConfiguration = conf;
+
 	    if( !enableCluster ) {
 	    	jobConf = new JobConf();
 	    } else {
 			System.setProperty("test.build.data", "build");
 			new File("build/test/log").mkdirs();
 			System.setProperty("hadoop.log.dir", "build/test/log");
-			Configuration conf = new Configuration();
-
-			defaultConfiguration.hadoopConfiguration = conf;
 			
 			dfs = new MiniDFSCluster(conf, 1, true, null);
 			fileSys = dfs.getFileSystem();
@@ -140,6 +140,8 @@ public abstract class CascadingTest extends ProgramEvaluationTest {
 		Flow.setJobPollingInterval(defaultConfiguration.flowProperties, 500); // should speed up tests
 		FlowConnector.setDebugLevel(defaultConfiguration.flowProperties, DebugLevel.VERBOSE);
 		MultiMapReducePlanner.setJobConf( defaultConfiguration.flowProperties, jobConf );
+
+		defaultConfiguration.jobConf = jobConf;
 		
 		FactsFactory.PROPERTIES = "/facts-configuration-test.properties";
 		

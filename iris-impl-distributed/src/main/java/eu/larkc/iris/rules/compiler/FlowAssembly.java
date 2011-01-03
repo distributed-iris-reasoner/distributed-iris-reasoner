@@ -25,7 +25,6 @@ import java.util.Map;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.deri.iris.EvaluationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +32,6 @@ import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.pipe.Pipe;
 import cascading.tap.Hfs;
-import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
@@ -55,22 +53,22 @@ public class FlowAssembly {
 	private Configuration mConfiguration;
 	
 	private Tap source;
-	private Map<String, Tap> sinks;
+	private Fields sinkFields;
 	private Pipe[] pipes;
 	
 	private Flow flow = null;
+	private String path = null;
 	
-	public FlowAssembly (Configuration configuration, Tap source, Map<String, Tap> sinks, Pipe... pipes) {
+	public FlowAssembly (Configuration configuration, Tap source, Fields sinkFields, Pipe... pipes) {
 		this.mConfiguration = configuration;
 		this.source = source;
-		this.sinks = sinks;
+		this.sinkFields = sinkFields;
 		this.pipes = pipes;
 	}
 	
 	private Flow createFlow(String flowName, String output) {
 		Map<String, Tap> sinks = new HashMap<String, Tap>();
-		sinks.putAll(this.sinks);
-		Tap headSink = new Hfs(Fields.ALL, output, true );
+		Tap headSink = new Hfs(sinkFields, output, true );
 		sinks.put(RESULT_TAIL, headSink);
 		
 		Flow flow = new FlowConnector(mConfiguration.flowProperties).connect(flowName, source, sinks, pipes);
@@ -82,7 +80,9 @@ public class FlowAssembly {
 		return flow;
 	}
 	
-	public void evaluate(EvaluationContext evaluationContext) {
+	public boolean evaluate(EvaluationContext evaluationContext) {
+		boolean hasNewInferences = false;
+		
 		String flowIdentificator = "_" + evaluationContext.getIterationNumber() + "_" + evaluationContext.getRuleNumber();
 		String flowName = "flow" + flowIdentificator;
 		String resultName = mConfiguration.keepResults ? mConfiguration.resultsName : "inference";
@@ -91,13 +91,15 @@ public class FlowAssembly {
 		flow = createFlow(flowName, output);
 		flow.complete();
 		
-		String outputPath = mConfiguration.project + "/data/inferences/tmp/" + mConfiguration.resultsName + flowIdentificator;
+		path = mConfiguration.project + "/data/inferences/tmp/" + mConfiguration.resultsName + flowIdentificator;
 		try {
 			TupleEntryIterator iterator = flow.openSink(RESULT_TAIL);
-			Hfs hfs = new Hfs(Fields.ALL, outputPath);
+			Hfs hfs = new Hfs(Fields.ALL, path);
 			TupleEntryCollector tec = hfs.openForWrite(mConfiguration.jobConf);
-			hasNewInferences = iterator.hasNext();
 			while(iterator.hasNext()) {
+				if (!hasNewInferences) {
+					hasNewInferences = true;
+				}
 				TupleEntry te = iterator.next();
 				//logger.info("add : " + te.getTuple());
 				tec.add(te);
@@ -109,21 +111,14 @@ public class FlowAssembly {
 			logger.error("io exception", e);
 			throw new RuntimeException("io exception", e);
 		}
-	}
-	
-	private boolean hasNewInferences = true;
-	
-	/*
-	 * Check if new inferences have been generated with the last evaluation
-	 */
-	public boolean hasNewInferences() throws EvaluationException {
 		return hasNewInferences;
 	}
-
+	
 	public TupleEntryIterator openSink() throws IOException {
 		if (flow == null) {
 			return null;
 		}
-		return flow.openSink();
+		Hfs hfs = new Hfs(Fields.ALL, path);
+		return hfs.openForRead(mConfiguration.jobConf);
 	}
 }

@@ -30,9 +30,9 @@
   <property name="hadoop.lib" location="${hadoop.home}/lib"/>
 
   <!-- assumes Cascading shares the same parent directory, change if necessary -->
-  <property name="cascading.home" location="${softsdir}/cascading-1.1.2-hadoop-0.19.2+"/>
+  <property name="cascading.home" location="${softsdir}/cascading-1.2.0-hadoop-0.19.2+"/>
   <property file="${cascading.home}/version.properties"/>
-  <property name="cascading.release.version" value="1.1.2"/>
+  <property name="cascading.release.version" value="1.2.0"/>
   <property name="cascading.filename.core" value="cascading-core-${cascading.release.version}.jar"/>
   <property name="cascading.filename.xml" value="cascading-xml-${cascading.release.version}.jar"/>
   <property name="cascading.filename.test" value="cascading-test-${cascading.release.version}.jar"/>

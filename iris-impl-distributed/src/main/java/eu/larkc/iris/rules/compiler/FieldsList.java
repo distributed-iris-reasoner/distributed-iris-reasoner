@@ -16,6 +16,7 @@
 package eu.larkc.iris.rules.compiler;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import cascading.tuple.Fields;
 
@@ -36,11 +37,32 @@ public class FieldsList extends ArrayList<String> {
 		this.addAll(fieldsList);
 	}
 	
-	public Fields getFields() {
+	public Fields getFieldsNames() {
 		Fields fields = new Fields();
 		for (String field : this) {
 			fields = fields.append(new Fields(field));
 		}
 		return fields;
 	}
+	
+	public Fields getFields(FieldsList fieldsList) {
+		List<Integer> indexes = new ArrayList<Integer>();
+		for (String aField : fieldsList) {
+			for (String field : this) {
+				if (field.equals(aField)) {
+					indexes.add(this.indexOf(field));
+				}
+			}
+		}
+		return new Fields(indexes.toArray(new Integer[0]));
+	}
+	
+	public Fields getFields() {
+		Integer[] indexes = new Integer[this.size()];
+		for (int i = 0 ; i < this.size(); i++) {
+			indexes[i] = i;
+		}
+		return new Fields(indexes);
+	}
+
 }
