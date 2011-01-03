@@ -19,10 +19,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang.NotImplementedException;
@@ -137,7 +136,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 */
 	protected PipeFielded compileBody(FieldsVariablesMapping fieldsVariablesMapping, IAtom head, Collection<ILiteral> bodyLiterals) {
 		List<ILiteral> literals = new ArrayList<ILiteral>(bodyLiterals);
-		Map<IAtom, Pipe> subGoals = new HashMap<IAtom, Pipe>();
+		List<SubGoal> subGoals = new ArrayList<SubGoal>();
 
 		mainPipe = new Pipe("main");
 		
@@ -172,7 +171,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 				//Fields atomFields = Utils.getFieldsForAtom(fieldsVariablesMapping, atom);
 				//pipe = new Each(pipe, Fields.ALL, new Identity(atomFields));
 				
-				subGoals.put(atom, pipe);
+				subGoals.add(new SubGoal(atom, pipe));
 			}
 		}
 
@@ -275,7 +274,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 * @return
 	 */
 	public PipeFielded buildJoin(FieldsVariablesMapping fieldsVariablesMapping, IAtom head, boolean leftJoinApplied, PipeFielded lhsJoin, 
-			Iterator<Entry<IAtom, Pipe>> subgoalsIterator) {
+			ListIterator<SubGoal> subgoalsIterator) {
 		Pipe leftJoin = null;
 		if (!leftJoinApplied) {
 			leftJoin = eliminateOldInferencedData(fieldsVariablesMapping, head, lhsJoin);
@@ -289,9 +288,9 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 			}
 			return lhsJoin;
 		}
-		Entry<IAtom, Pipe> subgoal = subgoalsIterator.next();
-		IAtom atom = subgoal.getKey();
-		Pipe pipe = subgoal.getValue();
+		SubGoal subgoal = subgoalsIterator.next();
+		IAtom atom = subgoal.getAtom();
+		Pipe pipe = subgoal.getPipe();
 		
 		//first call, create pipe for the first subgoal, nothing to join
 		if (lhsJoin == null) {
@@ -314,7 +313,8 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		FieldsList outputFieldsList = composeOutputFields(fieldsVariablesMapping, lhsJoin.getFields(), atom);
 		
 		FieldsList keepFieldsList = fieldsToKeep(fieldsVariablesMapping, outputFieldsList);
-		join = new Each( join, outputFieldsList.getFields(keepFieldsList), new Identity(Fields.UNKNOWN));	// outgoing -> "keepField"
+		Fields keepFields = outputFieldsList.getFields(keepFieldsList);
+		join = new Each( join, keepFields, new Identity(keepFields));	// outgoing -> "keepField"
 		
 		PipeFielded pipeFielded = new PipeFielded(fieldsVariablesMapping, join, keepFieldsList);
 		return buildJoin(fieldsVariablesMapping, head, leftJoinApplied, pipeFielded, subgoalsIterator);
@@ -344,14 +344,14 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 * @param subGoals
 	 * @return
 	 */
-	protected PipeFielded setupJoins(FieldsVariablesMapping fieldsVariablesMapping, IAtom head, Map<IAtom, Pipe> subGoals) {
+	protected PipeFielded setupJoins(FieldsVariablesMapping fieldsVariablesMapping, IAtom head, List<SubGoal> subGoals) {
 
 		if (subGoals.isEmpty()) {
 			throw new IllegalArgumentException(
 				"Cannot setup joins with no subgoals.");			
 		}
 
-		return buildJoin(fieldsVariablesMapping, head, false, null, subGoals.entrySet().iterator());
+		return buildJoin(fieldsVariablesMapping, head, false, null, subGoals.listIterator());
 	}
 
 	/**
