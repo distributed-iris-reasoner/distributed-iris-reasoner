@@ -61,7 +61,7 @@ public class InitAndStartupTest extends CascadingTest {
 			new Importer().importFromFile(defaultConfiguration, defaultConfiguration.project, this.getClass().getResource("/input/default.nt").getPath(), "import");
 		} else {
 			new Importer().processNTriple(defaultConfiguration, this.getClass().getResource("/input/default.nt").getPath(), defaultConfiguration.project, "import");
-		}		
+		}
 	}
 
 	@Override
@@ -69,9 +69,9 @@ public class InitAndStartupTest extends CascadingTest {
 		super.tearDown();
 		
 		if (enableCluster) {
-			fileSys.delete(new Path("test/results"), true);
+			fileSys.delete(new Path("test/data/inferences"), true);
 		} else {
-			FileUtil.fullyDelete(new File("test/results"));
+			FileUtil.fullyDelete(new File("test/data/inferences"));
 		}
 	}
 

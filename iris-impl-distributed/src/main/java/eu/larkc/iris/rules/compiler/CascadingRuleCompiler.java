@@ -78,6 +78,9 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 */
 	private static final String HEAD_PREDICATE_FIELD = "HPF";
 
+	private FieldsVariablesMapping fieldsVariablesMapping = new FieldsVariablesMapping();
+	private IAtom head;
+	
 	/**
 	 * Sets up a CascadingRuleCompiler with a specific configuration, taking
 	 * relevant datasources for rule execution into account.
@@ -100,18 +103,16 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 */
 	public IDistributedCompiledRule compile(IRule rule) throws EvaluationException {
 
-		FieldsVariablesMapping fieldsVariableMapping = new FieldsVariablesMapping();
-
 		List<ILiteral> body = rule.getBody();
-		IAtom head = rule.getHead().get(0).getAtom();
-		fieldsVariableMapping.loadAtom(head); //load also the heads fields, to do the left outer join
-		PipeFielded bodyPipe = compileBody(fieldsVariableMapping, head, body);
+		head = rule.getHead().get(0).getAtom();
+		fieldsVariablesMapping.loadAtom(head); //load also the heads fields, to do the left outer join
+		PipeFielded bodyPipe = compileBody(body);
 		
 		// tell the planner remove all Debug operations
 		//Properties properties = new Properties();
 		//FlowConnector.setDebugLevel(properties, DebugLevel.NONE);
 
-		FlowAssembly compiledCascadingRuleFlowAssembly = attachTaps(fieldsVariableMapping, bodyPipe, rule);
+		FlowAssembly compiledCascadingRuleFlowAssembly = attachTaps(bodyPipe, rule);
 
 		IPredicate headPredicate = head.getPredicate();
 
@@ -134,7 +135,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 * @param bodyLiterals
 	 * @return
 	 */
-	protected PipeFielded compileBody(FieldsVariablesMapping fieldsVariablesMapping, IAtom head, Collection<ILiteral> bodyLiterals) {
+	protected PipeFielded compileBody(Collection<ILiteral> bodyLiterals) {
 		List<ILiteral> literals = new ArrayList<ILiteral>(bodyLiterals);
 		List<SubGoal> subGoals = new ArrayList<SubGoal>();
 
@@ -175,7 +176,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 			}
 		}
 
-		result = setupJoins(fieldsVariablesMapping, head, subGoals);
+		result = setupJoins(subGoals);
 
 		return result;
 	}
@@ -273,7 +274,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 * @param subgoalsIterator
 	 * @return
 	 */
-	public PipeFielded buildJoin(FieldsVariablesMapping fieldsVariablesMapping, IAtom head, boolean leftJoinApplied, PipeFielded lhsJoin, 
+	public PipeFielded buildJoin(boolean leftJoinApplied, PipeFielded lhsJoin, 
 			ListIterator<SubGoal> subgoalsIterator) {
 		Pipe leftJoin = null;
 		if (!leftJoinApplied) {
@@ -295,7 +296,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		//first call, create pipe for the first subgoal, nothing to join
 		if (lhsJoin == null) {
 			PipeFielded pipeFielded = new PipeFielded(fieldsVariablesMapping, pipe, Utils.getFieldsFromAtom(fieldsVariablesMapping, atom));
-			return buildJoin(fieldsVariablesMapping, head, leftJoinApplied, pipeFielded, subgoalsIterator);
+			return buildJoin(leftJoinApplied, pipeFielded, subgoalsIterator);
 		}
 
 		FieldsList lhsFieldsList = lhsJoin.getFields();
@@ -317,7 +318,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		join = new Each( join, keepFields, new Identity(keepFields));	// outgoing -> "keepField"
 		
 		PipeFielded pipeFielded = new PipeFielded(fieldsVariablesMapping, join, keepFieldsList);
-		return buildJoin(fieldsVariablesMapping, head, leftJoinApplied, pipeFielded, subgoalsIterator);
+		return buildJoin(leftJoinApplied, pipeFielded, subgoalsIterator);
 	}
 	
 	/**
@@ -344,14 +345,14 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 * @param subGoals
 	 * @return
 	 */
-	protected PipeFielded setupJoins(FieldsVariablesMapping fieldsVariablesMapping, IAtom head, List<SubGoal> subGoals) {
+	protected PipeFielded setupJoins(List<SubGoal> subGoals) {
 
 		if (subGoals.isEmpty()) {
 			throw new IllegalArgumentException(
 				"Cannot setup joins with no subgoals.");			
 		}
 
-		return buildJoin(fieldsVariablesMapping, head, false, null, subGoals.listIterator());
+		return buildJoin(false, null, subGoals.listIterator());
 	}
 
 	/**
@@ -427,7 +428,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 * @param originalRule
 	 * @return
 	 */
-	protected FlowAssembly attachTaps(FieldsVariablesMapping fieldsVariablesMapping, PipeFielded rulePipeFielded, IRule originalRule) {
+	protected FlowAssembly attachTaps(PipeFielded rulePipeFielded, IRule originalRule) {
 
 		Pipe rulePipe = rulePipeFielded.getPipe();
 		
