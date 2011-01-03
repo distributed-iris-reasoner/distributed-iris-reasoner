@@ -24,19 +24,19 @@ import cascading.pipe.Pipe;
 public class PipeFielded {
 
 	private Pipe pipe;
-	private FieldsList fields;
+	private FieldsList fieldsList;
 	
-	public PipeFielded(Pipe pipe, FieldsList fields) {
+	public PipeFielded(Pipe pipe, FieldsList fieldsList) {
 		this.pipe = pipe;
-		this.fields = fields;
+		this.fieldsList = fieldsList;
 	}
 
 	public Pipe getPipe() {
 		return pipe;
 	}
 
-	public FieldsList getFields() {
-		return fields;
+	public FieldsList getFieldsList() {
+		return fieldsList;
 	}
 	
 }

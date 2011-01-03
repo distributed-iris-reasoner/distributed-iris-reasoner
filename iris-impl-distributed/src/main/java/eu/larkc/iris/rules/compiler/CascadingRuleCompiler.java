@@ -222,7 +222,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 			return null;
 		}
 		// check whether all head's variable fields are in the stream, do the outer join if so
-		FieldsList lhsFieldsList = lhsJoin.getFields();
+		FieldsList lhsFieldsList = lhsJoin.getFieldsList();
 		FieldsList identifiedHeadFieldsList = identifyHeadVariableFields(fieldsVariablesMapping, head, lhsFieldsList);
 		Pipe leftJoin = null;
 		if (identifiedHeadFieldsList != null) {
@@ -285,7 +285,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		//if not subgoals left return the last join
 		if (!subgoalsIterator.hasNext()) {
 			if (leftJoin != null) {
-				return new PipeFielded(leftJoin, lhsJoin.getFields());
+				return new PipeFielded(leftJoin, lhsJoin.getFieldsList());
 			}
 			return lhsJoin;
 		}
@@ -299,7 +299,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 			return buildJoin(leftJoinApplied, pipeFielded, subgoalsIterator);
 		}
 
-		FieldsList lhsFieldsList = lhsJoin.getFields();
+		FieldsList lhsFieldsList = lhsJoin.getFieldsList();
 		FieldsList rhsFieldsList = Utils.getFieldsFromAtom(fieldsVariablesMapping, atom);
 		AtomsCommonFields atomsCommonFields = new AtomsCommonFields(fieldsVariablesMapping, lhsFieldsList, atom);
 		
@@ -311,7 +311,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		Pipe join = new CoGroup(lhsPipe, lhsFields, pipe, rhsFields, new InnerJoin());
 		
 		//compose the output fields list
-		FieldsList outputFieldsList = composeOutputFields(lhsJoin.getFields(), atom);
+		FieldsList outputFieldsList = composeOutputFields(lhsJoin.getFieldsList(), atom);
 		
 		FieldsList keepFieldsList = fieldsToKeep(outputFieldsList);
 		Fields keepFields = outputFieldsList.getFields(keepFieldsList);
@@ -447,7 +447,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 
 		Pipe resultPipe = new Pipe("resultTail", rulePipe);
 
-		FieldsList ruleFieldsList = rulePipeFielded.getFields();
+		FieldsList ruleFieldsList = rulePipeFielded.getFieldsList();
 		FieldsList headFieldsList = identifyHeadVariableFields(fieldsVariablesMapping, headAtom, ruleFieldsList);
 		FieldsList resultFieldsList = new FieldsList(headFieldsList);
 		

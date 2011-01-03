@@ -44,7 +44,7 @@ public class RecursiveRuleTest extends CascadingTest {
 	private static final Logger logger = LoggerFactory.getLogger(RecursiveRuleTest.class);
 
 	public RecursiveRuleTest(String name) {
-		super(name, true);
+		super(name, false);
 	}
 	
 	@Override
@@ -72,7 +72,7 @@ public class RecursiveRuleTest extends CascadingTest {
 	protected Collection<String> createExpressions() {
 		Collection<String> expressions = new ArrayList<String>();
 
-		expressions.add("p( ?X, ?Y ) :- q( ?X, ?Y ), p( ?Y, ?Z ).");
+		expressions.add("p( ?X, ?Z ) :- p( ?X, ?Y ), p( ?Y, ?Z ).");
 
 		return expressions;
 	}
