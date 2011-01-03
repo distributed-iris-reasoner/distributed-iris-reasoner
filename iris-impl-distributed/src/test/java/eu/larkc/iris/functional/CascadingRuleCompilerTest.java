@@ -15,13 +15,8 @@
  */
 package eu.larkc.iris.functional;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
 
-import org.apache.hadoop.fs.FileUtil;
-import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,30 +46,18 @@ public class CascadingRuleCompilerTest extends CascadingTest {
 	protected  void createFacts() throws IOException {
 		defaultConfiguration.project = "test";
 		if (enableCluster) {
-			new Importer().importFromFile(defaultConfiguration, defaultConfiguration.project, this.getClass().getResource("/input/default.nt").getPath(), "import");
+			new Importer().importFromFile(defaultConfiguration, defaultConfiguration.project, this.getClass().getResource("/facts/default.nt").getPath(), "import");
 		} else {
-			new Importer().processNTriple(defaultConfiguration, this.getClass().getResource("/input/default.nt").getPath(), defaultConfiguration.project, "import");
+			new Importer().processNTriple(defaultConfiguration, this.getClass().getResource("/facts/default.nt").getPath(), defaultConfiguration.project, "import");
 		}		
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.larkc.iris.evaluation.distributed.ProgramEvaluationTest#getRulesFile()
+	 */
 	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
-		
-		if (enableCluster) {
-			fileSys.delete(new Path("test/results"), true);
-		} else {
-			FileUtil.fullyDelete(new File("test/results"));
-		}
-	}
-
-	@Override
-	protected Collection<String> createExpressions() {
-		Collection<String> expressions = new ArrayList<String>();
-
-		expressions.add("p( ?X, ?Y ) :- q( ?X, ?Y ), r( ?Y, ?Z ).");
-
-		return expressions;
+	protected String getRulesFile() {
+		return "/rules/cascading.xml";
 	}
 
 	public void testAvoidOldInferencedData() throws Exception {

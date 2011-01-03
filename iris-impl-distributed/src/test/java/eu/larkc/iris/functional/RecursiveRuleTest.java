@@ -15,13 +15,8 @@
  */
 package eu.larkc.iris.functional;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
 
-import org.apache.hadoop.fs.FileUtil;
-import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,37 +39,25 @@ public class RecursiveRuleTest extends CascadingTest {
 	private static final Logger logger = LoggerFactory.getLogger(RecursiveRuleTest.class);
 
 	public RecursiveRuleTest(String name) {
-		super(name, false);
+		super(name, true);
 	}
 	
 	@Override
 	protected  void createFacts() throws IOException {
 		defaultConfiguration.project = "test";
 		if (enableCluster) {
-			new Importer().importFromFile(defaultConfiguration, defaultConfiguration.project, this.getClass().getResource("/input/recursive.nt").getPath(), "import");
+			new Importer().importFromFile(defaultConfiguration, defaultConfiguration.project, this.getClass().getResource("/facts/recursive.nt").getPath(), "import");
 		} else {
-			new Importer().processNTriple(defaultConfiguration, this.getClass().getResource("/input/recursive.nt").getPath(), defaultConfiguration.project, "import");
+			new Importer().processNTriple(defaultConfiguration, this.getClass().getResource("/facts/recursive.nt").getPath(), defaultConfiguration.project, "import");
 		}		
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.larkc.iris.evaluation.distributed.ProgramEvaluationTest#getRulesFile()
+	 */
 	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
-		
-		if (enableCluster) {
-			fileSys.delete(new Path("test/results"), true);
-		} else {
-			FileUtil.fullyDelete(new File("test/results"));
-		}
-	}
-
-	@Override
-	protected Collection<String> createExpressions() {
-		Collection<String> expressions = new ArrayList<String>();
-
-		expressions.add("p( ?X, ?Z ) :- p( ?X, ?Y ), p( ?Y, ?Z ).");
-
-		return expressions;
+	protected String getRulesFile() {
+		return "/rules/recursive.xml";
 	}
 
 	public void testEvaluation() throws Exception {

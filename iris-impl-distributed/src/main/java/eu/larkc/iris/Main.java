@@ -29,6 +29,9 @@ import org.deri.iris.storage.IRelation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.sti2.rif4j.parser.xml.XmlParser;
+import at.sti2.rif4j.rule.Document;
+import at.sti2.rif4j.translator.iris.RifToIrisTranslator;
 import cascading.flow.FlowConnector;
 import cascading.flow.MultiMapReducePlanner;
 import cascading.operation.DebugLevel;
@@ -80,8 +83,6 @@ public class Main extends Configured implements Tool {
 	
 	private eu.larkc.iris.Configuration defaultConfiguration;
 	//transient private static Map<Object, Object> properties = new HashMap<Object, Object>();
-	
-	private Parser parser;
 	
 	protected List<IRule> rules;
 	
@@ -205,23 +206,8 @@ public class Main extends Configured implements Tool {
 
 		processUserArguments(gop.getRemainingArgs());
 		
-		Collection<String> expressions = createExpressions();
-		parser = new Parser();
-		StringBuffer buffer = new StringBuffer();
-
-		for (String expression : expressions) {
-			buffer.append(expression);
-		}
-
-		try {
-			parser.parse(buffer.toString());
-		} catch (ParserException e) {
-			logger.error("rules parser exception", e);
-			throw new RuntimeException("rules parser exception", e);
-		}
+		rules = createRules();
 		
-		rules = parser.getRules();
-
 		Configuration hadoopConf = gop.getConfiguration();
 		defaultConfiguration.hadoopConfiguration = hadoopConf;
 		defaultConfiguration.jobConf = setupJob(hadoopConf);
@@ -239,9 +225,10 @@ public class Main extends Configured implements Tool {
 		return -1;
 	}
 
-	protected Collection<String> createExpressions() {
-		Collection<String> expressions = new ArrayList<String>();
+	protected List<IRule> createRules() {
+		List<IRule> rules = null;
 		if (rulesType == RULES_TYPE.DATALOG) {
+			Collection<String> expressions = new ArrayList<String>();
 			try {
 				BufferedReader br = new BufferedReader(new FileReader(new File(rulesFile)));
 				String line = null;
@@ -258,30 +245,40 @@ public class Main extends Configured implements Tool {
 			}
 			//expressions.add("subClassOf( ?X, ?Z ) :- subClassOf( ?X, ?Y ), subClassOf( ?Y, ?Z ).");
 			//expressions.add("type( ?X, ?Z ) :- type( ?X, ?Y ), subClassOf( ?Y, ?Z ).");
+			
+			Parser parser = new Parser();
+			StringBuffer buffer = new StringBuffer();
+
+			for (String expression : expressions) {
+				buffer.append(expression);
+			}
+
+			try {
+				parser.parse(buffer.toString());
+			} catch (ParserException e) {
+				logger.error("rules parser exception", e);
+				throw new RuntimeException("rules parser exception", e);
+			}
+			
+			rules = parser.getRules();
 		}
 		
 		if (rulesType == RULES_TYPE.RIF) {
-			
+			XmlParser parser = new XmlParser(true);
+			Document rifDocument;
+			try {
+				rifDocument = parser.parseDocument(new FileReader(new File(rulesFile)));
+			} catch (Exception e) {
+				logger.error("exception reading/parsing rules RIF file!", e);
+				throw new RuntimeException("exception reading/parsing rules RIF file!", e);
+			}
+
+			RifToIrisTranslator translator = new RifToIrisTranslator();
+			translator.translate(rifDocument);
+			rules = translator.getRules();
 		}
 		
-		return expressions;
-	}
-
-	//parseQuery("?- subClassOf(?X, ?Y).")
-	private IQuery parseQuery(String query) {
-		Parser parser = new Parser();
-		try {
-			parser.parse(query);
-			List<IQuery> queries = parser.getQueries();
-
-			if (queries.size() == 1) {
-				return queries.get(0);
-			}
-		} catch (ParserException e) {
-			e.printStackTrace();
-		}
-
-		return null;
+		return rules;
 	}
 
 	public Main() {

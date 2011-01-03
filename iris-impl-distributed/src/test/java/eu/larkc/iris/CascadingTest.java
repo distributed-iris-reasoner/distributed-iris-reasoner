@@ -5,8 +5,6 @@ package eu.larkc.iris;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -15,7 +13,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MiniMRCluster;
-import org.ontoware.rdf2go.model.Model;
 import org.ontoware.rdf2go.model.ModelSet;
 import org.openrdf.rdf2go.RepositoryModelSet;
 import org.openrdf.repository.Repository;
@@ -79,6 +76,17 @@ public abstract class CascadingTest extends ProgramEvaluationTest {
 
 	public CascadingTest(String string) {
 		super(string);
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		
+		if (enableCluster) {
+			fileSys.delete(new Path("test/data/inferences"), true);
+		} else {
+			FileUtil.fullyDelete(new File("test/data/inferences"));
+		}
 	}
 
 	public boolean isEnableCluster() {

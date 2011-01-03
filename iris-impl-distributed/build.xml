@@ -44,6 +44,9 @@
   <property name="iris.api.lib" value="${maven.repo}/at/sti2/iris/iris-api/0.7.2/iris-api-0.7.2.jar"/>
   <property name="iris.parser.lib" value="${maven.repo}/at/sti2/iris/iris-parser/0.7.2/iris-parser-0.7.2.jar"/>
   <property name="iris.impl.lib" value="${maven.repo}/at/sti2/iris/iris-impl/0.7.2/iris-impl-0.7.2.jar"/>
+  <property name="rif4j.impl.lib" value="${maven.repo}/at/sti2/rif4j/rif4j-impl/1.0.0-SNAPSHOT/rif4j-impl-1.0.0-SNAPSHOT.jar"/>
+  <property name="rif4j.iris.lib" value="${maven.repo}/at/sti2/rif4j/rif4j-iris/1.0.0-SNAPSHOT/rif4j-iris-1.0.0-SNAPSHOT.jar"/>
+  <property name="rif4j.parser.lib" value="${maven.repo}/at/sti2/rif4j/rif4j-parser/1.0.0-SNAPSHOT/rif4j-parser-1.0.0-SNAPSHOT.jar"/>
 	
   <condition property="cascading.path" value="${cascading.home}"
              else="${cascading.home}/build">
@@ -89,7 +92,11 @@
   	<pathelement location="${iris.api.lib}"/>
   	<pathelement location="${iris.parser.lib}"/>
   	<pathelement location="${iris.impl.lib}"/>
-  	
+
+  	<pathelement location="${rif4j.impl.lib}"/>
+  	<pathelement location="${rif4j.iris.lib}"/>
+  	<pathelement location="${rif4j.parser.lib}"/>
+
   	<pathelement location="${maven.repo}/org/semweb4j/rdf2go.api/4.7.3/rdf2go.api-4.7.3.jar"/>
   	<pathelement location="${maven.repo}/org/semweb4j/rdf2go.impl.sesame23/4.7.3/rdf2go.impl.sesame23-4.7.3.jar"/>
   	<pathelement location="${maven.repo}/org/openrdf/openrdf-sesame/2.3.2/openrdf-sesame-2.3.2.jar"/>
@@ -166,6 +173,10 @@
 		<zipfileset file="${maven.repo}/at/sti2/iris/iris-api/0.7.2/iris-api-0.7.2.jar" prefix="lib" />
 		<zipfileset file="${maven.repo}/at/sti2/iris/iris-parser/0.7.2/iris-parser-0.7.2.jar" prefix="lib" />
 		<zipfileset file="${maven.repo}/at/sti2/iris/iris-impl/0.7.2/iris-impl-0.7.2.jar" prefix="lib" />
+
+		<zipfileset file="${maven.repo}/at/sti2/rif4j/rif4j-impl/1.0.0-SNAPSHOT/rif4j-impl-1.0.0-SNAPSHOT.jar" prefix="lib" />
+    	<zipfileset file="${maven.repo}/at/sti2/rif4j/rif4j-iris/1.0.0-SNAPSHOT/rif4j-iris-1.0.0-SNAPSHOT.jar" prefix="lib" />
+		<zipfileset file="${maven.repo}/at/sti2/rif4j/rif4j-parser/1.0.0-SNAPSHOT/rif4j-parser-1.0.0-SNAPSHOT.jar" prefix="lib" />
 
     	<zipfileset file="${maven.repo}/commons-lang/commons-lang/2.5/commons-lang-2.5.jar" prefix="lib" />
     	<zipfileset file="${maven.repo}/org/jgrapht/jgrapht-jdk1.5/0.7.3/jgrapht-jdk1.5-0.7.3.jar" prefix="lib" />

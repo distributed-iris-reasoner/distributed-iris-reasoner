@@ -15,7 +15,10 @@
  */
 package eu.larkc.iris.evaluation.distributed;
 
-import java.util.Collection;
+import java.io.File;
+import java.io.FileReader;
+import java.io.Reader;
+import java.net.URL;
 import java.util.List;
 
 import org.deri.iris.api.basics.IQuery;
@@ -25,6 +28,9 @@ import org.deri.iris.compiler.Parser;
 import org.deri.iris.compiler.ParserException;
 import org.deri.iris.storage.IRelation;
 
+import at.sti2.rif4j.parser.xml.XmlParser;
+import at.sti2.rif4j.rule.Document;
+import at.sti2.rif4j.translator.iris.RifToIrisTranslator;
 import eu.larkc.iris.storage.FactsFactory;
 
 /**
@@ -33,8 +39,8 @@ import eu.larkc.iris.storage.FactsFactory;
  */
 public abstract class ProgramEvaluationTest extends EvaluationTest {
 
-	private Parser parser;
-
+	private RifToIrisTranslator translator;
+	
 	public ProgramEvaluationTest(String name) {
 		super(name);
 	}
@@ -44,15 +50,14 @@ public abstract class ProgramEvaluationTest extends EvaluationTest {
 		// Set up the knowledge base consisting of a set of facts and a set of
 		// rules.
 
-		Collection<String> expressions = createExpressions();
-		parser = new Parser();
-		StringBuffer buffer = new StringBuffer();
+		URL rulesURL = this.getClass().getResource(getRulesFile());
+		File rulesFile = new File(rulesURL.getPath());
+		Reader rifXmlFileReader = new FileReader(rulesFile);
+		XmlParser parser = new XmlParser(true);
+		Document rifDocument = parser.parseDocument(rifXmlFileReader);
 
-		for (String expression : expressions) {
-			buffer.append(expression);
-		}
-
-		parser.parse(buffer.toString());
+		translator = new RifToIrisTranslator();
+		translator.translate(rifDocument);
 
 		super.setUp();
 	}
@@ -60,13 +65,13 @@ public abstract class ProgramEvaluationTest extends EvaluationTest {
 	@Override
 	protected List<IQuery> createQueries() {
 		// Create the queries.
-		return parser.getQueries();
+		return translator.getQueries();
 	}
 
 	@Override
 	protected List<IRule> createRules() {
 		// Create the rules.
-		return parser.getRules();
+		return translator.getRules();
 	}
 
 	private IQuery parseQuery(String query) {
@@ -112,6 +117,6 @@ public abstract class ProgramEvaluationTest extends EvaluationTest {
 	 * @return The Datalog program represented as a collection of rules and
 	 *         facts in string form.
 	 */
-	protected abstract Collection<String> createExpressions();
+	protected abstract String getRulesFile();
 
 }

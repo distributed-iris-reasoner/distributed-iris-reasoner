@@ -122,7 +122,7 @@ public class RdfFactsTapTest extends TestCase {
 
 		model.open();
 		
-		model.readFrom(this.getClass().getResourceAsStream("/input/humans.rdf"));
+		model.readFrom(this.getClass().getResourceAsStream("/facts/humans.rdf"));
 		
 		model.commit();
 		

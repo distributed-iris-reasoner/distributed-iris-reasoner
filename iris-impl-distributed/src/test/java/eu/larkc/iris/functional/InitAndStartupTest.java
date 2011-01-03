@@ -15,13 +15,8 @@
  */
 package eu.larkc.iris.functional;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
 
-import org.apache.hadoop.fs.FileUtil;
-import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,40 +46,25 @@ public class InitAndStartupTest extends CascadingTest {
 	//?- p(?X, ?Y).
 	
 	public InitAndStartupTest(String name) {
-		super(name, false);
+		super(name, true);
 	}
 	
 	@Override
 	protected  void createFacts() throws IOException {
 		defaultConfiguration.project = "test";
 		if (enableCluster) {
-			new Importer().importFromFile(defaultConfiguration, defaultConfiguration.project, this.getClass().getResource("/input/default.nt").getPath(), "import");
+			new Importer().importFromFile(defaultConfiguration, defaultConfiguration.project, this.getClass().getResource("/facts/default.nt").getPath(), "import");
 		} else {
-			new Importer().processNTriple(defaultConfiguration, this.getClass().getResource("/input/default.nt").getPath(), defaultConfiguration.project, "import");
+			new Importer().processNTriple(defaultConfiguration, this.getClass().getResource("/facts/default.nt").getPath(), defaultConfiguration.project, "import");
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.larkc.iris.evaluation.distributed.ProgramEvaluationTest#getRulesReader()
+	 */
 	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
-		
-		if (enableCluster) {
-			fileSys.delete(new Path("test/data/inferences"), true);
-		} else {
-			FileUtil.fullyDelete(new File("test/data/inferences"));
-		}
-	}
-
-	@Override
-	protected Collection<String> createExpressions() {
-		Collection<String> expressions = new ArrayList<String>();
-
-		// Create rules.
-		//expressions.add("p( ?X, ?Y ) :- q( ?X, ?Y ), r( ?Y, ?Z ).");
-		//later arbitrary joins
-		expressions.add("p( ?X, ?Y ) :- q( ?X, ?Y ), r( ?Y, ?Z ), s( ?X, ?Z ).");
-
-		return expressions;
+	protected String getRulesFile() {
+		return "/rules/initAndStartup.xml";
 	}
 
 	public void testEvaluation() throws Exception {
