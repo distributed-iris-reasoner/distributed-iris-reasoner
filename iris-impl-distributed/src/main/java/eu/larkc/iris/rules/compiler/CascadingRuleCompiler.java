@@ -163,7 +163,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 				// construct pipe assembly, one pipe per atom
 				/**/
 				Pipe pipe = new Pipe(atom.toString(), mainPipe);
-				pipe = new Each(pipe, Fields.ALL, new PredicateFilter(atom.getPredicate()));
+				pipe = new Each(pipe, new Fields(0, 1, 2), new PredicateFilter(atom.getPredicate()));
 				
 				pipe = filterConstants(pipe, atom.getTuple());
 				/**/
@@ -190,7 +190,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		Set<Comparable> fieldTerms = new HashSet<Comparable>();
 		for (String field : outputFields) {
 			Comparable term = fieldsVariablesMapping.getComparable(field);
-			if (term == null || (term instanceof IPredicate)) {
+			if (!(term instanceof IVariable)) {
 				continue;
 			}
 			if (fieldTerms.contains(term)) {
@@ -243,17 +243,15 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 			
 			//new Each(lhsJoin.getPipe(), new Debug(true));
 			
-			Pipe aPipe = new Each( lhsJoin.getPipe(), new Fields(0, 1, 2), new Identity(new Fields(0, 1, 2)));
-			aPipe = new Each(aPipe, new Debug(true));
+			//Pipe aPipe = new Each( lhsJoin.getPipe(), new Fields(0, 1, 2), new Identity(new Fields(0, 1, 2)));
+			//aPipe = new Each(aPipe, new Debug(true));
 						
 			//FIX ME must set the field names cause there is some bug in cascading, if using indexes no null values are added instead the tuple size is shrunked
 			//headPipe = new Each(headPipe, headFieldsList.getFields(), new Identity(headFieldsList.getFieldsNames()));
 			//Pipe aPipe = new Each(lhsJoin.getPipe(), lhsFieldsList.getFields(), new Identity(lhsFieldsList.getFieldsNames()));
 			//~
 			
-			leftJoin = new CoGroup(headPipe, rhsFields, aPipe, lhsFields, new RightJoin());
-			
-			leftJoin = new Each(leftJoin, new Debug(true));
+			leftJoin = new CoGroup(headPipe, rhsFields, lhsJoin.getPipe(), lhsFields, new RightJoin());
 			
 			FieldsList allFields = new FieldsList(headFieldsList);
 			allFields.addAll(lhsFieldsList);
@@ -303,15 +301,33 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		FieldsList rhsFieldsList = Utils.getFieldsFromAtom(fieldsVariablesMapping, atom);
 		AtomsCommonFields atomsCommonFields = new AtomsCommonFields(fieldsVariablesMapping, lhsFieldsList, atom);
 		
-		//join the previous join's pipe with the pipe for this literal
-		Fields lhsFields = lhsFieldsList.getFields(atomsCommonFields.getLhsFields());
-		Fields rhsFields = rhsFieldsList.getFields(atomsCommonFields.getRhsFields());
+		FieldsList commonLhsFieldsList = atomsCommonFields.getLhsFields();
+		FieldsList commonRhsFieldsList = atomsCommonFields.getRhsFields();
+		
 		Pipe lhsPipe = (leftJoin == null) ? lhsJoin.getPipe() : leftJoin;
-		
-		Pipe join = new CoGroup(lhsPipe, lhsFields, pipe, rhsFields, new InnerJoin());
-		
 		//compose the output fields list
 		FieldsList outputFieldsList = composeOutputFields(lhsJoin.getFieldsList(), atom);
+
+		Pipe join = null;
+		if (!commonLhsFieldsList.isEmpty()) {
+			//join the previous join's pipe with the pipe for this literal
+			Fields lhsFields = lhsFieldsList.getFields(commonLhsFieldsList);
+			Fields rhsFields = rhsFieldsList.getFields(commonRhsFieldsList);
+			
+			join = new CoGroup(lhsPipe, lhsFields, pipe, rhsFields, new InnerJoin());
+		} else {
+			//this is not very effective, joining without common fields, but it has to be done for some unoptimized rules
+			lhsFieldsList.add("LCF");
+			lhsPipe = new Each(lhsPipe, new Insert(new Fields("LCF"), new Integer(1)), lhsFieldsList.getFields());
+			
+			rhsFieldsList.add("RCF");
+			pipe = new Each(pipe, new Insert(new Fields("RCF"), new Integer(1)), rhsFieldsList.getFields());
+
+			join = new CoGroup(lhsPipe, new Fields(lhsFieldsList.size() - 1), pipe, new Fields(rhsFieldsList.size() - 1), new InnerJoin());
+
+			outputFieldsList.add(lhsJoin.getFieldsList().size(), "LCF");
+			outputFieldsList.add("RCF");
+		}
 		
 		FieldsList keepFieldsList = fieldsToKeep(outputFieldsList);
 		Fields keepFields = outputFieldsList.getFields(keepFieldsList);

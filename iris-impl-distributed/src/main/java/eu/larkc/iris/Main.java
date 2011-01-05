@@ -130,6 +130,7 @@ public class Main extends Configured implements Tool {
 		
 		jobConf.setBoolean("mapred.input.dir.recursive", true);
 		
+		jobConf.set("cascading.serialization.tokens", "130=eu.larkc.iris.storage.IRIWritable,131=eu.larkc.iris.storage.PredicateWritable,132=eu.larkc.iris.storage.StringTermWritable");
 		defaultConfiguration.flowProperties.put("cascading.serialization.tokens", "130=eu.larkc.iris.storage.IRIWritable,131=eu.larkc.iris.storage.PredicateWritable,132=eu.larkc.iris.storage.StringTermWritable");
 		
 	    if( System.getProperty("log4j.logger") != null )
@@ -176,9 +177,11 @@ public class Main extends Configured implements Tool {
 			return -1;
 		}
 		
-		while (tei.hasNext()) {
+		int i = 0;
+		while (tei.hasNext() && i < 10) {
 			TupleEntry te = tei.next();
 			logger.info(te.toString());
+			i++;
 		}
 		
 		return 0;

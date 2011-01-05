@@ -84,7 +84,7 @@ public class Importer {
 	public void processNTriple(Configuration configuration, String inPath, String project, String importName) {
 		Tap source = new Hfs(new TextLine(), inPath);
 
-		Tap sink = new Hfs(Fields.ALL, project + "/data/facts/" + importName, true );
+		Tap sink = new Hfs(new Fields(0, 1, 2), project + "/data/facts/" + importName, true );
 
 		int[] groups = {2, 1, 3};
 		RegexParser parser = new RegexParser(Fields.UNKNOWN, "^(<[^\\s]+>)\\s*(<[^\\s]+>)\\s*([<\"].*[^\\s])\\s*.\\s*$", groups);

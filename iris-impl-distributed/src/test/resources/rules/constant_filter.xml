@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE Document [
+  <!ENTITY rif  "http://www.w3.org/2007/rif#">
+  <!ENTITY xs   "http://www.w3.org/2001/XMLSchema#">
+  <!ENTITY rdf  "http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+]>
+
+<Document xmlns="&rif;">
+  <payload>
+    <Group>
+      <sentence>
+        <Forall>
+          <declare>
+            <Var>X</Var>
+          </declare>
+          <declare>
+            <Var>Y</Var>
+          </declare>
+          <formula>
+            <Implies>
+              <if>
+                <And>
+                  <formula>
+                    <Atom>
+                      <op>
+                        <Const type="&rif;iri">http://www.w3.org/2000/01/rdf-schema#q</Const>
+                      </op>
+                      <args>
+                        <Var>X</Var>
+                        <Var>Y</Var>
+                      </args>
+                    </Atom>
+                  </formula>
+                  <formula>
+                    <Atom>
+                      <op>
+                        <Const type="&rif;iri">http://www.w3.org/2000/01/rdf-schema#r</Const>
+                      </op>
+                      <args>
+                        <Var>Y</Var>
+                        <Const type="&rif;iri">http://dbpedia.org/ontology/6</Const>
+                      </args>
+                    </Atom>
+                  </formula>
+                </And>
+              </if>
+              <then>
+                <Atom>
+                  <op>
+                    <Const type="&rif;iri">http://www.w3.org/2000/01/rdf-schema#p</Const>
+                  </op>
+                  <args>
+                    <Var>X</Var>
+                    <Var>Y</Var>
+                  </args>
+                </Atom>
+              </then>
+            </Implies>
+          </formula>
+        </Forall>
+      </sentence>
+    </Group>
+  </payload>
+</Document>
+<!--XML document generated on Wed Nov 11 09:12:17 EST 2009-->
