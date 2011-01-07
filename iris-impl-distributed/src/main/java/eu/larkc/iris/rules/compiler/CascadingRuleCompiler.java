@@ -316,7 +316,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 			
 			join = new CoGroup(lhsPipe, lhsFields, pipe, rhsFields, new InnerJoin());
 		} else {
-			//this is not very effective, joining without common fields, but it has to be done for some unoptimized rules
+			//this is not effective, joining without common fields, but it has to be done for some unoptimized rules
 			lhsFieldsList.add("LCF");
 			lhsPipe = new Each(lhsPipe, new Insert(new Fields("LCF"), new Integer(1)), lhsFieldsList.getFields());
 			
@@ -331,7 +331,10 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		
 		FieldsList keepFieldsList = fieldsToKeep(outputFieldsList);
 		Fields keepFields = outputFieldsList.getFields(keepFieldsList);
-		join = new Each( join, keepFields, new Identity(keepFields));	// outgoing -> "keepField"
+		join = new Each( join, keepFields, new Identity());	// outgoing -> "keepField"
+		
+		join = new GroupBy(join, keepFieldsList.getFields()); //eliminate duplicates
+		join = new Every(join, new Count(), keepFieldsList.getFields());
 		
 		PipeFielded pipeFielded = new PipeFielded(join, keepFieldsList);
 		return buildJoin(leftJoinApplied, pipeFielded, subgoalsIterator);
@@ -465,38 +468,20 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 
 		FieldsList ruleFieldsList = rulePipeFielded.getFieldsList();
 		FieldsList headFieldsList = identifyHeadVariableFields(fieldsVariablesMapping, headAtom, ruleFieldsList);
-		FieldsList resultFieldsList = new FieldsList(headFieldsList);
 		
-		resultPipe = new GroupBy(resultPipe, ruleFieldsList.getFields(resultFieldsList)); //eliminate duplicates
-		resultPipe = new Every(resultPipe, new Count());
-		resultFieldsList.add("count");
+		//Fields resultFields = ruleFieldsList.getFields(resultFieldsList);
+		//resultPipe = new GroupBy(resultPipe, resultFields); //eliminate duplicates
+		//resultPipe = new Every(resultPipe, new Count(), resultFields);
 		
-		//resultPipe = new Each( resultPipe, new Insert( new Fields(HEAD_PREDICATE_FIELD), new PredicateWritable(headAtom.getPredicate())), Fields.ALL );
-		//resultPipe = new Each( resultPipe, new Insert( new Fields(HEAD_PREDICATE_FIELD), "<" + headAtom.getPredicate() + ">"), Fields.ALL );
-		resultPipe = new Each( resultPipe, new Insert( new Fields(HEAD_PREDICATE_FIELD), new PredicateWritable(headAtom.getPredicate())), Fields.ALL );
-		resultFieldsList.add(HEAD_PREDICATE_FIELD);
+		resultPipe = new Each(resultPipe, new Debug(true));
 		
 		headFieldsList.add(0, HEAD_PREDICATE_FIELD);
-		Fields headFields = resultFieldsList.getFields(headFieldsList);
+		ruleFieldsList.add(HEAD_PREDICATE_FIELD);
+		Fields headFields = ruleFieldsList.getFields(headFieldsList);
+		resultPipe = new Each( resultPipe, new Insert( new Fields(HEAD_PREDICATE_FIELD), new PredicateWritable(headAtom.getPredicate())), headFields);
 		
-		resultPipe = new Each( resultPipe, headFields, new Identity());
-		
-		//Pipe storageResultPipe = new Pipe("storageResultTail", resultPipe);
-		//storageResultPipe = new Each( storageResultPipe, headFields, new Identity(headFields));
-		
-		/*
-		Pipe countPipe = new Pipe(mConfiguration.DELTA_TAIL_NAME, resultPipe);
-		countPipe = new GroupBy(countPipe, new Fields(HEAD_PREDICATE_FIELD));
-		countPipe = new Every(countPipe, new Count(new Fields(DELTA_FIELD)));
-		countPipe = new Each( countPipe, new Fields(DELTA_FIELD), new Identity());
-		Tap deltaSink = new Hfs(new Fields(DELTA_FIELD), mConfiguration.DELTA_TAIL_HFS_PATH, SinkMode.REPLACE);
-		*/
-		//Map<String, Tap> sinks = new HashMap<String, Tap>();
-		//sinks.put(countPipe.getName(), deltaSink);
-
 		String input = mConfiguration.project + "/data/";
-		Tap source = new Hfs(headFieldsList.getFields(), input, true ); //we can assume that the numner of fields are the same as the head;s tuple size + 1 (the predicate)
-		//sources.put("main", source);
+		Tap source = new Hfs(headFieldsList.getFields(), input, true ); //we can assume that the number of fields are the same as the head;s tuple size + 1 (the predicate)
 
 		FlowAssembly flowAssembly = new FlowAssembly(mConfiguration, source, headFieldsList.getFields(), resultPipe);//, countPipe);
 		return flowAssembly;
