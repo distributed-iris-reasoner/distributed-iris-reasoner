@@ -46,7 +46,7 @@ public class InitAndStartupTest extends CascadingTest {
 	//?- p(?X, ?Y).
 	
 	public InitAndStartupTest(String name) {
-		super(name, false);
+		super(name, true);
 	}
 	
 	@Override

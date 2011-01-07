@@ -473,8 +473,6 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		//resultPipe = new GroupBy(resultPipe, resultFields); //eliminate duplicates
 		//resultPipe = new Every(resultPipe, new Count(), resultFields);
 		
-		resultPipe = new Each(resultPipe, new Debug(true));
-		
 		headFieldsList.add(0, HEAD_PREDICATE_FIELD);
 		ruleFieldsList.add(HEAD_PREDICATE_FIELD);
 		Fields headFields = ruleFieldsList.getFields(headFieldsList);
