@@ -16,7 +16,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-    
+      
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -50,56 +50,23 @@
 		</dependency>		
 		
 		<dependency>
-    		<groupId>cascading-core</groupId>
-    		<artifactId>cascading-core</artifactId>
-    		<version>1.2.0</version>
-    		<scope>compile</scope>
-    		<type>jar</type>    	
-		</dependency>	
-
-		<dependency>
-    		<groupId>cascading-core</groupId>
-    		<artifactId>cascading-core</artifactId>
-    		<version>1.2.0</version>
-    		<scope>compile</scope>
-    		<type>jar</type>
-    		<classifier>sources</classifier>
-		</dependency>	
+  			<groupId>cascading</groupId>
+  			<artifactId>cascading-core</artifactId>
+  			<version>1.2.0</version>
+		</dependency>
 		
 		<dependency>
-    		<groupId>cascading-xml</groupId>
-    		<artifactId>cascading-xml</artifactId>
-    		<version>1.2.0</version>
-    		<scope>compile</scope>
-    		<type>jar</type>
-		</dependency>	
-
-		<dependency>
-    		<groupId>cascading-xml</groupId>
-    		<artifactId>cascading-xml</artifactId>
-    		<version>1.2.0</version>
-    		<scope>compile</scope>
-    		<type>jar</type>
-    		<classifier>sources</classifier>
-		</dependency>	
+  			<groupId>cascading</groupId>
+  			<artifactId>cascading-xml</artifactId>
+  			<version>1.2.0</version>
+		</dependency>
 		
 		<dependency>
-    		<groupId>cascading-test</groupId>
-    		<artifactId>cascading-test</artifactId>
-    		<version>1.2.0</version>
-    		<scope>compile</scope>
-    		<type>jar</type>
+  			<groupId>cascading</groupId>
+  			<artifactId>cascading-test</artifactId>
+  			<version>1.2.0</version>
 		</dependency>
-
-		<dependency>
-    		<groupId>cascading-test</groupId>
-    		<artifactId>cascading-test</artifactId>
-    		<version>1.2.0</version>
-    		<scope>compile</scope>
-    		<type>jar</type>
-    		<classifier>sources</classifier>
-		</dependency>
-
+		
 		<dependency>
            <groupId>org.semweb4j</groupId>
            <artifactId>rdf2go.api</artifactId>

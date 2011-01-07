@@ -74,7 +74,7 @@
 		</plugins>
 	</build>
 
-	<distributionManagement>
+	<distributionManagement>		
 		<repository>
 			<id>sti2-archiva-external</id>
 			<name>STI Innsbruck External Release Repository</name>
@@ -90,6 +90,10 @@
 	</distributionManagement>
 
 	<repositories>
+		<repository>
+  			<id>conjars.org</id>
+  			<url>http://conjars.org/repo</url>
+  		</repository>
 		<repository>
 			<id>sti2-archiva-external</id>
 			<url>http://maven.sti2.at/archiva/repository/external</url>
