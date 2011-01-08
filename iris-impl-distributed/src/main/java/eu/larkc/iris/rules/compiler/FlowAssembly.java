@@ -20,8 +20,6 @@
 package eu.larkc.iris.rules.compiler;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -48,30 +46,30 @@ public class FlowAssembly {
 
 	private static final Logger logger = LoggerFactory.getLogger(FlowAssembly.class);
 	
-	private static final String RESULT_TAIL = "resultTail";
+	//private static final String RESULT_TAIL = "resultTail";
 	
 	private Configuration mConfiguration;
 	
 	private Tap source;
 	private Fields sinkFields;
-	private Pipe[] pipes;
+	private Pipe pipe;
 	
 	private Flow flow = null;
 	private String path = null;
 	
-	public FlowAssembly (Configuration configuration, Tap source, Fields sinkFields, Pipe... pipes) {
+	public FlowAssembly (Configuration configuration, Tap source, Fields sinkFields, Pipe pipe) {
 		this.mConfiguration = configuration;
 		this.source = source;
 		this.sinkFields = sinkFields;
-		this.pipes = pipes;
+		this.pipe = pipe;
 	}
 	
 	private Flow createFlow(String flowName, String output) {
-		Map<String, Tap> sinks = new HashMap<String, Tap>();
+		//Map<String, Tap> sinks = new HashMap<String, Tap>();
 		Tap headSink = new Hfs(sinkFields, output, true );
-		sinks.put(RESULT_TAIL, headSink);
+		//sinks.put(RESULT_TAIL, headSink);
 		
-		Flow flow = new FlowConnector(mConfiguration.flowProperties).connect(flowName, source, sinks, pipes);
+		Flow flow = new FlowConnector(mConfiguration.flowProperties).connect(flowName, source, headSink, pipe);
 		
 		if(flow != null) {
 			flow.writeDOT("flow.dot");
@@ -93,7 +91,7 @@ public class FlowAssembly {
 		
 		path = mConfiguration.project + "/data/inferences/tmp/" + mConfiguration.resultsName + flowIdentificator;
 		try {
-			TupleEntryIterator iterator = flow.openSink(RESULT_TAIL);
+			TupleEntryIterator iterator = flow.openSink();
 			Hfs hfs = new Hfs(Fields.ALL, path);
 			TupleEntryCollector tec = hfs.openForWrite(mConfiguration.jobConf);
 			while(iterator.hasNext()) {

@@ -40,7 +40,6 @@ import org.deri.iris.utils.TermMatchingAndSubstitution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cascading.operation.Debug;
 import cascading.operation.Identity;
 import cascading.operation.Insert;
 import cascading.operation.aggregator.Count;
@@ -233,23 +232,6 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 			AtomsCommonFields headCommonFields = new AtomsCommonFields(fieldsVariablesMapping, lhsFieldsList, head);
 			Fields lhsFields = lhsFieldsList.getFields(headCommonFields.getLhsFields());
 			Fields rhsFields = headFieldsList.getFields(headCommonFields.getRhsFields());
-			//Pipe headPipe = new Pipe(head.toString());
-			
-			//headPipe = new Each(headPipe, Fields.ALL, new Identity(Utils.getFieldsForAtom(fieldsVariablesMapping, head)));
-			//Fields headFields = Utils.getFieldsForAtom(fieldsVariablesMapping, head);
-			//int[] groups = {2, 1, 3};
-			//RegexParser parser = new RegexParser(headFields, "^(<[^\\s]+>)\\s*(<[^\\s]+>)\\s*([<\"].*[^\\s])\\s*.\\s*$", groups);
-			//headPipe = new Each(headPipe, new Fields("line"), parser);
-			
-			//new Each(lhsJoin.getPipe(), new Debug(true));
-			
-			//Pipe aPipe = new Each( lhsJoin.getPipe(), new Fields(0, 1, 2), new Identity(new Fields(0, 1, 2)));
-			//aPipe = new Each(aPipe, new Debug(true));
-						
-			//FIX ME must set the field names cause there is some bug in cascading, if using indexes no null values are added instead the tuple size is shrunked
-			//headPipe = new Each(headPipe, headFieldsList.getFields(), new Identity(headFieldsList.getFieldsNames()));
-			//Pipe aPipe = new Each(lhsJoin.getPipe(), lhsFieldsList.getFields(), new Identity(lhsFieldsList.getFieldsNames()));
-			//~
 			
 			leftJoin = new CoGroup(headPipe, rhsFields, lhsJoin.getPipe(), lhsFields, new RightJoin());
 			
@@ -257,9 +239,6 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 			allFields.addAll(lhsFieldsList);
 			leftJoin = new Each( leftJoin, allFields.getFields(headFieldsList), new FilterNotNull());	// outgoing -> "keepField"
 			leftJoin = new Each( leftJoin, allFields.getFields(lhsFieldsList), new Identity());	// outgoing -> "keepField"
-			
-			//leftJoin = new Each(leftJoin, new Debug(true));
-			
 		}
 		return leftJoin;
 	}
@@ -464,8 +443,6 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 
 		IAtom headAtom = head.get(0).getAtom();
 
-		Pipe resultPipe = new Pipe("resultTail", rulePipe);
-
 		FieldsList ruleFieldsList = rulePipeFielded.getFieldsList();
 		FieldsList headFieldsList = identifyHeadVariableFields(fieldsVariablesMapping, headAtom, ruleFieldsList);
 		
@@ -476,12 +453,12 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		headFieldsList.add(0, HEAD_PREDICATE_FIELD);
 		ruleFieldsList.add(HEAD_PREDICATE_FIELD);
 		Fields headFields = ruleFieldsList.getFields(headFieldsList);
-		resultPipe = new Each( resultPipe, new Insert( new Fields(HEAD_PREDICATE_FIELD), new PredicateWritable(headAtom.getPredicate())), headFields);
+		rulePipe = new Each( rulePipe, new Insert( new Fields(HEAD_PREDICATE_FIELD), new PredicateWritable(headAtom.getPredicate())), headFields);
 		
 		String input = mConfiguration.project + "/data/";
 		Tap source = new Hfs(headFieldsList.getFields(), input, true ); //we can assume that the number of fields are the same as the head;s tuple size + 1 (the predicate)
 
-		FlowAssembly flowAssembly = new FlowAssembly(mConfiguration, source, headFieldsList.getFields(), resultPipe);//, countPipe);
+		FlowAssembly flowAssembly = new FlowAssembly(mConfiguration, source, headFieldsList.getFields(), rulePipe);//, countPipe);
 		return flowAssembly;
 	}
 
