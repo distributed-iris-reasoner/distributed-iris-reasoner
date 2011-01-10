@@ -30,6 +30,7 @@ import org.apache.hadoop.mapred.JobConf;
 import eu.larkc.iris.evaluation.IDistributedEvaluationStrategyFactory;
 import eu.larkc.iris.evaluation.bottomup.DistributedBottomUpEvaluationStrategyFactory;
 import eu.larkc.iris.evaluation.bottomup.naive.DistributedNaiveEvaluatorFactory;
+import eu.larkc.iris.rules.optimisation.JoinOptimizer;
 
 /**
  * This class holds all configuration data for a knowledge base.
@@ -56,4 +57,9 @@ public class Configuration extends org.deri.iris.Configuration
 	/** The evaluation strategy to use. */
 	public IDistributedEvaluationStrategyFactory evaluationStrategyFactory = new DistributedBottomUpEvaluationStrategyFactory( new DistributedNaiveEvaluatorFactory() );
 
+	public Configuration() {
+		super();
+		
+		ruleOptimisers.add(new JoinOptimizer());
+	}
 }
