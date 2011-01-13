@@ -15,6 +15,7 @@ D * Copyright 2010 Softgress - http://www.softgress.com/
  */
 package eu.larkc.iris.rules.compiler;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,6 +26,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.NotImplementedException;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.deri.iris.EvaluationException;
 import org.deri.iris.api.basics.IAtom;
 import org.deri.iris.api.basics.ILiteral;
@@ -51,7 +54,10 @@ import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.cogroup.InnerJoin;
 import cascading.pipe.cogroup.RightJoin;
+import cascading.scheme.Scheme;
+import cascading.scheme.SequenceFile;
 import cascading.tap.Hfs;
+import cascading.tap.MultiSourceTap;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import eu.larkc.iris.Utils;
@@ -455,13 +461,10 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		Fields headFields = ruleFieldsList.getFields(headFieldsList);
 		rulePipe = new Each( rulePipe, new Insert( new Fields(HEAD_PREDICATE_FIELD), new PredicateWritable(headAtom.getPredicate())), headFields);
 		
-		String input = mConfiguration.project + "/data/";
-		Tap source = new Hfs(headFieldsList.getFields(), input, true ); //we can assume that the number of fields are the same as the head;s tuple size + 1 (the predicate)
-
-		FlowAssembly flowAssembly = new FlowAssembly(mConfiguration, source, headFieldsList.getFields(), rulePipe);//, countPipe);
+		FlowAssembly flowAssembly = new FlowAssembly(mConfiguration, headFieldsList.getFields(), rulePipe);//, countPipe);
 		return flowAssembly;
 	}
-
+	
 	/*
 	 * Returns the fields list that correspond to head variables, null in case not all variables were identified in the result stream
 	 */

@@ -168,7 +168,7 @@
       <fileset dir="${build.classes}"/>
         <zipfileset file="${cascading.lib.core}" prefix="lib" />
     	<zipfileset file="${cascading.lib.xml}" prefix="lib" />
-    	<zipfileset file="${cascading.lib.test}" prefix="lib" />
+    	<!-- zipfileset file="${cascading.lib.test}" prefix="lib" / -->
 
 		<zipfileset file="${maven.repo}/at/sti2/iris/iris-api/0.7.2/iris-api-0.7.2.jar" prefix="lib" />
 		<zipfileset file="${maven.repo}/at/sti2/iris/iris-parser/0.7.2/iris-parser-0.7.2.jar" prefix="lib" />

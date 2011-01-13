@@ -83,9 +83,9 @@ public abstract class CascadingTest extends ProgramEvaluationTest {
 		super.tearDown();
 		
 		if (enableCluster) {
-			fileSys.delete(new Path("test/data/inferences"), true);
+			fileSys.delete(new Path("test/inferences"), true);
 		} else {
-			FileUtil.fullyDelete(new File("test/data/inferences"));
+			FileUtil.fullyDelete(new File("test/inferences"));
 		}
 	}
 

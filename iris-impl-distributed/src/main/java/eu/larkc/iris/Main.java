@@ -112,10 +112,10 @@ public class Main extends Configured implements Tool {
 			rulesType = RULES_TYPE.valueOf(args[2].toUpperCase());
 			rulesFile = args[3];
 			if (args[4] != null && !"".equals(args[4])) {
-				keepResults = Boolean.valueOf(args[4]);
-				resultsName = args[5];
-				if (args.length > 6) {
-					outputStorageId = args[6];
+				//keepResults = Boolean.valueOf(args[4]);
+				resultsName = args[4];
+				if (args.length > 5) {
+					outputStorageId = args[5];
 				}
 			}
 		} else if (operation.equals("-test")) {
@@ -125,7 +125,8 @@ public class Main extends Configured implements Tool {
 	}
 	
 	private JobConf setupJob(Configuration conf) {
-		JobConf jobConf = new JobConf(conf, Main.class); 
+		JobConf jobConf = new JobConf(conf, Main.class);
+		
 	    // run the job here.
 		
 		jobConf.setBoolean("mapred.input.dir.recursive", true);

@@ -16,22 +16,12 @@
 
 package eu.larkc.iris.evaluation.bottomup.naive;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.deri.iris.EvaluationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cascading.tap.Hfs;
-import cascading.tap.Tap;
-import cascading.tuple.Fields;
-import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryCollector;
-import cascading.tuple.TupleEntryIterator;
 import eu.larkc.iris.evaluation.EvaluationContext;
 import eu.larkc.iris.evaluation.bottomup.IDistributedRuleEvaluator;
 import eu.larkc.iris.rules.compiler.IDistributedCompiledRule;
@@ -60,6 +50,7 @@ public class DistributedNaiveEvaluator implements IDistributedRuleEvaluator {
 			iterationNumber++;
 		}
 
+		/*
 		String outputPath = null;
 		if (configuration.keepResults) {
 			outputPath = configuration.project + "/data/inferences/" + configuration.resultsName;
@@ -93,7 +84,7 @@ public class DistributedNaiveEvaluator implements IDistributedRuleEvaluator {
 			logger.error("io exception", e);
 			throw new RuntimeException("io exception", e);
 		}				
-
+		*/
 	}
 
 }

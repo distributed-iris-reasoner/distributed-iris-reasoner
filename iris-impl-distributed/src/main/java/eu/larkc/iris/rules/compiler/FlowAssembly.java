@@ -20,6 +20,8 @@
 package eu.larkc.iris.rules.compiler;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -29,11 +31,12 @@ import org.slf4j.LoggerFactory;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.pipe.Pipe;
+import cascading.scheme.Scheme;
+import cascading.scheme.SequenceFile;
 import cascading.tap.Hfs;
+import cascading.tap.MultiSourceTap;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
-import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import eu.larkc.iris.Configuration;
 import eu.larkc.iris.evaluation.EvaluationContext;
@@ -50,23 +53,25 @@ public class FlowAssembly {
 	
 	private Configuration mConfiguration;
 	
-	private Tap source;
-	private Fields sinkFields;
+	private Fields fields;
 	private Pipe pipe;
 	
 	private Flow flow = null;
 	private String path = null;
 	
-	public FlowAssembly (Configuration configuration, Tap source, Fields sinkFields, Pipe pipe) {
+	public FlowAssembly (Configuration configuration, Fields fields, Pipe pipe) {
 		this.mConfiguration = configuration;
-		this.source = source;
-		this.sinkFields = sinkFields;
+		this.fields = fields;
 		this.pipe = pipe;
 	}
 	
 	private Flow createFlow(String flowName, String output) {
+		Tap source = prepareSourceTaps(fields);
+		
 		//Map<String, Tap> sinks = new HashMap<String, Tap>();
-		Tap headSink = new Hfs(sinkFields, output, true );
+		SequenceFile sinkScheme = new SequenceFile(fields);
+		sinkScheme.setNumSinkParts(1);
+		Tap headSink = new Hfs(sinkScheme, output, true );
 		//sinks.put(RESULT_TAIL, headSink);
 		
 		Flow flow = new FlowConnector(mConfiguration.flowProperties).connect(flowName, source, headSink, pipe);
@@ -82,29 +87,18 @@ public class FlowAssembly {
 		boolean hasNewInferences = false;
 		
 		String flowIdentificator = "_" + evaluationContext.getIterationNumber() + "_" + evaluationContext.getRuleNumber();
-		String flowName = "flow" + flowIdentificator;
 		String resultName = mConfiguration.keepResults ? mConfiguration.resultsName : "inference";
-		String output = mConfiguration.project + "/tmp/inferences/" + resultName + flowIdentificator;
+		String flowName = resultName + flowIdentificator;
+		path = mConfiguration.project + "/inferences/" + resultName + "/" + resultName + flowIdentificator;
 		
-		flow = createFlow(flowName, output);
+		flow = createFlow(flowName, path);
 		flow.complete();
 		
-		path = mConfiguration.project + "/data/inferences/tmp/" + mConfiguration.resultsName + flowIdentificator;
 		try {
 			TupleEntryIterator iterator = flow.openSink();
-			Hfs hfs = new Hfs(Fields.ALL, path);
-			TupleEntryCollector tec = hfs.openForWrite(mConfiguration.jobConf);
-			while(iterator.hasNext()) {
-				if (!hasNewInferences) {
-					hasNewInferences = true;
-				}
-				TupleEntry te = iterator.next();
-				//logger.info("add : " + te.getTuple());
-				tec.add(te);
+			if(iterator.hasNext()) {
+				hasNewInferences = true;
 			}
-			tec.close();
-			FileSystem fs = FileSystem.get(mConfiguration.hadoopConfiguration);
-			fs.delete(new Path(output), true);
 		} catch (IOException e) {
 			logger.error("io exception", e);
 			throw new RuntimeException("io exception", e);
@@ -116,7 +110,35 @@ public class FlowAssembly {
 		if (flow == null) {
 			return null;
 		}
-		Hfs hfs = new Hfs(Fields.ALL, path);
-		return hfs.openForRead(mConfiguration.jobConf);
+		return flow.openSink();
+		//Hfs hfs = new Hfs(Fields.ALL, path);
+		//return hfs.openForRead(mConfiguration.jobConf);
 	}
+	
+	private MultiSourceTap prepareSourceTaps(Fields fields) {
+		SequenceFile sourceScheme = new SequenceFile(fields);
+		List<Tap> sources = new ArrayList<Tap>();
+		Tap factsTap = new Hfs(sourceScheme, mConfiguration.project + "/facts/");
+		Tap inferencesTap = getInferencesTap(sourceScheme);
+		sources.add(factsTap);
+		if (inferencesTap != null) {
+			sources.add(inferencesTap);
+		}
+		return new MultiSourceTap(sources.toArray(new Tap[0])); //we can assume that the number of fields are the same as the head;s tuple size + 1 (the predicate)		
+	}
+	
+	private Tap getInferencesTap(Scheme scheme) {
+		try {
+			String path = mConfiguration.project + "/inferences/";
+			FileSystem fs = FileSystem.get(mConfiguration.hadoopConfiguration);
+			if (!fs.exists(new Path(path))) {
+				return null;
+			}
+			return new Hfs(scheme, path);
+		} catch (IOException e) {
+			logger.error("io exception", e);
+			throw new RuntimeException("io exception", e);
+		}		
+	}
+
 }

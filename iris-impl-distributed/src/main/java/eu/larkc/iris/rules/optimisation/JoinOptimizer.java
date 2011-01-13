@@ -14,6 +14,7 @@ import org.deri.iris.api.basics.ILiteral;
 import org.deri.iris.api.basics.IRule;
 import org.deri.iris.api.basics.ITuple;
 import org.deri.iris.api.terms.IVariable;
+import org.deri.iris.basics.BasicFactory;
 import org.deri.iris.rules.IRuleOptimiser;
 import org.deri.iris.utils.TermMatchingAndSubstitution;
 import org.slf4j.Logger;
@@ -140,14 +141,14 @@ public class JoinOptimizer implements IRuleOptimiser {
 	 */
 	@Override
 	public IRule optimise(IRule rule) {
+		IRule aRule = null;
 		literals = rule.getBody();
 		List<Literals> resultLiterals = findPath(0, null, new ArrayList<ILiteral>());
 		if (!resultLiterals.isEmpty()) {
-			rule.getBody().clear();
-			rule.getBody().addAll(resultLiterals.get(0));
+			aRule = BasicFactory.getInstance().createRule(rule.getHead(), resultLiterals.get(0));
 		}
 		
-		return rule;
+		return aRule;
 	}
 
 }

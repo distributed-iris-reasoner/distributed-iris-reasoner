@@ -52,9 +52,62 @@ java.lang.NullPointerException
 Execution
 =========
 
-./bin/hadoop jar /home/valer/Projects/eu.larkc.reasoner/workspace/distributed-iris-reasoner/iris-impl-distributed/build/iris-impl-distributed-0.0.1.jar eu.larkc.iris.Main dbpedia -process DATALOG ./rules.txt true subclassof
-./bin/hadoop jar /home/valer/Projects/eu.larkc.reasoner/workspace/distributed-iris-reasoner/iris-impl-distributed/build/iris-impl-distributed-0.0.1.jar eu.larkc.iris.Main dbpedia -process RIF ./rules.xml true subclassof
+./bin/hadoop jar /home/valer/Projects/eu.larkc.reasoner/workspace/distributed-iris-reasoner/iris-impl-distributed/build/iris-impl-distributed-0.0.1.jar eu.larkc.iris.Main dbpedia -process DATALOG ./rules.txt subclassof
+./bin/hadoop jar /home/valer/Projects/eu.larkc.reasoner/workspace/distributed-iris-reasoner/iris-impl-distributed/build/iris-impl-distributed-0.0.1.jar eu.larkc.iris.Main dbpedia -process RIF ./rules.xml subclassof
 
 ./bin/hadoop jar /home/valer/Projects/eu.larkc.reasoner/workspace/distributed-iris-reasoner/iris-impl-distributed/build/iris-impl-distributed-0.0.1.jar eu.larkc.iris.Main dbpedia -importNTriple /home/valer/Tasks/iris_distributed_reasoner/instance_types_en.nt instance-types
 ./bin/hadoop jar /home/valer/Projects/eu.larkc.reasoner/workspace/distributed-iris-reasoner/iris-impl-distributed/build/iris-impl-distributed-0.0.1.jar eu.larkc.iris.Main dbpedia -importRdf default ontology
 ./bin/hadoop jar /home/valer/Projects/eu.larkc.reasoner/workspace/distributed-iris-reasoner/iris-impl-distributed/build/iris-impl-distributed-0.0.1.jar eu.larkc.iris.Main dbpedia -test 
+
+
+Execute with Amazon EC2
+=======================
+
+1. Create an Amazon EC2 account
+2. Install whirr http://incubator.apache.org/whirr/
+3. Write an haddop.properties file like this one :
+
+whirr.service-name=hadoop
+whirr.cluster-name=myhadoopcluster
+whirr.instance-templates=1 jt+nn,1 dn+tt
+whirr.provider=ec2
+whirr.identity=AKIAIGLBFMZRZWL5A3TQ
+whirr.credential=K+Lqb23cDj7V3W9WYXmENWC5udlLAqWXahQKV6C1
+whirr.private-key-file=/home/valer/.ec2/keypair/APKAJHUH3LALVR23LTJQ 
+#whirr.private-key-file=/home/valer/.ec2/keypair/APKAJHUH3LALVR23LTJQ.pub
+whirr.hardware-id=t1.micro
+
+The authentication values are from the amazon account.
+
+4. Run the cluster with
+
+./bin/whirr launch-cluster --config ../hadoop.properties
+
+5. To check the hadoop namenode and job tracker use :
+
+http://ec2-184-72-188-205.compute-1.amazonaws.com
+
+6. To ssh to master node use :
+
+ssh -i /home/valer/.ec2/keypair/APKAJHUH3LALVR23LTJQ ec2-user@ec2-184-72-188-205.compute-1.amazonaws.com
+
+7. To use hadoop tools do the following :
+
+export HADOOP_CONF_DIR=~/.whirr/myhadoopcluster/
+export JAVA_HOME=/usr/lib/jvm/java-6-sun/
+
+start the script :
+
+~/.whirr/myhadoopcluster/hadoop-proxy.sh
+
+then you may use from the haddop installation dir (same version as on amazon, in our case 0.20.2)
+
+./bin/hadoop fs -ls /
+./bin/hadoop fs -mkdir input
+./bin/hadoop fs -put LICENSE.txt input
+./bin/hadoop jar hadoop-0.20.2-examples.jar wordcount input output
+./bin/hadoop fs -cat output/part-*
+
+8. Stop the cluster with
+
+./bin/whirr destroy-cluster --config ../hadoop.properties
