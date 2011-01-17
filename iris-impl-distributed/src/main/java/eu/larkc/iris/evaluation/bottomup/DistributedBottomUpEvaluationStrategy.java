@@ -15,13 +15,18 @@
 package eu.larkc.iris.evaluation.bottomup;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
 
 import org.deri.iris.EvaluationException;
 import org.deri.iris.ProgramNotStratifiedException;
 import org.deri.iris.RuleUnsafeException;
 import org.deri.iris.api.basics.ILiteral;
+import org.deri.iris.api.basics.IPredicate;
 import org.deri.iris.api.basics.IQuery;
 import org.deri.iris.api.basics.IRule;
 import org.deri.iris.api.terms.IVariable;
@@ -29,17 +34,22 @@ import org.deri.iris.evaluation.IEvaluationStrategy;
 import org.deri.iris.evaluation.stratifiedbottomup.EvaluationUtilities;
 import org.deri.iris.storage.IRelation;
 
+import cascading.flow.Flow;
+import cascading.flow.FlowConnector;
+import cascading.operation.Identity;
+import cascading.pipe.Each;
+import cascading.pipe.Pipe;
+import cascading.tap.Hfs;
+import cascading.tap.Tap;
+
 import eu.larkc.iris.evaluation.PredicateCounts;
+import eu.larkc.iris.rules.IRecursiveRulePreProcessor;
+import eu.larkc.iris.rules.NonOptimizingRecursiveRulePreProcessor;
 import eu.larkc.iris.rules.compiler.CascadingRuleCompiler;
 import eu.larkc.iris.rules.compiler.IDistributedCompiledRule;
 import eu.larkc.iris.rules.compiler.IDistributedRuleCompiler;
 
 /**
- * For now we can choose the standard interface of IEvaluation Strategy as
- * starting point. In the long term IKnowledgebase should be reimplemented to
- * encapsulate 1.) a set fo RIF rules, 2.) references (URIs) that identify RDF
- * graphs to work on.
- * 
  * 
  * @History 14.09.2010 fisf, Creation
  * @author Florian Fischer
@@ -47,12 +57,7 @@ import eu.larkc.iris.rules.compiler.IDistributedRuleCompiler;
 public class DistributedBottomUpEvaluationStrategy implements
 		IEvaluationStrategy {
 
-	/**
-	 * TODO (fisf): IRule should encapsulate parsed RIF rules in this case. TODO
-	 * (fisf): IFacts should encapsulate a set of datasources and predicates
-	 * they contain. This directly results in suitable taps and tuples for
-	 * cascading.
-	 * 
+	/** 
 	 * @param configuration
 	 * @param ruleEvaluatorFactory
 	 * @param rules
@@ -63,12 +68,10 @@ public class DistributedBottomUpEvaluationStrategy implements
 		this.mRuleEvaluatorFactory = ruleEvaluatorFactory;
 		this.mConfiguration = configuration;
 		this.mRules = rules;
+		this.utils = new EvaluationUtilities(mConfiguration);
 	}
 
 	/*
-	 * 
-	 * (non-Javadoc)
-	 * 
 	 * @see
 	 * org.deri.iris.evaluation.IEvaluationStrategy#evaluateQuery(org.deri.iris
 	 * .api.basics.IQuery, java.util.List)
@@ -77,7 +80,6 @@ public class DistributedBottomUpEvaluationStrategy implements
 	public IRelation evaluateQuery(IQuery query, List<IVariable> outputVariables)
 			throws ProgramNotStratifiedException, RuleUnsafeException,
 			EvaluationException {
-
 		
 		// Real query answering should be delegated to an external store.
 		// this requires 1.) Wrapping up e.g. a sparql query in a IQuery implementation, and 2.) accessing the external store hidden behind
@@ -85,13 +87,7 @@ public class DistributedBottomUpEvaluationStrategy implements
 		
 		initBottomUpEvaluation(mRules);
 		
-		return null;
-		
-		
-		//throw new NotImplementedException("Query answering not yet delegated to external store");		
-		
-		//TODO: Unwrap query, convert to suitable format, execute over external store, process answers
-		
+		return null;		
 	}
 
 	/**
@@ -100,105 +96,66 @@ public class DistributedBottomUpEvaluationStrategy implements
 	 * @param rules
 	 * @throws EvaluationException
 	 */
-	public void initBottomUpEvaluation(List<IRule> rules) throws EvaluationException {
+	public void initBottomUpEvaluation(List<IRule> rules) throws EvaluationException {		
 		
-		// setup of utils (stratification, etc.) according to configuration
-		// objects
-		EvaluationUtilities utils = new EvaluationUtilities(mConfiguration);
-
-		// are rules safe? TODO (fisf): check close compliance with
-		// http://www.w3.org/TR/rif-core/#Safeness_Criteria
-		List<IRule> safeRules = utils.applyRuleSafetyProcessor(rules);
+		List<IRule> safeRules = utils.applyRuleSafetyProcessor(rules);		
 		
-		//we need to determine if there are cycles 
 		//TODO (fisf): make it possible to enable/disable this with a switch on mConfiguration
 		//this should be encapsulated in EvaluationUtilities when there are multiple implementations that e.g. can be chained
-		//IRecursiveRulePreProcessor recursiveRuleProcessor = new NonOptimizingRecursiveRulePreProcessor();
-		//safeRules = recursiveRuleProcessor.process(safeRules);
-				
-		// order rules into different strata for execution. TODO (fisf,
-		// optimization): This might be more expensive than needed in the
-		// absence of negation,
-		// a simple dependency graph might be enough
-		List<List<IRule>> stratifiedRules = utils.stratify(safeRules);
-
-		// compile to cascading
+		IRecursiveRulePreProcessor recursiveRuleProcessor = new NonOptimizingRecursiveRulePreProcessor();
+		recursiveRuleProcessor.process(safeRules);
+		List<IRule> singlePassRules = recursiveRuleProcessor.getNonrecursive();
+		List<IRule> recursiveRules = recursiveRuleProcessor.getRecursive();
+		
+		evaluateSinglePassRules(singlePassRules);
+		
+		evaluateRecursiveRules(recursiveRules);	
+	}
+	
+	protected void evaluateSinglePassRules(List<IRule> rules) throws EvaluationException {	
+		IDistributedRuleEvaluator singlePass = mRuleEvaluatorFactory.createEvaluator(IDistributedRuleEvaluatorFactory.SINGLEPASSEVALUATOR);
 		IDistributedRuleCompiler rc = new CascadingRuleCompiler(mConfiguration);
+		
+		List<IRule> reorderedRules = utils.reOrderRules(rules);		
+		List<IRule> optimisedRules = utils.applyRuleOptimisers(reorderedRules);
 
-		IDistributedRuleEvaluator evaluator = mRuleEvaluatorFactory.createEvaluator();
+		List<IDistributedCompiledRule> compiledRules = new ArrayList<IDistributedCompiledRule>();
 		
-		
+		for (IRule rule : optimisedRules) {
+			IDistributedCompiledRule compiledRule = rc.compile(rule);
+			compiledRules.add(compiledRule);
+		}
+
+		singlePass.evaluateRules(compiledRules, mConfiguration);		
+	}
+	
+	protected void evaluateRecursiveRules(List<IRule> rules) throws EvaluationException {		
+		//Done by DependencyMinimizingStratifier, TODO (fisf) complete 
+		List<List<IRule>> stratifiedRules = utils.stratify(rules);
+	
+		IDistributedRuleCompiler rc = new CascadingRuleCompiler(mConfiguration);		
+		IDistributedRuleEvaluator evaluator = mRuleEvaluatorFactory.createEvaluator(IDistributedRuleEvaluatorFactory.RECURSIONAWAREEVALUATOR);		
 		PredicateCounts predicateCounts = PredicateCounts.getInstance(mConfiguration);
 		
-		// for each rule layer, reorder and optimize, compile, evaluate
+		//process each rule layer independently, no recomputations outside of each layer are required
 		for (List<IRule> stratum : stratifiedRules) {
 			
 			for (IRule rule : stratum) {
 				ListIterator<ILiteral> iterator = rule.getBody().listIterator();
 				while (iterator.hasNext()) {
 					ILiteral literal = iterator.next();
+					//TODO: fisf, attach predicatecount to each literal so that it can be fed to the ruleoptimizer.
+					//Should then be processed in applyRuleOptimizers similarly to ReOrderLiteralsOptimiser
 					//Long count = predicateCounts.getCount(literal.getAtom());
 				}
 			}
-
-			// Re-order stratum, this could also work on the whole program at
-			// once, see above
-			List<IRule> reorderedRules = utils.reOrderRules(stratum);
-
-			// Rule optimisation, per default
-			List<IRule> optimisedRules = utils
-					.applyRuleOptimisers(reorderedRules);
-
-			List<IDistributedCompiledRule> compiledRules = new ArrayList<IDistributedCompiledRule>();
-
-			//extract all predicates, used to load all data into HFS
-			/*
-			Set<IPredicate> predicates = new HashSet<IPredicate>();
-			for (IRule rule : optimisedRules) {
-				predicates.add(rule.getHead().get(0).getAtom().getPredicate());
-				for (ILiteral literal : rule.getBody()) {
-					IPredicate predicate = literal.getAtom().getPredicate();
-					predicates.add(predicate);
-				}
-			}
-			FactsTap source = mFacts.getFacts(predicates.toArray(new IPredicate[0]));
-			//FactsTap source = mFacts.getFacts(optimisedRules.get(0).getHead().get(0).getAtom());
 			
-			String output = mConfiguration.HADOOP_HFS_PATH + "/" + mFacts.getStorageId();
-			Tap sink = new Hfs(source.getSourceFields(), output , true );
+			//reorder rules within stratum
+			List<IRule> reorderedRules = utils.reOrderRules(stratum);		
+			//TODO(fisf): apply optimizer for outer joins
+			List<IRule> optimisedRules = utils.applyRuleOptimisers(reorderedRules);
 
-			//String output1 = mConfiguration.HADOOP_HFS_PATH + "/" + mFacts.getStorageId() + "1";
-			//Tap sink1 = new Hfs( source.getSourceFields(), output1 , true );
-
-			Map<String, Tap> sources = new HashMap<String, Tap>();
-			sources.put("source", source);
-
-			Map<String, Tap> sinks = new HashMap<String, Tap>();
-			sinks.put("sink", sink);
-			//sinks.put("sink1", sink1);
-
-			Pipe sourcePipe = new Pipe("source");
-			sourcePipe = new Each(sourcePipe, source.getSourceFields(), new Identity(source.getSourceFields()));
-			Pipe identity = new Pipe("sink", sourcePipe);
-			//identity = new Each(identity, source.getSourceFields(), new Identity(source.getSourceFields()));
-			//Pipe identity1 = new Pipe("sink1", sourcePipe);
-			//identity1 = new Each(identity1, source.getSourceFields(), new Identity(source.getSourceFields()));
-			
-			//Flow aFlow = new FlowConnector(mConfiguration.flowProperties).connect(sources, sink, identity);
-			Flow aFlow = new FlowConnector(mConfiguration.flowProperties).connect(sources, sinks, identity);
-			aFlow.complete();
-			*/
-			//~
-
-			// TODO (fisf, optimization): essentially each rule is compiled
-			// independently and than evaluated by the naive evaluator
-			// one-by-one
-			// until no further change occurs. However, it should be possible to
-			// evaluate rules in each stratum in parallel.
-			// This requires a new implementation of 1.) an Evaluator that
-			// replaces the naive one, 2.) a new factory that is passed along as
-			// argument
-			// This would basically combine the different flows to a cascade.
+			List<IDistributedCompiledRule> compiledRules = new ArrayList<IDistributedCompiledRule>();			
 			for (IRule rule : optimisedRules) {
 				IDistributedCompiledRule compiledRule = rc.compile(rule);
 				compiledRules.add(compiledRule);
@@ -207,6 +164,48 @@ public class DistributedBottomUpEvaluationStrategy implements
 			evaluator.evaluateRules(compiledRules, mConfiguration);
 		}
 	}
+	
+	protected void loadDataHFS(List<IRule> rules) {
+		//extract all predicates, used to load all data into HFS
+		/*
+		Set<IPredicate> predicates = new HashSet<IPredicate>();
+		for (IRule rule : optimisedRules) {
+			predicates.add(rule.getHead().get(0).getAtom().getPredicate());
+			for (ILiteral literal : rule.getBody()) {
+				IPredicate predicate = literal.getAtom().getPredicate();
+				predicates.add(predicate);
+			}
+		}
+		FactsTap source = mFacts.getFacts(predicates.toArray(new IPredicate[0]));
+		//FactsTap source = mFacts.getFacts(optimisedRules.get(0).getHead().get(0).getAtom());
+		
+		String output = mConfiguration.HADOOP_HFS_PATH + "/" + mFacts.getStorageId();
+		Tap sink = new Hfs(source.getSourceFields(), output , true );
+
+		//String output1 = mConfiguration.HADOOP_HFS_PATH + "/" + mFacts.getStorageId() + "1";
+		//Tap sink1 = new Hfs( source.getSourceFields(), output1 , true );
+
+		Map<String, Tap> sources = new HashMap<String, Tap>();
+		sources.put("source", source);
+
+		Map<String, Tap> sinks = new HashMap<String, Tap>();
+		sinks.put("sink", sink);
+		//sinks.put("sink1", sink1);
+
+		Pipe sourcePipe = new Pipe("source");
+		sourcePipe = new Each(sourcePipe, source.getSourceFields(), new Identity(source.getSourceFields()));
+		Pipe identity = new Pipe("sink", sourcePipe);
+		//identity = new Each(identity, source.getSourceFields(), new Identity(source.getSourceFields()));
+		//Pipe identity1 = new Pipe("sink1", sourcePipe);
+		//identity1 = new Each(identity1, source.getSourceFields(), new Identity(source.getSourceFields()));
+		
+		//Flow aFlow = new FlowConnector(mConfiguration.flowProperties).connect(sources, sink, identity);
+		Flow aFlow = new FlowConnector(mConfiguration.flowProperties).connect(sources, sinks, identity);
+		aFlow.complete();
+		*/
+	}
+	
+	protected EvaluationUtilities utils;
 
 	protected final IDistributedRuleEvaluatorFactory mRuleEvaluatorFactory;
 

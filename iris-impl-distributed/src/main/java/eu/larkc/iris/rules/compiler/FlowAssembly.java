@@ -83,6 +83,17 @@ public class FlowAssembly {
 		return flow;
 	}
 	
+	public void evaluate(Integer ruleNumber) {
+		//TODO: ensure this works correctly
+		String resultName = mConfiguration.keepResults ? mConfiguration.resultsName : "inference";
+		String flowIdentificator = "_" + ruleNumber;
+		path = mConfiguration.project + "/inferences/" + resultName + "/" + resultName + flowIdentificator;
+		
+		String flowName = resultName + flowIdentificator;
+		flow = createFlow(flowName, path);
+		flow.complete();		
+	}
+	
 	public boolean evaluate(EvaluationContext evaluationContext) {
 		boolean hasNewInferences = false;
 		

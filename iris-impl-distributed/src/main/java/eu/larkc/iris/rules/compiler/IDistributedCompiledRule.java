@@ -28,6 +28,15 @@ import eu.larkc.iris.evaluation.EvaluationContext;
  */
 public interface IDistributedCompiledRule {
 
+	
+	/**
+	 * Evaluate rule with all known facts. 
+	 * Does not return information about whether new information was derived.
+	 * 
+	 * @param ruleNumber
+	 */
+	void evaluate(Integer ruleNumber) throws EvaluationException;
+	
 	/**
 	 * Evaluate rule with all known facts.
 	 * @return The result relation for this rule.

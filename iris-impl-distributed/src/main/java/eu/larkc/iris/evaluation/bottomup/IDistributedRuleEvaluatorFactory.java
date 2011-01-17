@@ -19,9 +19,21 @@ package eu.larkc.iris.evaluation.bottomup;
 
 public interface IDistributedRuleEvaluatorFactory {
 
+	public final static int SINGLEPASSEVALUATOR = 0;
+	
+	public final static int RECURSIONAWAREEVALUATOR = 1;
+	
+	
 	/**
 	 * Create a new evaluator.
 	 */
 	IDistributedRuleEvaluator createEvaluator();
 
+	/**
+	 * Create a specific new evaluator.
+	 * @param evaluator
+	 * @return
+	 */
+	IDistributedRuleEvaluator createEvaluator(int evaluator);
+	
 }

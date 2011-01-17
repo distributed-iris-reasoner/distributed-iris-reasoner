@@ -99,7 +99,7 @@ public class EvaluationUtilities
 		}
 			
 		return optimisedRules;
-	}
+	}	
 	
 	/**
 	 * Check the given rules for rule-safety (unbound variables).

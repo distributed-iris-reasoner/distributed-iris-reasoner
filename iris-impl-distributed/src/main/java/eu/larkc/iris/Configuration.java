@@ -22,15 +22,22 @@
  */
 package eu.larkc.iris;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.mapred.JobConf;
+import org.deri.iris.api.IProgramOptimisation;
+import org.deri.iris.rules.stratification.GlobalStratifier;
 
 import eu.larkc.iris.evaluation.IDistributedEvaluationStrategyFactory;
 import eu.larkc.iris.evaluation.bottomup.DistributedBottomUpEvaluationStrategyFactory;
 import eu.larkc.iris.evaluation.bottomup.naive.DistributedNaiveEvaluatorFactory;
+import eu.larkc.iris.rules.IRecursiveRulePreProcessor;
+import eu.larkc.iris.rules.NonOptimizingRecursiveRulePreProcessor;
 import eu.larkc.iris.rules.optimisation.JoinOptimizer;
+import eu.larkc.iris.rules.stratification.DependencyMinimizingStratifier;
 
 /**
  * This class holds all configuration data for a knowledge base.
@@ -57,9 +64,14 @@ public class Configuration extends org.deri.iris.Configuration
 	/** The evaluation strategy to use. */
 	public IDistributedEvaluationStrategyFactory evaluationStrategyFactory = new DistributedBottomUpEvaluationStrategyFactory( new DistributedNaiveEvaluatorFactory() );
 
+	public final List<IRecursiveRulePreProcessor> recursiveRulePreProcessors = new ArrayList<IRecursiveRulePreProcessor>();
+	
 	public Configuration() {
+		//TODO: check if all the optimizations in super are applicable
 		super();
 		
 		ruleOptimisers.add(new JoinOptimizer());
+		recursiveRulePreProcessors.add(new NonOptimizingRecursiveRulePreProcessor());
+		stratifiers.add(new DependencyMinimizingStratifier());
 	}
 }
