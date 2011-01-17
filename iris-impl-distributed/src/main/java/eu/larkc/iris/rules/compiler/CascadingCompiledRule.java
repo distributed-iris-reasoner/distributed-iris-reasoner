@@ -40,6 +40,20 @@ public class CascadingCompiledRule implements IDistributedCompiledRule {
 		this.mConfiguration = configuration;
 	}
 
+	
+	
+	@Override
+	public void evaluate(Integer ruleNumber) throws EvaluationException {
+	
+		if(flowAssembly == null) {
+			throw new IllegalArgumentException("Flow assembly must not be null");
+		}			
+				
+		flowAssembly.evaluate(ruleNumber);
+	}
+
+
+
 	/*
 	 * (non-Javadoc)
 	 * @see eu.larkc.iris.rules.compiler.IDistributedCompiledRule#evaluate(eu.larkc.iris.evaluation.EvaluationContext)
@@ -50,12 +64,8 @@ public class CascadingCompiledRule implements IDistributedCompiledRule {
 		//start returns immediately		
 		if(flowAssembly == null) {
 			throw new IllegalArgumentException("Flow assembly must not be null");
-		}
-		
-		//TODO: jobconf is constructed within the rule compiler right now, which is likely not the right place.
-		//this should either happen here or in a custom evaluator implementation		
-		
-		//FIXME (fisf): check for recursion / cycles.
+		}		
+	
 		//Overall story:
 		//Naive evaluation does several passes over the rules and finishes when no new tuples are added anymore.
 		//Several passes are actually only needed if the dependency graph contains cycles.

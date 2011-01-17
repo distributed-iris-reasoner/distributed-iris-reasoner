@@ -22,9 +22,21 @@ import eu.larkc.iris.evaluation.bottomup.IDistributedRuleEvaluatorFactory;
 
 public class DistributedNaiveEvaluatorFactory implements IDistributedRuleEvaluatorFactory {
 
+	
 	@Override
 	public IDistributedRuleEvaluator createEvaluator() {
 		return new DistributedNaiveEvaluator();
 	}
 
+	@Override
+	public IDistributedRuleEvaluator createEvaluator(int evaluator) {
+		switch (evaluator) {
+		case SINGLEPASSEVALUATOR:
+			return new DistributedOnePassEvaluator();			
+		case RECURSIONAWAREEVALUATOR:
+			return new DistributedNaiveEvaluator();
+		default:
+			return null;
+		}
+	}
 }

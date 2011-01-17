@@ -19,12 +19,10 @@ import eu.larkc.iris.storage.FactsFactory;
 
 /**
  * A collection of tests that ensure the correction support of various Datalog language features.
- * 
- * TODO: (fisf) Add data import if we want to go beyond testing the compiler. This needs a RIF parser and suitable RDF data.
- * 
+ *  
  * @author Florian Fischer, fisf, 09-Dec-2010
  */
-public class LangFeaturesTest extends EvaluationTest {
+public abstract class LangFeaturesTest extends EvaluationTest {
 
 	/**
 	 * The Test program
