@@ -5,3 +5,6 @@
 <http://dbpedia.org/ontology/4> <http://www.w3.org/2000/01/rdf-schema#q> <http://dbpedia.org/ontology/5> .
 <http://dbpedia.org/ontology/5> <http://www.w3.org/2000/01/rdf-schema#r> <http://dbpedia.org/ontology/6> .
 <http://dbpedia.org/ontology/4> <http://www.w3.org/2000/01/rdf-schema#s> <http://dbpedia.org/ontology/6> .
+<http://dbpedia.org/ontology/4> <http://www.w3.org/2000/01/rdf-schema#q> <http://dbpedia.org/ontology/5> .
+<http://dbpedia.org/ontology/5> <http://www.w3.org/2000/01/rdf-schema#r> <http://dbpedia.org/ontology/6> .
+<http://dbpedia.org/ontology/4> <http://www.w3.org/2000/01/rdf-schema#s> <http://dbpedia.org/ontology/6> .

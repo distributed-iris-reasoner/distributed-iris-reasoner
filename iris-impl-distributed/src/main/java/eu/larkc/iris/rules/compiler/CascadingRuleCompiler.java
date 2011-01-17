@@ -15,7 +15,6 @@ D * Copyright 2010 Softgress - http://www.softgress.com/
  */
 package eu.larkc.iris.rules.compiler;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -26,8 +25,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.NotImplementedException;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.deri.iris.EvaluationException;
 import org.deri.iris.api.basics.IAtom;
 import org.deri.iris.api.basics.ILiteral;
@@ -54,11 +51,6 @@ import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.cogroup.InnerJoin;
 import cascading.pipe.cogroup.RightJoin;
-import cascading.scheme.Scheme;
-import cascading.scheme.SequenceFile;
-import cascading.tap.Hfs;
-import cascading.tap.MultiSourceTap;
-import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import eu.larkc.iris.Utils;
 import eu.larkc.iris.evaluation.ConstantFilter;
@@ -113,10 +105,6 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		fieldsVariablesMapping.loadAtom(head); //load also the heads fields, to do the left outer join
 		PipeFielded bodyPipe = compileBody(body);
 		
-		// tell the planner remove all Debug operations
-		//Properties properties = new Properties();
-		//FlowConnector.setDebugLevel(properties, DebugLevel.NONE);
-
 		FlowAssembly compiledCascadingRuleFlowAssembly = attachTaps(bodyPipe, rule);
 
 		IPredicate headPredicate = head.getPredicate();
@@ -451,17 +439,18 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 
 		FieldsList ruleFieldsList = rulePipeFielded.getFieldsList();
 		FieldsList headFieldsList = identifyHeadVariableFields(fieldsVariablesMapping, headAtom, ruleFieldsList);
-		
-		//Fields resultFields = ruleFieldsList.getFields(resultFieldsList);
-		//resultPipe = new GroupBy(resultPipe, resultFields); //eliminate duplicates
-		//resultPipe = new Every(resultPipe, new Count(), resultFields);
-		
+						
 		headFieldsList.add(0, HEAD_PREDICATE_FIELD);
 		ruleFieldsList.add(HEAD_PREDICATE_FIELD);
 		Fields headFields = ruleFieldsList.getFields(headFieldsList);
 		rulePipe = new Each( rulePipe, new Insert( new Fields(HEAD_PREDICATE_FIELD), new PredicateWritable(headAtom.getPredicate())), headFields);
 		
-		FlowAssembly flowAssembly = new FlowAssembly(mConfiguration, headFieldsList.getFields(), rulePipe);//, countPipe);
+		Fields resultFields = headFieldsList.getFields();
+		
+		rulePipe = new GroupBy(rulePipe, resultFields); //eliminate duplicates
+		rulePipe = new Every(rulePipe, new Count(), resultFields);
+
+		FlowAssembly flowAssembly = new FlowAssembly(mConfiguration, resultFields, rulePipe);//, countPipe);
 		return flowAssembly;
 	}
 	

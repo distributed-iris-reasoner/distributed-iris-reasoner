@@ -42,6 +42,7 @@ import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryIterator;
 import eu.larkc.iris.evaluation.bottomup.DistributedBottomUpEvaluationStrategyFactory;
 import eu.larkc.iris.evaluation.bottomup.naive.DistributedNaiveEvaluatorFactory;
+import eu.larkc.iris.exports.Exporter;
 import eu.larkc.iris.imports.Importer;
 
 /**
@@ -65,12 +66,17 @@ public class Main extends Configured implements Tool {
 	private boolean ntripleImporter = false;
 	private boolean tester = false;
 	private boolean processer = false;
+	private boolean rdfExporter = false;
+	private boolean ntripleExporter = false;
 	
 	//rdf importer args
 	private String storageId = null;
 
 	//ntriple importer
 	private String inPath = null;
+
+	//ntriple exporter
+	private String outPath = null;
 
 	//test args
 	private String sourcePath = null;
@@ -87,7 +93,11 @@ public class Main extends Configured implements Tool {
 	protected List<IRule> rules;
 	
 	private void printUsage() {
-		System.out.println("<project_name> <-importRdf storage_id import_name | -importNTriple path_to_file import_name | -process rules_type:<DATALOG|RIF> rules_file_path keep_results:<true:false> results_name output_storage_id > ");
+		System.out.println("<project_name> <-importRdf storage_id import_name | " +
+				"-importNTriple path_to_file import_name | " + 
+				"-process rules_type:<DATALOG|RIF> rules_file_path keep_results:<true:false> results_name output_storage_id > | " +
+				"-exportRdf storage_id results_name | " + 
+				"-exportNTriple path_to_export_file name results_name ");
 	}
 	
 	private void processUserArguments(String[] args) {
@@ -118,6 +128,14 @@ public class Main extends Configured implements Tool {
 					outputStorageId = args[5];
 				}
 			}
+		} else if (operation.equalsIgnoreCase("-exportRdf")) {
+			rdfExporter = true;
+			storageId = args[2];
+			resultsName = args[3];
+		} else if (operation.equalsIgnoreCase("-exportNTriple")) {
+			ntripleExporter = true;
+			outPath = args[2];
+			resultsName = args[3];
 		} else if (operation.equals("-test")) {
 			tester = true;
 			sourcePath = args[2];
@@ -159,6 +177,16 @@ public class Main extends Configured implements Tool {
 
 	public int doNTripleImport(eu.larkc.iris.Configuration configuration) {
 		new Importer().importFromFile(configuration, project, inPath, importName);
+		return 0;
+	}
+
+	public int doRdfExport(eu.larkc.iris.Configuration configuration) {
+		new Exporter().exportToRdf(configuration, project, storageId, resultsName);
+		return 0;
+	}
+
+	public int doNTripleExport(eu.larkc.iris.Configuration configuration) {
+		new Exporter().exportToFile(configuration, project, outPath, resultsName);
 		return 0;
 	}
 
@@ -224,6 +252,10 @@ public class Main extends Configured implements Tool {
 			return doTester(defaultConfiguration);
 		} else if (processer) {
 			return doProcess();
+		} else if (rdfExporter) {
+			return doRdfExport(defaultConfiguration);
+		} else if (ntripleExporter) {
+			return doNTripleExport(defaultConfiguration);
 		}
 		
 		return -1;

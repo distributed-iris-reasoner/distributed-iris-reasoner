@@ -87,7 +87,7 @@ public class FlowAssembly {
 		boolean hasNewInferences = false;
 		
 		String flowIdentificator = "_" + evaluationContext.getIterationNumber() + "_" + evaluationContext.getRuleNumber();
-		String resultName = mConfiguration.keepResults ? mConfiguration.resultsName : "inference";
+		String resultName = mConfiguration.resultsName != null ? mConfiguration.resultsName : "inference";
 		String flowName = resultName + flowIdentificator;
 		path = mConfiguration.project + "/inferences/" + resultName + "/" + resultName + flowIdentificator;
 		
