@@ -97,7 +97,7 @@ public class Main extends Configured implements Tool {
 				"-importNTriple path_to_file import_name | " + 
 				"-process rules_type:<DATALOG|RIF> rules_file_path keep_results:<true:false> results_name output_storage_id > | " +
 				"-exportRdf storage_id results_name | " + 
-				"-exportNTriple path_to_export_file name results_name ");
+				"-exportNTriple path_to_export_file results_name ");
 	}
 	
 	private void processUserArguments(String[] args) {
