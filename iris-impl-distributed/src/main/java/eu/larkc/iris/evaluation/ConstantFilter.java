@@ -47,7 +47,7 @@ public class ConstantFilter extends BaseOperation implements Filter {
 	public ConstantFilter(Map<String, WritableComparable> expectedConstants) {
 		this.mExpectedconstants = expectedConstants;
 	}
-	
+
 	/**
 	 * Removes all the tuples that do not match with the specified constants
 	 */

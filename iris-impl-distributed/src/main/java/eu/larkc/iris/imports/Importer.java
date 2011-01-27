@@ -36,6 +36,18 @@ public class Importer {
 
 	private static final Logger logger = LoggerFactory.getLogger(Importer.class);
 	
+	/*
+	private class PredicateCount {
+		private PredicateWritable predicate;
+		private Long count;
+		
+		private PredicateCount(PredicateWritable predicate, Long count) {
+			this.predicate = predicate;
+			this.count = count;
+		}
+	}
+	*/
+	
 	public void importFromRdf(Configuration configuration, String project, String storageId, String importName) {
 		Tap source = FactsFactory.getInstance(storageId).getFacts();
 		
@@ -82,6 +94,15 @@ public class Importer {
 			logger.error("io exception", e);
 			return;
 		}
+		
+		/*
+		try {
+			processIndexing(configuration, project, importName);
+		} catch (IOException e) {
+			logger.error("io exception", e);
+			throw new RuntimeException("io exception", e);
+		}
+		*/
 	}
 	
 	public void processNTriple(Configuration configuration, String inPath, String project, String importName) {
@@ -96,8 +117,80 @@ public class Importer {
 		Pipe sourcePipe = new Each("sourcePipe", new Fields("line"), parser);
 		
 		sourcePipe = new Each(sourcePipe, Fields.ALL, new TextImporterFunction());
-		
+				
 		Flow aFlow = new FlowConnector(configuration.flowProperties).connect(source, sink, sourcePipe);
-		aFlow.complete();		
+		aFlow.complete();
 	}
+	
+	/*
+	private void processIndexing(Configuration configuration, String project, String importName) throws IOException {
+		//process indexing
+		
+		Tap predicatesSource = new Hfs(new Fields(0, 1, 2), project + "/facts/" + importName, true );
+		Tap predicatesSink = new Hfs(new Fields(0, 1), project + "/facts/predicates/" + importName);
+		Pipe predicatesPipe = new Pipe("predicatesPipe");
+		predicatesPipe = new GroupBy(predicatesPipe, new Fields(0)); //group by predicates
+		predicatesPipe = new Every(predicatesPipe, new Count(new Fields("count")), new Fields(0, "count"));
+		Flow predicatesFlow = new FlowConnector(configuration.flowProperties).connect(predicatesSource, predicatesSink, predicatesPipe);
+		predicatesFlow.complete();
+		
+		List<PredicateCount> predicateCounts = new ArrayList<PredicateCount>();
+		
+		TupleEntryIterator predicatesEntryIterator = predicatesFlow.openSink();
+		while (predicatesEntryIterator.hasNext()) {
+			TupleEntry predicatesEntry = predicatesEntryIterator.next();
+			Tuple predicatesTuple = predicatesEntry.getTuple();
+			PredicateWritable predicate = (PredicateWritable) predicatesTuple.getObject(0);
+			Long count = predicatesTuple.getLong(1);
+			predicateCounts.add(new PredicateCount(predicate, count));
+		}
+
+		Tap importSource = new Hfs(new Fields(0, 1, 2), project + "/facts/" + importName, true );
+		Map<String, Tap> sinks = new HashMap<String, Tap>();
+		List<Pipe> pipes = new ArrayList<Pipe>();
+		Pipe sourcePipe = new Pipe("sourcePipe");
+		for (PredicateCount predicateCount : predicateCounts) {
+			PredicateWritable predicate = predicateCount.predicate;
+			
+			Scheme predicateScheme = new SequenceFile(new Fields(0, 1));
+			predicateScheme.setNumSinkParts(1);
+			Tap predicateSink = new Hfs(predicateScheme, project + "/facts/" + getPredicateId(predicate) + "/data/" + importName, true);
+			sinks.put(getPredicateId(predicate), predicateSink);
+			
+			Pipe predicatePipe = new Pipe(getPredicateId(predicate), sourcePipe);
+			predicatePipe = new Each(predicatePipe, new PredicateFilter(predicate));
+			predicatePipe = new Each(predicatePipe, new Identity(), new Fields(1, 2));
+			pipes.add(predicatePipe);
+		}
+		Flow filterFlow = new FlowConnector(configuration.flowProperties).connect(importSource, sinks, pipes);
+		filterFlow.complete();
+		
+		for (PredicateCount predicateCount : predicateCounts) {
+			PredicateWritable predicate = predicateCount.predicate;
+			Long count = predicateCount.count;
+			
+			writePredicateCount(configuration, project, predicate, count);
+		}
+	}
+	
+	private void writePredicateCount(Configuration configuration, String project, PredicateWritable predicate, Long count) throws IOException {
+		FileSystem fs = FileSystem.get(configuration.hadoopConfiguration);
+		Path countPath = new Path(project + "/facts/" + getPredicateId(predicate) + "/count");
+		Long totalCount = new Long(0);
+		if(fs.exists(countPath)) {
+			FSDataInputStream countDIS = fs.open(countPath);
+			totalCount = countDIS.readLong();
+			countDIS.close();
+		}
+		totalCount += count;
+		FSDataOutputStream countDOS = fs.create(countPath, true);
+		countDOS.writeLong(totalCount);
+		countDOS.close();			
+	}
+
+	private String getPredicateId(PredicateWritable predicate) {
+		String symbol = predicate.getURI().replace("/", "|");
+		return (symbol.length() > 10 ? symbol.substring(symbol.length() - 10) : symbol) + "$" + predicate.getArity();
+	}
+	*/
 }
