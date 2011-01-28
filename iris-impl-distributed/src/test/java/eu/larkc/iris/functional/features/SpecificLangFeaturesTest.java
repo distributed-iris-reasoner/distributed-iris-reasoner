@@ -129,6 +129,10 @@ public class SpecificLangFeaturesTest extends LangFeaturesTest {
 		compile();
 
 	}
+	
+	/*
+	 * The following two are expected to fail for now.
+	 */
 
 	public void testRuleWithOnlyConstantsInHead() throws Exception {
 		program = "p('a') :- TRUE." + "?-p(?X).";

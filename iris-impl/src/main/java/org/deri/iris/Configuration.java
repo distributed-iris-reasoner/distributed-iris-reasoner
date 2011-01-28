@@ -130,9 +130,10 @@ public class Configuration
 	 */
 	public Configuration()
 	{
-		stratifiers.add( new GlobalStratifier() );
-		stratifiers.add( new LocalStratifier( true ) );
-		stratifiers.add( new LocalStratifier( false ) );
+		//Not applicable for distributed evaluation
+//		stratifiers.add( new GlobalStratifier() );
+//		stratifiers.add( new LocalStratifier( true ) );
+//		stratifiers.add( new LocalStratifier( false ) );
 		
 		ruleOptimisers.add( new JoinConditionOptimiser() );
 		ruleOptimisers.add( new ReplaceVariablesWithConstantsOptimiser() );

@@ -66,8 +66,8 @@ public class Configuration extends org.deri.iris.Configuration
 
 	public final List<IRecursiveRulePreProcessor> recursiveRulePreProcessors = new ArrayList<IRecursiveRulePreProcessor>();
 	
-	public Configuration() {
-		//TODO: check if all the optimizations in super are applicable
+	public Configuration() {		
+		//include default optimizers
 		super();
 		
 		ruleOptimisers.add(new JoinOptimizer());
