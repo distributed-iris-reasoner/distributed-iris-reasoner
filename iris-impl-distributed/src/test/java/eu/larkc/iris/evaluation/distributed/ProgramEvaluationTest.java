@@ -53,7 +53,7 @@ public abstract class ProgramEvaluationTest extends EvaluationTest {
 		URL rulesURL = this.getClass().getResource(getRulesFile());
 		File rulesFile = new File(rulesURL.getPath());
 		Reader rifXmlFileReader = new FileReader(rulesFile);
-		XmlParser parser = new XmlParser(false);
+		XmlParser parser = new XmlParser(true);
 		Document rifDocument = parser.parseDocument(rifXmlFileReader);
 
 		translator = new RifToIrisTranslator();

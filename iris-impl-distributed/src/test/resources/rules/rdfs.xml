@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE Document [
+  <!ENTITY rif  "http://www.w3.org/2007/rif#">
+  <!ENTITY xs   "http://www.w3.org/2001/XMLSchema#">
+  <!ENTITY rdf  "http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+]>
+
+<Document xmlns="&rif;">
+  <payload>
+    <Group>
+      
+      <!-- RDFS Rules http://www.w3.org/TR/rdf-mt/#RDFSRules -->
+        
+      <!--  rdfs2  -->
+      <!-- sentence>
+        <Forall>
+          <declare>
+            <Var>aaa</Var>
+          </declare>
+          <declare>
+            <Var>xxx</Var>
+          </declare>
+          <declare>
+            <Var>uuu</Var>
+          </declare>
+          <declare>
+            <Var>vvv</Var>
+          </declare>
+          <formula>
+            <Implies>
+              <if>
+                <And>
+                  <formula>
+                    <Atom>
+                      <op>
+                        <Const type="&rif;iri">http://www.w3.org/2000/01/rdf-schema#domain</Const>
+                      </op>
+                      <args>
+                        <Var>aaa</Var>
+                        <Var>xxx</Var>
+                      </args>
+                    </Atom>
+                  </formula>
+                  <formula>
+                    <Frame>
+                      <object>
+                      	<Var>aaa</Var>
+                      </object>
+                      <slot>
+                        <Var>uuu</Var>
+                        <Var>vvv</Var>
+                      </slot>
+                    </Frame>
+                  </formula>
+                </And>
+              </if>
+              <then>
+                <Atom>
+                  <op>
+                    <Const type="&rif;iri">http://www.w3.org/2000/01/rdf-schema#type</Const>
+                  </op>
+                  <args>
+                    <Var>uuu</Var>
+                    <Var>xxx</Var>
+                  </args>
+                </Atom>
+              </then>
+            </Implies>
+          </formula>
+        </Forall>
+      </sentence -->
+
+      <!--  rdfs5  -->
+      <!-- uuu rdfs:subPropertyOf xxx . :- uuu rdfs:subPropertyOf vvv . vvv rdfs:subPropertyOf xxx . -->
+      <sentence>
+        <Forall>
+          <declare>
+            <Var>uuu</Var>
+          </declare>
+          <declare>
+            <Var>vvv</Var>
+          </declare>
+          <declare>
+            <Var>xxx</Var>
+          </declare>
+          <formula>
+            <Implies>
+              <if>
+                <And>
+                  <formula>
+                    <Atom>
+                      <op>
+                        <Const type="&rif;iri">http://www.w3.org/2000/01/rdf-schema#subPropertyOf</Const>
+                      </op>
+                      <args>
+                        <Var>uuu</Var>
+                        <Var>vvv</Var>
+                      </args>
+                    </Atom>
+                  </formula>
+                  <formula>
+                    <Atom>
+                      <op>
+                        <Const type="&rif;iri">http://www.w3.org/2000/01/rdf-schema#subPropertyOf</Const>
+                      </op>
+                      <args>
+                        <Var>vvv</Var>
+                        <Var>xxx</Var>
+                      </args>
+                    </Atom>
+                  </formula>
+                </And>
+              </if>
+              <then>
+                <Atom>
+                  <op>
+                    <Const type="&rif;iri">http://www.w3.org/2000/01/rdf-schema#subPropertyOf</Const>
+                  </op>
+                  <args>
+                    <Var>uuu</Var>
+                    <Var>xxx</Var>
+                  </args>
+                </Atom>
+              </then>
+            </Implies>
+          </formula>
+        </Forall>
+      </sentence>
+      
+      <!--  rdfs6  -->
+      <!-- uuu rdfs:subPropertyOf uuu . :- uuu rdf:type rdf:Property . -->
+      <!-- sentence>
+        <Forall>
+          <declare>
+            <Var>uuu</Var>
+          </declare>
+          <formula>
+            <Implies>
+              <if>
+                <And>
+                  <formula>
+                    <Atom>
+                      <op>
+                        <Const type="&rif;iri">http://www.w3.org/1999/02/22-rdf-syntax-ns#type</Const>
+                      </op>
+                      <args>
+                        <Var>uuu</Var>
+                        <Const type="&rif;iri">http://www.w3.org/1999/02/22-rdf-syntax-ns#Property</Const>
+                      </args>
+                    </Atom>
+                  </formula>
+                </And>
+              </if>
+              <then>
+                 <Atom>
+                   <op>
+                     <Const type="&rif;iri">http://www.w3.org/2000/01/rdf-schema#subPropertyOf</Const>
+                   </op>
+                   <args>
+                     <Var>uuu</Var>
+                     <Var>uuu</Var>
+                   </args>
+                 </Atom>
+              </then>
+            </Implies>
+          </formula>
+        </Forall>
+      </sentence -->
+     
+      <!--  rdfs9  -->
+      <!-- vvv rdf:type xxx . :- uuu rdfs:subClassOf xxx . vvv rdf:type uuu . -->
+      <sentence>
+        <Forall>
+          <declare>
+            <Var>uuu</Var>
+          </declare>
+          <declare>
+            <Var>vvv</Var>
+          </declare>
+          <declare>
+            <Var>xxx</Var>
+          </declare>
+          <formula>
+            <Implies>
+              <if>
+                <And>
+                  <formula>
+                    <Atom>
+                      <op>
+                        <Const type="&rif;iri">http://www.w3.org/2000/01/rdf-schema#subClassOf</Const>
+                      </op>
+                      <args>
+                        <Var>uuu</Var>
+                        <Var>xxx</Var>
+                      </args>
+                    </Atom>
+                  </formula>
+                  <formula>
+                    <Atom>
+                      <op>
+                        <Const type="&rif;iri">http://www.w3.org/1999/02/22-rdf-syntax-ns#type</Const>
+                      </op>
+                      <args>
+                        <Var>vvv</Var>
+                        <Var>uuu</Var>
+                      </args>
+                    </Atom>
+                  </formula>
+                </And>
+              </if>
+              <then>
+                <Atom>
+                  <op>
+                    <Const type="&rif;iri">http://www.w3.org/1999/02/22-rdf-syntax-ns#type</Const>
+                  </op>
+                  <args>
+                    <Var>vvv</Var>
+                    <Var>xxx</Var>
+                  </args>
+                </Atom>
+              </then>
+            </Implies>
+          </formula>
+        </Forall>
+      </sentence>
+
+      <!--  rdfs10  -->
+      <!-- uuu rdfs:subClassOf uuu . :- uuu rdf:type rdfs:Class . -->
+      <!-- sentence>
+        <Forall>
+          <declare>
+            <Var>uuu</Var>
+          </declare>
+          <formula>
+            <Implies>
+              <if>
+                <And>
+                  <formula>
+                    <Atom>
+                      <op>
+                        <Const type="&rif;iri">http://www.w3.org/1999/02/22-rdf-syntax-ns#type</Const>
+                      </op>
+                      <args>
+                        <Var>uuu</Var>
+                        <Const type="&rif;iri">http://www.w3.org/1999/02/22-rdf-syntax-ns#Class</Const>
+                      </args>
+                    </Atom>
+                  </formula>
+                </And>
+              </if>
+              <then>
+                 <Atom>
+                   <op>
+                     <Const type="&rif;iri">http://www.w3.org/2000/01/rdf-schema#subClassOf</Const>
+                   </op>
+                   <args>
+                     <Var>uuu</Var>
+                     <Var>uuu</Var>
+                   </args>
+                 </Atom>
+              </then>
+            </Implies>
+          </formula>
+        </Forall>
+      </sentence -->
+
+      <!--  rdfs11  -->
+      <!-- uuu rdfs:subClassOf xxx . :- uuu rdfs:subClassOf vvv . vvv rdfs:subClassOf xxx . -->
+      <sentence>
+        <Forall>
+          <declare>
+            <Var>uuu</Var>
+          </declare>
+          <declare>
+            <Var>vvv</Var>
+          </declare>
+          <declare>
+            <Var>xxx</Var>
+          </declare>
+          <formula>
+            <Implies>
+              <if>
+                <And>
+                  <formula>
+                    <Atom>
+                      <op>
+                        <Const type="&rif;iri">http://www.w3.org/2000/01/rdf-schema#subClassOf</Const>
+                      </op>
+                      <args>
+                        <Var>uuu</Var>
+                        <Var>vvv</Var>
+                      </args>
+                    </Atom>
+                  </formula>
+                  <formula>
+                    <Atom>
+                      <op>
+                        <Const type="&rif;iri">http://www.w3.org/2000/01/rdf-schema#subClassOf</Const>
+                      </op>
+                      <args>
+                        <Var>vvv</Var>
+                        <Var>xxx</Var>
+                      </args>
+                    </Atom>
+                  </formula>
+                </And>
+              </if>
+              <then>
+                <Atom>
+                  <op>
+                    <Const type="&rif;iri">http://www.w3.org/2000/01/rdf-schema#subClassOf</Const>
+                  </op>
+                  <args>
+                    <Var>uuu</Var>
+                    <Var>xxx</Var>
+                  </args>
+                </Atom>
+              </then>
+            </Implies>
+          </formula>
+        </Forall>
+      </sentence>
+        
+    </Group>
+  </payload>
+</Document>
+<!--XML document generated on Wed Nov 11 09:12:17 EST 2009-->

@@ -29,7 +29,7 @@ public class TextImporterFunction extends BaseOperation implements Function {
 		Tuple outTuple = new Tuple();
 		for (int i = 0; i < tuple.size(); i++) {
 			String value = tuple.getString(i);
-			if (value.startsWith("<") && value.endsWith(">")) {
+			if ((value.startsWith("<") && value.endsWith(">") || value.startsWith("_:node"))) {
 				if (i == 0) {
 					PredicateWritable predicateWritable = new PredicateWritable();
 					predicateWritable.setURI(value.substring(1, value.length() - 1));

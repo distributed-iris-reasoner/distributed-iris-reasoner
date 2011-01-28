@@ -75,7 +75,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 */
 	private static final String HEAD_PREDICATE_FIELD = "HPF";
 
-	private FieldsVariablesMapping fieldsVariablesMapping = new FieldsVariablesMapping();
+	private FieldsVariablesMapping fieldsVariablesMapping = null;
 	private IAtom head;
 	
 	/**
@@ -100,6 +100,8 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 */
 	public IDistributedCompiledRule compile(IRule rule) throws EvaluationException {
 
+		fieldsVariablesMapping = new FieldsVariablesMapping();
+		
 		List<ILiteral> body = rule.getBody();
 		head = rule.getHead().get(0).getAtom();
 		fieldsVariablesMapping.loadAtom(head); //load also the heads fields, to do the left outer join

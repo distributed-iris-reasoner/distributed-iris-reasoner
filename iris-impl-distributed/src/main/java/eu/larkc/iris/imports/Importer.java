@@ -20,6 +20,7 @@ import cascading.operation.Identity;
 import cascading.operation.regex.RegexParser;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
+import cascading.scheme.SequenceFile;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
 import cascading.tap.Tap;
@@ -38,7 +39,9 @@ public class Importer {
 	public void importFromRdf(Configuration configuration, String project, String storageId, String importName) {
 		Tap source = FactsFactory.getInstance(storageId).getFacts();
 		
-		Tap sink = new Hfs(source.getSourceFields(), project + "/facts/" + importName, true );
+		SequenceFile sinkScheme = new SequenceFile(source.getSourceFields());
+		sinkScheme.setNumSinkParts(1);
+		Tap sink = new Hfs(sinkScheme, project + "/facts/" + importName, true );
 
 		Map<String, Tap> sources = new HashMap<String, Tap>();
 		sources.put("source", source);
@@ -84,10 +87,12 @@ public class Importer {
 	public void processNTriple(Configuration configuration, String inPath, String project, String importName) {
 		Tap source = new Hfs(new TextLine(), inPath);
 
-		Tap sink = new Hfs(new Fields(0, 1, 2), project + "/facts/" + importName, true );
+		SequenceFile sinkScheme = new SequenceFile(new Fields(0, 1, 2));
+		sinkScheme.setNumSinkParts(1);
+		Tap sink = new Hfs(sinkScheme, project + "/facts/" + importName, true );
 
 		int[] groups = {2, 1, 3};
-		RegexParser parser = new RegexParser(Fields.UNKNOWN, "^(<[^\\s]+>)\\s*(<[^\\s]+>)\\s*([<\"].*[^\\s])\\s*.\\s*$", groups);
+		RegexParser parser = new RegexParser(Fields.UNKNOWN, "^(<[^\\s]+>|_:node\\w+)\\s*(<[^\\s]+>|_:node\\w+)\\s*([<\"].*[^\\s]|_:node\\w+)\\s*.\\s*$", groups); //_ is for generated nodes like _:node15n67q1f2x14
 		Pipe sourcePipe = new Each("sourcePipe", new Fields("line"), parser);
 		
 		sourcePipe = new Each(sourcePipe, Fields.ALL, new TextImporterFunction());
