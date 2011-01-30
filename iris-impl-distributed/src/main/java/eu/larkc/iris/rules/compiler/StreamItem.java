@@ -1,7 +1,9 @@
 package eu.larkc.iris.rules.compiler;
 
 import org.deri.iris.api.basics.IPredicate;
+import org.deri.iris.api.terms.IStringTerm;
 import org.deri.iris.api.terms.IVariable;
+import org.deri.iris.api.terms.concrete.IIri;
 
 import eu.larkc.iris.rules.compiler.LiteralFields.TermId;
 
@@ -20,6 +22,10 @@ public class StreamItem extends Field {
 			return ((IPredicate) source).getPredicateSymbol();
 		} else if (source instanceof IVariable) {
 			return ((IVariable) source).getValue();
+		} else if (source instanceof IIri) {
+			return ((IIri) source).getValue();
+		} else if (source instanceof IStringTerm) {
+			return ((IStringTerm) source).getValue();
 		}
 		return super.getValue();
 	}

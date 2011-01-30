@@ -14,6 +14,7 @@ import org.deri.iris.api.basics.ILiteral;
 import org.deri.iris.api.basics.IPredicate;
 import org.deri.iris.api.builtins.IBuiltinAtom;
 import org.deri.iris.api.terms.IConstructedTerm;
+import org.deri.iris.api.terms.IStringTerm;
 import org.deri.iris.api.terms.ITerm;
 import org.deri.iris.api.terms.IVariable;
 import org.deri.iris.api.terms.concrete.IIri;
@@ -38,6 +39,7 @@ public class LiteralFields extends eu.larkc.iris.rules.compiler.PipeFields {
 
 	private static final String PREDICATE_PREFIX = "P";
 	private static final String VARIABLE_PREFIX = "V";
+	private static final String CONSTANT_PREFIX = "C";
 	
 	private Pipe mainPipe;
 	private LiteralId id;
@@ -99,7 +101,11 @@ public class LiteralFields extends eu.larkc.iris.rules.compiler.PipeFields {
 		for (int i = 0; i < atom.getTuple().size(); i++) {
 			ITerm term = atom.getTuple().get(i);
 			if (term instanceof IVariable) {
-				add(new StreamItem(new TermId(literalId, VARIABLE_PREFIX, i), (IVariable) term));
+				add(new StreamItem(new TermId(literalId, VARIABLE_PREFIX, i), term));
+			} else if (term instanceof IIri) {
+				add(new StreamItem(new TermId(literalId, CONSTANT_PREFIX, i), term));
+			} else if (term instanceof IStringTerm) {
+				add(new StreamItem(new TermId(literalId, CONSTANT_PREFIX, i), term));
 			}
 		}
 	}

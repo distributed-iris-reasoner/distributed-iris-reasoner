@@ -39,7 +39,7 @@ public class ConstantFilterTest extends CascadingTest {
 	private static final Logger logger = LoggerFactory.getLogger(ConstantFilterTest.class);
 
 	public ConstantFilterTest(String name) {
-		super(name, true);
+		super(name, false);
 	}
 	
 	@Override
