@@ -46,7 +46,7 @@ public class ConstantFilter extends BaseOperation implements Filter {
 	/**
 	 * @param expectedConstants Constants in a subgoal.
 	 */
-	public ConstantFilter(Map<Integer, Object> expectedConstants) {
+	public ConstantFilter(Map<String, Object> expectedConstants) {
 		this.mExpectedconstants = expectedConstants;
 	}
 	
@@ -66,8 +66,8 @@ public class ConstantFilter extends BaseOperation implements Filter {
 					+ mExpectedconstants.size() + " Size of TupleEntry: " + arguments.size());
 		}
 			
-		Set<Integer> positions = mExpectedconstants.keySet();	
-		for (Integer pos : positions) {
+		Set<String> positions = mExpectedconstants.keySet();	
+		for (String pos : positions) {
 			//we only need to find one value that does not match the constant
 			Object compareTo = null;
 			Object expected = mExpectedconstants.get(pos);
@@ -85,5 +85,5 @@ public class ConstantFilter extends BaseOperation implements Filter {
 		return remove;
 	}
 	
-	private Map<Integer, Object> mExpectedconstants;
+	private Map<String, Object> mExpectedconstants;
 }

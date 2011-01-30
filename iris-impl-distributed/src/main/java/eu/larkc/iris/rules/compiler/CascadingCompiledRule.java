@@ -17,7 +17,6 @@ package eu.larkc.iris.rules.compiler;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.deri.iris.EvaluationException;
-import org.deri.iris.api.basics.IPredicate;
 import org.deri.iris.facts.IFacts;
 import org.deri.iris.storage.IRelation;
 
@@ -34,8 +33,7 @@ import eu.larkc.iris.evaluation.EvaluationContext;
 public class CascadingCompiledRule implements IDistributedCompiledRule {
 
 	
-	public CascadingCompiledRule(IPredicate headPredicate, FlowAssembly flowAssembly, eu.larkc.iris.Configuration configuration){
-		this.mHeadPredicate = headPredicate;
+	public CascadingCompiledRule(FlowAssembly flowAssembly, eu.larkc.iris.Configuration configuration){
 		this.flowAssembly = flowAssembly;
 		this.mConfiguration = configuration;
 	}
@@ -88,14 +86,6 @@ public class CascadingCompiledRule implements IDistributedCompiledRule {
 		// TODO (fisf) implement later
 		throw new NotImplementedException("Semi-naive evaluation is not implemented yet.");
 	}
-
-	/* (non-Javadoc)
-	 * @see org.deri.iris.rules.compiler.ICompiledRule#headPredicate()
-	 */
-	@Override
-	public IPredicate headPredicate() {
-		return mHeadPredicate;
-	}
 	
 	/*
 	 * (non-Javadoc)
@@ -107,11 +97,6 @@ public class CascadingCompiledRule implements IDistributedCompiledRule {
 
 
 	private final eu.larkc.iris.Configuration mConfiguration;
-	
-	/**
-	 * Describes the predicate to which the original rules output belongs.
-	 */
-	private final IPredicate mHeadPredicate;
 	
 	/**
 	 * The internal representation as a cascading flow of this rule.

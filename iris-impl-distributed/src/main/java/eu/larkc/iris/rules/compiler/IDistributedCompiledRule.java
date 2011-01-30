@@ -16,7 +16,6 @@
 package eu.larkc.iris.rules.compiler;
 
 import org.deri.iris.EvaluationException;
-import org.deri.iris.api.basics.IPredicate;
 import org.deri.iris.facts.IFacts;
 import org.deri.iris.storage.IRelation;
 
@@ -52,12 +51,6 @@ public interface IDistributedCompiledRule {
 	 * @throws EvaluationException 
 	 */
 	IRelation evaluateIteratively( IFacts deltas ) throws EvaluationException;
-	
-	/**
-	 * If this compiled rule represents a rule, then return the head predicate.
-	 * @return The head predicate.
-	 */
-	IPredicate headPredicate();
 	
 	public FlowAssembly getFlowAssembly();
 	

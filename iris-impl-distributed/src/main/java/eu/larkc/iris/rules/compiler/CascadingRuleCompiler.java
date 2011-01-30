@@ -15,47 +15,23 @@ D * Copyright 2010 Softgress - http://www.softgress.com/
  */
 package eu.larkc.iris.rules.compiler;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
-import java.util.Set;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.deri.iris.EvaluationException;
 import org.deri.iris.api.basics.IAtom;
 import org.deri.iris.api.basics.ILiteral;
-import org.deri.iris.api.basics.IPredicate;
 import org.deri.iris.api.basics.IRule;
-import org.deri.iris.api.basics.ITuple;
-import org.deri.iris.api.builtins.IBuiltinAtom;
-import org.deri.iris.api.terms.IConstructedTerm;
-import org.deri.iris.api.terms.ITerm;
-import org.deri.iris.api.terms.IVariable;
-import org.deri.iris.api.terms.concrete.IIri;
-import org.deri.iris.utils.TermMatchingAndSubstitution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cascading.operation.Identity;
 import cascading.operation.Insert;
 import cascading.operation.aggregator.Count;
-import cascading.operation.filter.FilterNotNull;
-import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.pipe.cogroup.InnerJoin;
-import cascading.pipe.cogroup.RightJoin;
 import cascading.tuple.Fields;
-import eu.larkc.iris.Utils;
-import eu.larkc.iris.evaluation.ConstantFilter;
-import eu.larkc.iris.evaluation.PredicateFilter;
-import eu.larkc.iris.storage.FieldsVariablesMapping;
 import eu.larkc.iris.storage.PredicateWritable;
 
 /**
@@ -75,8 +51,8 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 */
 	private static final String HEAD_PREDICATE_FIELD = "HPF";
 
-	private FieldsVariablesMapping fieldsVariablesMapping = null;
-	private IAtom head;
+	private RuleStreams ruleStreams = null;
+	private eu.larkc.iris.rules.compiler.PipeFields headFields = null;
 	
 	/**
 	 * Sets up a CascadingRuleCompiler with a specific configuration, taking
@@ -99,19 +75,17 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 * @throws EvaluationException
 	 */
 	public IDistributedCompiledRule compile(IRule rule) throws EvaluationException {
-
-		fieldsVariablesMapping = new FieldsVariablesMapping();
+		mainPipe = new Pipe("main");
 		
-		List<ILiteral> body = rule.getBody();
-		head = rule.getHead().get(0).getAtom();
-		fieldsVariablesMapping.loadAtom(head); //load also the heads fields, to do the left outer join
-		PipeFielded bodyPipe = compileBody(body);
+		ruleStreams = new RuleStreams(mainPipe, rule);
+		
+		headFields = ruleStreams.getHeadStream();
+		
+		eu.larkc.iris.rules.compiler.PipeFields bodyPipe = compileBody(ruleStreams);
 		
 		FlowAssembly compiledCascadingRuleFlowAssembly = attachTaps(bodyPipe, rule);
 
-		IPredicate headPredicate = head.getPredicate();
-
-		return new CascadingCompiledRule(headPredicate, compiledCascadingRuleFlowAssembly,
+		return new CascadingCompiledRule(compiledCascadingRuleFlowAssembly,
 				mConfiguration);
 	}
 
@@ -130,38 +104,25 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 * @param bodyLiterals
 	 * @return
 	 */
-	protected PipeFielded compileBody(Collection<ILiteral> bodyLiterals) {
-		List<ILiteral> literals = new ArrayList<ILiteral>(bodyLiterals);
-		List<SubGoal> subGoals = new ArrayList<SubGoal>();
+	protected eu.larkc.iris.rules.compiler.PipeFields compileBody(RuleStreams ruleStreams) {
 
-		mainPipe = new Pipe("main");
-		
-		PipeFielded result;
-		for (int l = 0; l < literals.size(); ++l) {
-			ILiteral literal = literals.get(l);
-			// we shouldn't even have to check for that if we do not deal
-			// with negation, this is basically a double check for the
-			// parser
-			if (!literal.isPositive()) {
-				throw new IllegalArgumentException(
-						"Negation is not supported: " + literal);
-			}
+		eu.larkc.iris.rules.compiler.PipeFields result;
+		for (int l = 0; l < ruleStreams.getBodyStreams().size(); ++l) {
+			eu.larkc.iris.rules.compiler.Fields literalStream = ruleStreams.getBodyStreams().get(l);
 
-			IAtom atom = literal.getAtom(); // get predicate and tuple
-			
-			fieldsVariablesMapping.loadAtom(atom);
-
+			/*
 			// (variables and constants)
-			if (atom instanceof IBuiltinAtom) {
-				processBuiltin((IBuiltinAtom) atom);
+			//atom instanceof IBuiltinAtom
+			if (literalStream.fromBuiltInAtom()) {
+				//processBuiltin((IBuiltinAtom) atom);
 			} else {
 				// construct pipe assembly, one pipe per atom
-				/**/
-				Pipe pipe = new Pipe(atom.toString(), mainPipe);
+				
+				Pipe pipe = new Pipe(literalStream.getId().toString(), mainPipe);
 				pipe = new Each(pipe, new Fields(0, 1, 2), new PredicateFilter(atom.getPredicate()));
 				
 				pipe = filterConstants(pipe, atom.getTuple());
-				/**/
+				
 				//Pipe pipe = AtomPipeFactory.getInstance(mainPipe).getPipe(atom);
 				
 				//Fields atomFields = Utils.getFieldsForAtom(fieldsVariablesMapping, atom);
@@ -169,49 +130,15 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 				
 				subGoals.add(new SubGoal(atom, pipe));
 			}
+			*/
 		}
 
-		result = setupJoins(subGoals);
+		result = setupJoins(ruleStreams);
 
 		return result;
 	}
 		
 	/*
-	 * Remove unwanted fields from the join output fields (predicates, diuplicated variables)
-	 */
-	@SuppressWarnings("rawtypes")
-	private FieldsList fieldsToKeep(FieldsList outputFields) {
-		FieldsList keepFieldsList = new FieldsList();
-		Set<Comparable> fieldTerms = new HashSet<Comparable>();
-		for (String field : outputFields) {
-			Comparable term = fieldsVariablesMapping.getComparable(field);
-			if (!(term instanceof IVariable)) {
-				continue;
-			}
-			if (fieldTerms.contains(term)) {
-				continue;
-			}
-			fieldTerms.add(term);
-			keepFieldsList.add(field);
-		}
-		logger.info("fields to keep : " + keepFieldsList);
-		return keepFieldsList;
-	}
-	
-	/*
-	 * Creates the output fields of the join based on the left join's fields and the new atom to be joined fields
-	 */
-	private FieldsList composeOutputFields(FieldsList initialFields, IAtom atom) {
-		FieldsList outputFieldsList = new FieldsList(initialFields);
-		outputFieldsList.add(fieldsVariablesMapping.getField(atom, atom.getPredicate()));
-		for (int i = 0; i < atom.getTuple().size(); i++) {
-			ITerm term = atom.getTuple().get(i);
-			String field = fieldsVariablesMapping.getField(atom, term);
-			outputFieldsList.add(field);
-		}
-		return outputFieldsList;
-	}
-	
 	private Pipe eliminateOldInferencedData(PipeFielded lhsJoin) {
 		if (lhsJoin == null) {
 			return null;
@@ -238,17 +165,55 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		}
 		return leftJoin;
 	}
+    */
 	
+	private eu.larkc.iris.rules.compiler.PipeFields eliminateOldInferencedData(eu.larkc.iris.rules.compiler.PipeFields lhsJoin) {
+		if (lhsJoin == null) {
+			return null;
+		}
+		
+		eu.larkc.iris.rules.compiler.FieldPairs commonFields = headFields.getCommonFields(lhsJoin);
+		if (!(commonFields.size() == headFields.getVariableFields().size())) {
+			return null;
+		}
+
+		return lhsJoin.eliminateExistingResults(headFields);
+		
+		/*
+		// check whether all head's variable fields are in the stream, do the outer join if so
+		FieldsList lhsFieldsList = lhsJoin.getFieldsList();
+		FieldsList identifiedHeadFieldsList = identifyHeadVariableFields(fieldsVariablesMapping, head, lhsFieldsList);
+		Pipe leftJoin = null;
+		if (identifiedHeadFieldsList != null) {
+			Pipe headPipe = new Pipe(head.toString(), mainPipe);
+			headPipe = new Each(headPipe, Fields.ALL, new PredicateFilter(head.getPredicate()));
+			
+			FieldsList headFieldsList = Utils.getFieldsFromAtom(fieldsVariablesMapping, head);
+			AtomsCommonFields headCommonFields = new AtomsCommonFields(fieldsVariablesMapping, lhsFieldsList, head);
+			Fields lhsFields = lhsFieldsList.getFields(headCommonFields.getLhsFields());
+			Fields rhsFields = headFieldsList.getFields(headCommonFields.getRhsFields());
+			
+			leftJoin = new CoGroup(headPipe, rhsFields, lhsJoin.getPipe(), lhsFields, new RightJoin());
+			
+			FieldsList allFields = new FieldsList(headFieldsList);
+			allFields.addAll(lhsFieldsList);
+			leftJoin = new Each( leftJoin, allFields.getFields(headFieldsList), new FilterNotNull());	// outgoing -> "keepField"
+			leftJoin = new Each( leftJoin, allFields.getFields(lhsFieldsList), new Identity());	// outgoing -> "keepField"
+		}
+		return leftJoin;
+		*/
+	}
+
 	/**
 	 * Build a join between all the literals of the rule
 	 * 
 	 * @param fieldsVariablesMapping
 	 * @param lhsJoin
-	 * @param subgoalsIterator
+	 * @param fieldsIterator
 	 * @return
 	 */
-	public PipeFielded buildJoin(boolean leftJoinApplied, PipeFielded lhsJoin, 
-			ListIterator<SubGoal> subgoalsIterator) {
+	/*public PipeFielded buildJoin(boolean leftJoinApplied, PipeFielded lhsJoin, 
+			ListIterator<Stream> subgoalsIterator) {
 		Pipe leftJoin = null;
 		if (!leftJoinApplied) {
 			leftJoin = eliminateOldInferencedData(lhsJoin);
@@ -313,6 +278,81 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		
 		PipeFielded pipeFielded = new PipeFielded(join, keepFieldsList);
 		return buildJoin(leftJoinApplied, pipeFielded, subgoalsIterator);
+	}*/
+	
+	public eu.larkc.iris.rules.compiler.PipeFields buildJoin(boolean leftJoinApplied, eu.larkc.iris.rules.compiler.PipeFields lhsJoin, ListIterator<eu.larkc.iris.rules.compiler.PipeFields> fieldsIterator) {
+		eu.larkc.iris.rules.compiler.PipeFields leftJoin = null;
+		if (!leftJoinApplied) {
+			leftJoin = eliminateOldInferencedData(lhsJoin);
+			leftJoinApplied = leftJoin != null;
+		}
+		
+		//if not subgoals left return the last join
+		if (!fieldsIterator.hasNext()) {
+			if (leftJoin != null) {
+				return leftJoin;
+			}
+			return lhsJoin;
+		}
+		eu.larkc.iris.rules.compiler.PipeFields stream = fieldsIterator.next();
+		lhsJoin = (leftJoin == null) ? lhsJoin : leftJoin;
+		
+		eu.larkc.iris.rules.compiler.PipeFields join = null;
+		if (lhsJoin.canBeInnerJoined(stream)) {
+			join = lhsJoin.innerJoin(stream);
+		} else {
+			//cartesian join
+		}
+		
+		join = join.getUniqueVariableFields();
+		
+		join = join.eliminateDuplicates();
+		
+		return buildJoin(leftJoinApplied, join, fieldsIterator);
+		
+		/*
+		FieldsList lhsFieldsList = lhsJoin.getFieldsList();
+		FieldsList rhsFieldsList = Utils.getFieldsFromAtom(fieldsVariablesMapping, atom);
+		AtomsCommonFields atomsCommonFields = new AtomsCommonFields(fieldsVariablesMapping, lhsFieldsList, atom);
+		
+		FieldsList commonLhsFieldsList = atomsCommonFields.getLhsFields();
+		FieldsList commonRhsFieldsList = atomsCommonFields.getRhsFields();
+		
+		Pipe lhsPipe = (leftJoin == null) ? lhsJoin.getPipe() : leftJoin;
+		//compose the output fields list
+		FieldsList outputFieldsList = composeOutputFields(lhsJoin.getFieldsList(), atom);
+
+		Pipe join = null;
+		if (!commonLhsFieldsList.isEmpty()) {
+			//join the previous join's pipe with the pipe for this literal
+			Fields lhsFields = lhsFieldsList.getFields(commonLhsFieldsList);
+			Fields rhsFields = rhsFieldsList.getFields(commonRhsFieldsList);
+			
+			join = new CoGroup(lhsPipe, lhsFields, pipe, rhsFields, new InnerJoin());
+		} else {
+			//this is not effective, joining without common fields, but it has to be done for some unoptimized rules
+			lhsFieldsList.add("LCF");
+			lhsPipe = new Each(lhsPipe, new Insert(new Fields("LCF"), new Integer(1)), lhsFieldsList.getFields());
+			
+			rhsFieldsList.add("RCF");
+			pipe = new Each(pipe, new Insert(new Fields("RCF"), new Integer(1)), rhsFieldsList.getFields());
+
+			join = new CoGroup(lhsPipe, new Fields(lhsFieldsList.size() - 1), pipe, new Fields(rhsFieldsList.size() - 1), new InnerJoin());
+
+			outputFieldsList.add(lhsJoin.getFieldsList().size(), "LCF");
+			outputFieldsList.add("RCF");
+		}
+		
+		FieldsList keepFieldsList = fieldsToKeep(outputFieldsList);
+		Fields keepFields = outputFieldsList.getFields(keepFieldsList);
+		join = new Each( join, keepFields, new Identity());	// outgoing -> "keepField"
+		
+		join = new GroupBy(join, keepFieldsList.getFields()); //eliminate duplicates
+		join = new Every(join, new Count(), keepFieldsList.getFields());
+		
+		PipeFielded pipeFielded = new PipeFielded(join, keepFieldsList);
+		return buildJoin(leftJoinApplied, pipeFielded, fieldsIterator);
+		*/
 	}
 	
 	/**
@@ -339,77 +379,15 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 * @param subGoals
 	 * @return
 	 */
-	protected PipeFielded setupJoins(List<SubGoal> subGoals) {
+	protected eu.larkc.iris.rules.compiler.PipeFields setupJoins(RuleStreams ruleStreams) {
 
-		if (subGoals.isEmpty()) {
+		if (ruleStreams.getBodyStreams().isEmpty()) {
 			throw new IllegalArgumentException(
 				"Cannot setup joins with no subgoals.");			
 		}
 
-		return buildJoin(false, null, subGoals.listIterator());
-	}
-
-	/**
-	 * This filters constants by providing in tuple streams according to the
-	 * original rule defintion.
-	 * 
-	 * @param attachTo
-	 * @param tuple
-	 * @return
-	 */
-	protected Pipe filterConstants(Pipe attachTo, ITuple tuple) {
-
-		Map<Integer, Object> constantTerms = new HashMap<Integer, Object>();
-
-		for (int i = 0; i < tuple.size(); i++) {
-			ITerm term = tuple.get(i);
-
-			// not a variable, we filter the tuples
-			if (term.isGround()) {
-				if (term instanceof IIri) {
-					constantTerms.put(i + 1, (IIri) term); //added one because of the predicate field
-				} else {
-					constantTerms.put(i + 1, term.getValue()); //added one because of the predicate field
-				}
-					
-			}
-		}
-
-		// did we actually find at least one constant?
-		if (!constantTerms.isEmpty()) {
-			Pipe filter = new Each(attachTo, new ConstantFilter(constantTerms));
-			return filter;
-		}
-
-		// nothing changed
-		return attachTo;
-	}
-
-	/**
-	 * Converts a built-in atom to a suitable cascading operation per the RIF
-	 * specs. This is currently a stub implementation.
-	 * 
-	 * @param atom
-	 */
-	protected void processBuiltin(IBuiltinAtom atom) {
-
-		boolean constructedTerms = false;
-		for (ITerm term : atom.getTuple()) {
-			if (term instanceof IConstructedTerm) {
-				constructedTerms = true;
-				break;
-			}
-		}
-		// TODO fisf: construct appropriate cascading operation
-		// once they are supported
-		if (constructedTerms) {
-			// function symbol
-			throw new NotImplementedException(
-					"Function Symbols are not supported");
-		} else {
-			// ordinary built-in, those WILL be handled
-			throw new NotImplementedException("Builtins not implemented yet");
-		}
+		ListIterator<eu.larkc.iris.rules.compiler.PipeFields> listIteratorFields = ruleStreams.getBodyStreamIterator();
+		return buildJoin(false, listIteratorFields.next(), listIteratorFields);
 	}
 
 	/**
@@ -422,9 +400,9 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 * @param originalRule
 	 * @return
 	 */
-	protected FlowAssembly attachTaps(PipeFielded rulePipeFielded, IRule originalRule) {
+	protected FlowAssembly attachTaps(eu.larkc.iris.rules.compiler.PipeFields pipeFields, IRule originalRule) {
 
-		Pipe rulePipe = rulePipeFielded.getPipe();
+		Pipe rulePipe = pipeFields.getPipe();
 		
 		//Map<String, Tap> sources = new HashMap<String, Tap>();
 		//Map<String, Tap> sinks = new HashMap<String, Tap>();
@@ -438,8 +416,22 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		}
 
 		IAtom headAtom = head.get(0).getAtom();
+		
+		eu.larkc.iris.rules.compiler.Fields theHeadFields = pipeFields.getCommonFields(headFields).getLeftFields();
+		theHeadFields.add(0, new Field(HEAD_PREDICATE_FIELD, headAtom.getPredicate()));
+		rulePipe = new Each( rulePipe, new Insert( new Fields(HEAD_PREDICATE_FIELD), new PredicateWritable(headAtom.getPredicate())), theHeadFields.getFields());
+		
+		Fields resultFields = theHeadFields.getFields();
+		
+		rulePipe = new GroupBy(rulePipe, resultFields); //eliminate duplicates
+		rulePipe = new Every(rulePipe, new Count(), resultFields);
 
-		FieldsList ruleFieldsList = rulePipeFielded.getFieldsList();
+		FlowAssembly flowAssembly = new FlowAssembly(mConfiguration, resultFields, rulePipe);//, countPipe);
+		return flowAssembly;
+		
+		
+		/*
+		FieldsList ruleFieldsList = pipeFields.getFieldsList();
 		FieldsList headFieldsList = identifyHeadVariableFields(fieldsVariablesMapping, headAtom, ruleFieldsList);
 						
 		headFieldsList.add(0, HEAD_PREDICATE_FIELD);
@@ -454,31 +446,9 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 
 		FlowAssembly flowAssembly = new FlowAssembly(mConfiguration, resultFields, rulePipe);//, countPipe);
 		return flowAssembly;
+		*/
 	}
 	
-	/*
-	 * Returns the fields list that correspond to head variables, null in case not all variables were identified in the result stream
-	 */
-	private FieldsList identifyHeadVariableFields(FieldsVariablesMapping fieldsVariablesMapping, IAtom head, FieldsList resultStreamFields) {
-		List<IVariable> variables = TermMatchingAndSubstitution.getVariables(head.getTuple(), true);		
-		FieldsList headFieldsList = new FieldsList();
-		//headFieldsList.add(fieldsVariablesMapping.getField(head, head.getPredicate()));
-		for (IVariable variable : variables) {
-			boolean identified = false;
-			for (String field : resultStreamFields) {
-				if (variable.equals(fieldsVariablesMapping.getComparable(field))) {
-					headFieldsList.add(field);
-					identified = true;
-					break;
-				}
-			}
-			if (!identified) {
-				return null;
-			}
-		}
-		return headFieldsList;
-	}
-
 	/**
 	 * Central configuration object
 	 */
