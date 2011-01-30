@@ -41,7 +41,6 @@ public class LiteralFields extends eu.larkc.iris.rules.compiler.PipeFields {
 	private static final String VARIABLE_PREFIX = "V";
 	private static final String CONSTANT_PREFIX = "C";
 	
-	private Pipe mainPipe;
 	private LiteralId id;
 	
 	public class TermId {
@@ -94,7 +93,6 @@ public class LiteralFields extends eu.larkc.iris.rules.compiler.PipeFields {
 	}
 	
 	LiteralFields(Pipe mainPipe, LiteralId literalId, ILiteral literal) {
-		this.mainPipe = mainPipe;
 		this.id = literalId;
 		IAtom atom = literal.getAtom();
 		add(new StreamItem(new TermId(literalId, PREDICATE_PREFIX), atom.getPredicate()));
@@ -108,6 +106,15 @@ public class LiteralFields extends eu.larkc.iris.rules.compiler.PipeFields {
 				add(new StreamItem(new TermId(literalId, CONSTANT_PREFIX, i), term));
 			}
 		}
+		
+		pipe = new Pipe(getId().toString(), mainPipe);
+		pipe = new Rename(pipe, new cascading.tuple.Fields(0, 1, 2), getFields());
+		IPredicate predicateValue = getPredicate();
+		if (predicateValue != null) {
+			pipe = new Each(pipe, getFields(), new PredicateFilter(predicateValue));
+		}
+		
+		pipe = filterConstants(pipe);
 	}
 	
 	public LiteralId getId() {
@@ -150,19 +157,6 @@ public class LiteralFields extends eu.larkc.iris.rules.compiler.PipeFields {
 	 */
 	@Override
 	public Pipe getPipe() {
-		if (pipe != null) {
-			return pipe;
-		}
-		
-		pipe = new Pipe(getId().toString(), mainPipe);
-		pipe = new Rename(pipe, new cascading.tuple.Fields(0, 1, 2), getFields());
-		IPredicate predicateValue = getPredicate();
-		if (predicateValue != null) {
-			pipe = new Each(pipe, getFields(), new PredicateFilter(predicateValue));
-		}
-		
-		pipe = filterConstants(pipe);
-
 		return pipe;
 	}
 

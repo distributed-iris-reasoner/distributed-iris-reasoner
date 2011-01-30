@@ -27,10 +27,12 @@ import org.slf4j.LoggerFactory;
 
 import cascading.operation.Insert;
 import cascading.operation.aggregator.Count;
+import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
+import cascading.pipe.cogroup.InnerJoin;
 import cascading.tuple.Fields;
 import eu.larkc.iris.storage.PredicateWritable;
 
@@ -301,7 +303,16 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		if (lhsJoin.canBeInnerJoined(stream)) {
 			join = lhsJoin.innerJoin(stream);
 		} else {
-			//cartesian join
+			//this is not effective, joining without common fields, but it has to be done for some unoptimized rules
+			lhsJoin.add(new Field("LCF", new Integer(1)));
+			Pipe lhsPipe = new Each(lhsJoin.getPipe(), new Insert(new Fields("LCF"), new Integer(1)), lhsJoin.getFields());
+			
+			stream.add(new Field("RCF", new Integer(1)));
+			Pipe rhsPipe = new Each(stream.getPipe(), new Insert(new Fields("RCF"), new Integer(1)), stream.getFields());
+
+			Pipe joinPipe = new CoGroup(lhsPipe, new Fields("LCF"), rhsPipe, new Fields("RCF"), new InnerJoin());
+			
+			join = new PipeFields(joinPipe, lhsJoin, stream);
 		}
 		
 		join = join.getUniqueVariableFields();

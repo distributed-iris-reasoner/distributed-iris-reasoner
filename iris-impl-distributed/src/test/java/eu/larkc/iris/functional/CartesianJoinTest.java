@@ -35,9 +35,9 @@ import eu.larkc.iris.rules.compiler.IDistributedCompiledRule;
  * @history Nov 09, 2010, vroman, implement a first version
  * @author Florian Fischer
  */
-public class ChartesianJoinTest extends CascadingTest {
+public class CartesianJoinTest extends CascadingTest {
 
-	private static final Logger logger = LoggerFactory.getLogger(ChartesianJoinTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(CartesianJoinTest.class);
 
 	//p( ?X, ?Y ) :- q( ?X, ?Y ), r( ?Y, ?Z ), s( ?X, ?Z ).
 	//q( 1, 2 ).
@@ -45,7 +45,7 @@ public class ChartesianJoinTest extends CascadingTest {
 	//s( 1, 3 ).
 	//?- p(?X, ?Y).
 	
-	public ChartesianJoinTest(String name) {
+	public CartesianJoinTest(String name) {
 		super(name, false);
 	}
 	
