@@ -17,6 +17,7 @@ package eu.larkc.iris.rules.compiler;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.deri.iris.EvaluationException;
+import org.deri.iris.api.basics.IRule;
 import org.deri.iris.facts.IFacts;
 import org.deri.iris.storage.IRelation;
 
@@ -33,7 +34,8 @@ import eu.larkc.iris.evaluation.EvaluationContext;
 public class CascadingCompiledRule implements IDistributedCompiledRule {
 
 	
-	public CascadingCompiledRule(FlowAssembly flowAssembly, eu.larkc.iris.Configuration configuration){
+	public CascadingCompiledRule(IRule rule, FlowAssembly flowAssembly, eu.larkc.iris.Configuration configuration){
+		this.rule = rule;
 		this.flowAssembly = flowAssembly;
 		this.mConfiguration = configuration;
 	}
@@ -95,8 +97,18 @@ public class CascadingCompiledRule implements IDistributedCompiledRule {
 		return flowAssembly;
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.larkc.iris.rules.compiler.IDistributedCompiledRule#getRule()
+	 */
+	@Override
+	public IRule getRule() {
+		return rule;
+	}
+
 
 	private final eu.larkc.iris.Configuration mConfiguration;
+
+	private IRule rule;
 	
 	/**
 	 * The internal representation as a cascading flow of this rule.

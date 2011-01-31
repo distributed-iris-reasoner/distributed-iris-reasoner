@@ -43,6 +43,7 @@ public class DistributedNaiveEvaluator implements IDistributedRuleEvaluator {
 			// For each rule in the collection (stratum)
 			for (final IDistributedCompiledRule rule : rules )
 			{
+				logger.info("evaluate iteration : " + iterationNumber + ", ruleNumber : " + ruleNumber + ", rule : " + rule.getRule());
 				boolean delta = rule.evaluate(new EvaluationContext(iterationNumber, ruleNumber));
 				cont = delta ?  delta : cont;
 				ruleNumber++;

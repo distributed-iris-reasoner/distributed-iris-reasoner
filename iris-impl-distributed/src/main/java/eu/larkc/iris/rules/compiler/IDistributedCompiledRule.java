@@ -16,6 +16,7 @@
 package eu.larkc.iris.rules.compiler;
 
 import org.deri.iris.EvaluationException;
+import org.deri.iris.api.basics.IRule;
 import org.deri.iris.facts.IFacts;
 import org.deri.iris.storage.IRelation;
 
@@ -53,5 +54,7 @@ public interface IDistributedCompiledRule {
 	IRelation evaluateIteratively( IFacts deltas ) throws EvaluationException;
 	
 	public FlowAssembly getFlowAssembly();
+	
+	public IRule getRule();
 	
 }

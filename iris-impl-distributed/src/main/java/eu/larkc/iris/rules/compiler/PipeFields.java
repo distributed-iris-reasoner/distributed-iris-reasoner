@@ -22,7 +22,6 @@ import org.deri.iris.api.terms.IVariable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cascading.operation.Debug;
 import cascading.operation.Identity;
 import cascading.operation.aggregator.Count;
 import cascading.operation.filter.FilterNotNull;
@@ -111,12 +110,8 @@ public class PipeFields extends Fields {
 		
 		Pipe leftJoin = new CoGroup(getPipe(), fieldGroup.getLeftFields().getFields(), headFields.getPipe(), fieldGroup.getRightFields().getFields(), new LeftJoin());
 		
-		leftJoin = new Each (leftJoin, new Debug(true));
-		
 		leftJoin = new Each( leftJoin, headFields.getFields(), new FilterNotNull());	// outgoing -> "keepField"
 		leftJoin = new Each( leftJoin, this.getFields(), new Identity());	// outgoing -> "keepField"
-
-		leftJoin = new Each (leftJoin, new Debug(true));
 		
 		return new PipeFields(leftJoin, this);
 	}

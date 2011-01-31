@@ -87,7 +87,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		
 		FlowAssembly compiledCascadingRuleFlowAssembly = attachTaps(bodyPipe, rule);
 
-		return new CascadingCompiledRule(compiledCascadingRuleFlowAssembly,
+		return new CascadingCompiledRule(rule, compiledCascadingRuleFlowAssembly,
 				mConfiguration);
 	}
 
