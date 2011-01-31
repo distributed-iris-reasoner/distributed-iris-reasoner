@@ -9,7 +9,6 @@ import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.tuple.Tuple;
 import eu.larkc.iris.storage.IRIWritable;
-import eu.larkc.iris.storage.PredicateWritable;
 import eu.larkc.iris.storage.StringTermWritable;
 
 /**
@@ -30,16 +29,9 @@ public class TextImporterFunction extends BaseOperation implements Function {
 		for (int i = 0; i < tuple.size(); i++) {
 			String value = tuple.getString(i);
 			if ((value.startsWith("<") && value.endsWith(">") || value.startsWith("_:node"))) {
-				if (i == 0) {
-					PredicateWritable predicateWritable = new PredicateWritable();
-					predicateWritable.setURI(value.substring(1, value.length() - 1));
-					predicateWritable.setArity(tuple.size() - 1);
-					outTuple.add(predicateWritable);
-				} else {
-					IRIWritable iriWritable = new IRIWritable();
-					iriWritable.setValue(value.substring(1, value.length() - 1));
-					outTuple.add(iriWritable);
-				}
+				IRIWritable iriWritable = new IRIWritable();
+				iriWritable.setValue(value.substring(1, value.length() - 1));
+				outTuple.add(iriWritable);
 			} else {
 				StringTermWritable stWritable = new StringTermWritable();
 				stWritable.setValue(value);

@@ -1,5 +1,5 @@
 /*
-D * Copyright 2010 Softgress - http://www.softgress.com/
+ * Copyright 2010 Softgress - http://www.softgress.com/
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.cogroup.InnerJoin;
 import cascading.tuple.Fields;
-import eu.larkc.iris.storage.PredicateWritable;
+import eu.larkc.iris.storage.IRIWritable;
 
 /**
  * 
@@ -428,9 +428,9 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 
 		IAtom headAtom = head.get(0).getAtom();
 		
-		eu.larkc.iris.rules.compiler.Fields theHeadFields = pipeFields.getCommonFields(headFields).getLeftFields();
+		eu.larkc.iris.rules.compiler.Fields theHeadFields = headFields.getCommonFields(pipeFields).getRightFields();
 		theHeadFields.add(0, new Field(HEAD_PREDICATE_FIELD, headAtom.getPredicate()));
-		rulePipe = new Each( rulePipe, new Insert( new Fields(HEAD_PREDICATE_FIELD), new PredicateWritable(headAtom.getPredicate())), theHeadFields.getFields());
+		rulePipe = new Each( rulePipe, new Insert( new Fields(HEAD_PREDICATE_FIELD), new IRIWritable(headAtom.getPredicate())), theHeadFields.getFields());
 		
 		Fields resultFields = theHeadFields.getFields();
 		

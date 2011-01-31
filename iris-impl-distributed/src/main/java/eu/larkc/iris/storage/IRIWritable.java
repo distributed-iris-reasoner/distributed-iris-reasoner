@@ -18,23 +18,29 @@ package eu.larkc.iris.storage;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.Serializable;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.hadoop.io.WritableComparable;
+import org.deri.iris.api.basics.IPredicate;
 import org.deri.iris.api.terms.concrete.IIri;
 
 /**
  * @author vroman
  *
  */
-public class IRIWritable implements WritableComparable<IRIWritable> {
+public class IRIWritable implements WritableComparable<IRIWritable>, Serializable {
 
-	private String iri;
+	protected String iri;
 	
 	public IRIWritable() {
 	}
-	
+
+	public IRIWritable(IPredicate predicate) {
+		this.iri = predicate.getPredicateSymbol();
+	}
+
 	public IRIWritable(IIri iri) {
 		this.iri = iri.getValue();
 	}

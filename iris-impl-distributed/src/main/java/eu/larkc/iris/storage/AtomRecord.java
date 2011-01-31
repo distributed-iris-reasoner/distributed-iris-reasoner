@@ -37,7 +37,7 @@ public abstract class AtomRecord {
 	
 	public void read(IAtom atom) {
 		tuple = new Tuple();
-		tuple.add(new PredicateWritable(atom.getPredicate()));
+		tuple.add(new IRIWritable(atom.getPredicate()));
 		for(int i= 0 ; i < atom.getTuple().size(); i++) {
 			ITerm term = atom.getTuple().get(i);
 			if (term instanceof IIri) {

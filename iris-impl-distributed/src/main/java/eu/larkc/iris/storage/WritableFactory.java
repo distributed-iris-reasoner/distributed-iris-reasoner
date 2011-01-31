@@ -13,42 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package eu.larkc.iris.rules.compiler;
+package eu.larkc.iris.storage;
 
-import org.deri.iris.api.terms.IVariable;
+import org.apache.hadoop.io.WritableComparable;
+import org.deri.iris.api.basics.IPredicate;
+import org.deri.iris.api.terms.IStringTerm;
+import org.deri.iris.api.terms.ITerm;
+import org.deri.iris.api.terms.concrete.IIri;
 
 /**
  * @author valer
  *
  */
-public class Field {
+public class WritableFactory {
 
-	private String name;
-	protected Comparable source;
-
-	public Field(String name, Comparable source) {
-		this.name = name;
-		this.source = source;
+	public static WritableComparable fromTerm(ITerm term) {
+		if (term instanceof IIri) {
+			return new IRIWritable((IIri) term);
+		} else if (term instanceof IStringTerm) {
+			return new StringTermWritable((IStringTerm) term);
+		}
+		return null;
 	}
 
-	protected Field(Comparable source) {
-		this.source = source;
+	public static WritableComparable fromPredicate(IPredicate predicate) {
+		return new IRIWritable(predicate);
 	}
 
-	public Comparable getSource() {
-		return source;
-	}
-
-	public String getValue() {
-		return source.toString();
-	}
-	
-	public boolean isVariable() {
-		return source instanceof IVariable;
-	}
-
-	public String getName() {
-		return name;
-	}
-	
 }

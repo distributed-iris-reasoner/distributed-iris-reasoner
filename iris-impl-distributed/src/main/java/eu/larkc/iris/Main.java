@@ -149,8 +149,8 @@ public class Main extends Configured implements Tool {
 		
 		jobConf.setBoolean("mapred.input.dir.recursive", true);
 		
-		jobConf.set("cascading.serialization.tokens", "130=eu.larkc.iris.storage.IRIWritable,131=eu.larkc.iris.storage.PredicateWritable,132=eu.larkc.iris.storage.StringTermWritable");
-		defaultConfiguration.flowProperties.put("cascading.serialization.tokens", "130=eu.larkc.iris.storage.IRIWritable,131=eu.larkc.iris.storage.PredicateWritable,132=eu.larkc.iris.storage.StringTermWritable");
+		jobConf.set("cascading.serialization.tokens", "130=eu.larkc.iris.storage.IRIWritable,131=eu.larkc.iris.storage.StringTermWritable");
+		defaultConfiguration.flowProperties.put("cascading.serialization.tokens", "130=eu.larkc.iris.storage.IRIWritable,131=eu.larkc.iris.storage.StringTermWritable");
 		
 	    if( System.getProperty("log4j.logger") != null )
 	    	defaultConfiguration.flowProperties.put( "log4j.logger", System.getProperty("log4j.logger") );

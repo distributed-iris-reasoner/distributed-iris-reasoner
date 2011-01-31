@@ -30,7 +30,6 @@ import cascading.tuple.Tuple;
 import eu.larkc.iris.storage.AtomRecord;
 import eu.larkc.iris.storage.FactsStorage;
 import eu.larkc.iris.storage.IRIWritable;
-import eu.larkc.iris.storage.PredicateWritable;
 import eu.larkc.iris.storage.StringTermWritable;
 
 public class RdfRecord extends AtomRecord {
@@ -50,7 +49,7 @@ public class RdfRecord extends AtomRecord {
 		if (!model.isOpen()) {
 			model.open();
 		}
-		URI predicate = new URIImpl(((PredicateWritable) tuple.get(0)).getURI());
+		URI predicate = new URIImpl(((IRIWritable) tuple.get(0)).getValue());
 		Resource subject = new URIImpl(((IRIWritable) tuple.get(1)).getValue());
 		Class[] types = tuple.getTypes();
 		//String objectTuple = null;

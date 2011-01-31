@@ -1,4 +1,2 @@
-<http://test/uuu> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://test/vvv> .
-<http://test/vvv> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://test/xxx> .
-<http://test/uuu> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://test/vvv> .
-<http://test/vvv> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://test/xxx> .
+<http://test/aaa> <http://www.w3.org/2000/01/rdf-schema#domain> <http://test/xxx> .
+<http://test/uuu> <http://test/aaa> <http://test/vvv> .

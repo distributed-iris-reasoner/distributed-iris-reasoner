@@ -1,5 +1,17 @@
-/**
+/*
+ * Copyright 2010 Softgress - http://www.softgress.com/
  * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package eu.larkc.iris.rules.compiler;
 
@@ -9,6 +21,7 @@ import java.util.Map;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.hadoop.io.WritableComparable;
 import org.deri.iris.api.basics.IAtom;
 import org.deri.iris.api.basics.ILiteral;
 import org.deri.iris.api.basics.IPredicate;
@@ -23,8 +36,8 @@ import cascading.pipe.Each;
 import cascading.pipe.Pipe;
 import cascading.pipe.assembly.Rename;
 import eu.larkc.iris.evaluation.ConstantFilter;
-import eu.larkc.iris.evaluation.PredicateFilter;
 import eu.larkc.iris.rules.compiler.RuleStreams.LiteralId;
+import eu.larkc.iris.storage.WritableFactory;
 
 /**
  * @author valer
@@ -37,6 +50,8 @@ public class LiteralFields extends eu.larkc.iris.rules.compiler.PipeFields {
 	 */
 	private static final long serialVersionUID = 6351207734635496829L;
 
+	private static final String RIF_HAS_VALUE = "RIF_HAS_VALUE";
+	
 	private static final String PREDICATE_PREFIX = "P";
 	private static final String VARIABLE_PREFIX = "V";
 	private static final String CONSTANT_PREFIX = "C";
@@ -95,24 +110,23 @@ public class LiteralFields extends eu.larkc.iris.rules.compiler.PipeFields {
 	LiteralFields(Pipe mainPipe, LiteralId literalId, ILiteral literal) {
 		this.id = literalId;
 		IAtom atom = literal.getAtom();
-		add(new StreamItem(new TermId(literalId, PREDICATE_PREFIX), atom.getPredicate()));
+		IPredicate predicate = atom.getPredicate();
+		if (!predicate.getPredicateSymbol().equals(RIF_HAS_VALUE)) {
+			add(new LiteralField(new TermId(literalId, PREDICATE_PREFIX), predicate));
+		}
 		for (int i = 0; i < atom.getTuple().size(); i++) {
 			ITerm term = atom.getTuple().get(i);
 			if (term instanceof IVariable) {
-				add(new StreamItem(new TermId(literalId, VARIABLE_PREFIX, i), term));
+				add(new LiteralField(new TermId(literalId, VARIABLE_PREFIX, i), term));
 			} else if (term instanceof IIri) {
-				add(new StreamItem(new TermId(literalId, CONSTANT_PREFIX, i), term));
+				add(new LiteralField(new TermId(literalId, CONSTANT_PREFIX, i), term));
 			} else if (term instanceof IStringTerm) {
-				add(new StreamItem(new TermId(literalId, CONSTANT_PREFIX, i), term));
+				add(new LiteralField(new TermId(literalId, CONSTANT_PREFIX, i), term));
 			}
 		}
 		
 		pipe = new Pipe(getId().toString(), mainPipe);
 		pipe = new Rename(pipe, new cascading.tuple.Fields(0, 1, 2), getFields());
-		IPredicate predicateValue = getPredicate();
-		if (predicateValue != null) {
-			pipe = new Each(pipe, getFields(), new PredicateFilter(predicateValue));
-		}
 		
 		pipe = filterConstants(pipe);
 	}
@@ -160,15 +174,6 @@ public class LiteralFields extends eu.larkc.iris.rules.compiler.PipeFields {
 		return pipe;
 	}
 
-	private IPredicate getPredicate() {
-		for (Field field : this) {
-			if (field.source instanceof IPredicate) {
-				return (IPredicate) field.getSource();
-			}
-		}
-		return null;
-	}
-	
 	/**
 	 * This filters constants by providing in tuple streams according to the
 	 * original rule defintion.
@@ -178,23 +183,17 @@ public class LiteralFields extends eu.larkc.iris.rules.compiler.PipeFields {
 	 * @return
 	 */
 	protected Pipe filterConstants(Pipe attachTo) {
-
-		Map<String, Object> constantTerms = new HashMap<String, Object>();
+		Map<String, WritableComparable> constantTerms = new HashMap<String, WritableComparable>();
 
 		for (Field field : this) {
-			if (!(field.getSource() instanceof ITerm)) {
-				continue;
-			}
-			ITerm term = (ITerm) field.getSource();
-
-			// not a variable, we filter the tuples
-			if (term.isGround()) {
-				if (term instanceof IIri) {
-					constantTerms.put(field.getName(), (IIri) term); //added one because of the predicate field
-				} else {
-					constantTerms.put(field.getName(), term.getValue()); //added one because of the predicate field
+			if (field.getSource() instanceof IPredicate) {
+				constantTerms.put(field.getName(), WritableFactory.fromPredicate((IPredicate) field.getSource())); //added one because of the predicate field
+			} else if (field.getSource() instanceof ITerm) {
+				ITerm term = (ITerm) field.getSource();
+				// not a variable, we filter the tuples
+				if (term.isGround()) {
+					constantTerms.put(field.getName(), WritableFactory.fromTerm(term)); //added one because of the predicate field
 				}
-					
 			}
 		}
 

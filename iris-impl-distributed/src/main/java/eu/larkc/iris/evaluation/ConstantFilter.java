@@ -18,15 +18,13 @@ package eu.larkc.iris.evaluation;
 import java.util.Map;
 import java.util.Set;
 
-import org.deri.iris.api.terms.ITerm;
-import org.deri.iris.api.terms.concrete.IIri;
+import org.apache.hadoop.io.WritableComparable;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 import cascading.tuple.TupleEntry;
-import eu.larkc.iris.storage.IRIWritable;
 
 /**
  * This filters according to constants in rules and is set-up during
@@ -46,7 +44,7 @@ public class ConstantFilter extends BaseOperation implements Filter {
 	/**
 	 * @param expectedConstants Constants in a subgoal.
 	 */
-	public ConstantFilter(Map<String, Object> expectedConstants) {
+	public ConstantFilter(Map<String, WritableComparable> expectedConstants) {
 		this.mExpectedconstants = expectedConstants;
 	}
 	
@@ -69,13 +67,7 @@ public class ConstantFilter extends BaseOperation implements Filter {
 		Set<String> positions = mExpectedconstants.keySet();	
 		for (String pos : positions) {
 			//we only need to find one value that does not match the constant
-			Object compareTo = null;
-			Object expected = mExpectedconstants.get(pos);
-			if (expected instanceof IIri) {
-				compareTo = new IRIWritable((IIri) expected);
-			} else {
-				compareTo = ((ITerm) expected).getValue();
-			}
+			Object compareTo = mExpectedconstants.get(pos);
 			if(!arguments.get(pos).equals(compareTo)) {
 				remove = true;
 				break;
@@ -85,5 +77,5 @@ public class ConstantFilter extends BaseOperation implements Filter {
 		return remove;
 	}
 	
-	private Map<String, Object> mExpectedconstants;
+	private Map<String, WritableComparable> mExpectedconstants;
 }

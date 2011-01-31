@@ -7,8 +7,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,10 +24,8 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
 import eu.larkc.iris.Configuration;
-import eu.larkc.iris.imports.TextImporterFunction;
 import eu.larkc.iris.storage.FactsFactory;
 import eu.larkc.iris.storage.IRIWritable;
-import eu.larkc.iris.storage.PredicateWritable;
 import eu.larkc.iris.storage.StringTermWritable;
 
 /**
@@ -90,10 +86,7 @@ public class Exporter {
 			Tuple tuple = tei.next().getTuple();
 			for (int i = 0; i < tuple.size(); i++) {
 				Object value = tuple.getObject(i);
-				if (value instanceof PredicateWritable) {
-					PredicateWritable predicate = (PredicateWritable) value;
-					sb.append("<" + predicate.getURI() + "> ");
-				} else if (value instanceof IRIWritable) {
+				if (value instanceof IRIWritable) {
 					IRIWritable iri = (IRIWritable) value;
 					sb.append("<" + iri.getValue() + "> ");
 				} else if (value instanceof StringTermWritable) {

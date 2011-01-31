@@ -13,7 +13,7 @@
       <!-- RDFS Rules http://www.w3.org/TR/rdf-mt/#RDFSRules -->
         
       <!--  rdfs2  -->
-      <!-- sentence>
+      <sentence>
         <Forall>
           <declare>
             <Var>aaa</Var>
@@ -69,7 +69,7 @@
             </Implies>
           </formula>
         </Forall>
-      </sentence -->
+      </sentence>
 
       <!--  rdfs5  -->
       <!-- uuu rdfs:subPropertyOf xxx . :- uuu rdfs:subPropertyOf vvv . vvv rdfs:subPropertyOf xxx . -->
