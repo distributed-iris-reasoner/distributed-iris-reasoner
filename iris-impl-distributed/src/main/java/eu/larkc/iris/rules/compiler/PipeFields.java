@@ -18,6 +18,7 @@ package eu.larkc.iris.rules.compiler;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.deri.iris.api.basics.IPredicate;
 import org.deri.iris.api.terms.IVariable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,4 +117,31 @@ public class PipeFields extends Fields {
 		return new PipeFields(leftJoin, this);
 	}
 
+	public PipeFields generateHeadVariablesInStream(PipeFields headFields) {
+		eu.larkc.iris.rules.compiler.Fields inHeadHeadFields = headFields.getCommonFields(this).getLeftFields();
+		eu.larkc.iris.rules.compiler.Fields inBodyHeadFields = headFields.getCommonFields(this).getRightFields();
+		
+		if (headFields.size() != (inBodyHeadFields.size() + 1)) { //+1 is for predicate
+			eu.larkc.iris.rules.compiler.FieldPairs extraFields = new eu.larkc.iris.rules.compiler.FieldPairs();
+			for (Field field : headFields) {
+				if ((field.getSource() instanceof IPredicate) || inHeadHeadFields.contains(field)) {
+					continue;
+				}
+				for (Field aField : inBodyHeadFields) {
+					if (field.getSource().equals(aField.getSource())) {
+						extraFields.add(field, aField);
+					}
+				}
+			}
+			eu.larkc.iris.rules.compiler.Fields leftFields = extraFields.getLeftFields();
+			eu.larkc.iris.rules.compiler.Fields rightFields = extraFields.getRightFields();
+			
+			Pipe rulePipe = new Each(getPipe(), rightFields.getFields(), new Identity(rightFields.getFields()));
+			eu.larkc.iris.rules.compiler.Fields declaredFields = new eu.larkc.iris.rules.compiler.Fields(rightFields);
+			declaredFields.addAll(leftFields);
+			rulePipe = new CoGroup(rulePipe, rightFields.getFields(), 1, declaredFields.getFields());
+			return new PipeFields(rulePipe, declaredFields);
+		}
+		return this;		
+	}
 }

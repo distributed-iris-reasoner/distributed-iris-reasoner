@@ -15,6 +15,8 @@
  */
 package eu.larkc.iris.rules.compiler;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.deri.iris.api.basics.IPredicate;
 import org.deri.iris.api.terms.IStringTerm;
 import org.deri.iris.api.terms.IVariable;
@@ -59,6 +61,29 @@ public class LiteralField extends Field {
 	@Override
 	public String toString() {
 		return id.toString();
+	}
+
+	/* (non-Javadoc)
+	 * @see eu.larkc.iris.rules.compiler.Field#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof LiteralField)) {
+			return false;
+		}
+		LiteralField aField = (LiteralField) obj;
+		return new EqualsBuilder().append(id, aField.id).isEquals();
+	}
+
+	/* (non-Javadoc)
+	 * @see eu.larkc.iris.rules.compiler.Field#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder().append(id).hashCode();
 	}
 
 }

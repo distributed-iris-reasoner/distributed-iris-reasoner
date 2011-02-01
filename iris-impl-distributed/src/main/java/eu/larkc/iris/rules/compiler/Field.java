@@ -15,6 +15,8 @@
  */
 package eu.larkc.iris.rules.compiler;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.deri.iris.api.terms.IVariable;
 
 /**
@@ -49,6 +51,29 @@ public class Field {
 
 	public String getName() {
 		return name;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof Field)) {
+			return false;
+		}
+		Field aField = (Field) obj;
+		return new EqualsBuilder().append(name, aField.name).isEquals();
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder().append(name).hashCode();
 	}
 	
 }

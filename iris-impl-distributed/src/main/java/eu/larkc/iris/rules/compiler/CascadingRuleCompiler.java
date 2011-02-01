@@ -412,12 +412,6 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 * @return
 	 */
 	protected FlowAssembly attachTaps(eu.larkc.iris.rules.compiler.PipeFields pipeFields, IRule originalRule) {
-
-		Pipe rulePipe = pipeFields.getPipe();
-		
-		//Map<String, Tap> sources = new HashMap<String, Tap>();
-		//Map<String, Tap> sinks = new HashMap<String, Tap>();
-		
 		List<ILiteral> head = originalRule.getHead();
 		// Only one literal in head
 		if (head.size() != 1) {
@@ -428,36 +422,22 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 
 		IAtom headAtom = head.get(0).getAtom();
 		
-		eu.larkc.iris.rules.compiler.Fields theHeadFields = headFields.getCommonFields(pipeFields).getRightFields();
-		theHeadFields.add(0, new Field(HEAD_PREDICATE_FIELD, headAtom.getPredicate()));
-		rulePipe = new Each( rulePipe, new Insert( new Fields(HEAD_PREDICATE_FIELD), new IRIWritable(headAtom.getPredicate())), theHeadFields.getFields());
+		//it could be that the head literal has several times the same variable p(x,x)
+		//we have to insert in the result stream another field for the second variable x, to be able to select then both x
+		pipeFields = pipeFields.generateHeadVariablesInStream(headFields);
 		
-		Fields resultFields = theHeadFields.getFields();
+		eu.larkc.iris.rules.compiler.Fields inBodyHeadFields = headFields.getCommonFields(false, pipeFields).getRightFields();
 		
-		rulePipe = new GroupBy(rulePipe, resultFields); //eliminate duplicates
-		rulePipe = new Every(rulePipe, new Count(), resultFields);
-
-		FlowAssembly flowAssembly = new FlowAssembly(mConfiguration, resultFields, rulePipe);//, countPipe);
-		return flowAssembly;
+		inBodyHeadFields.add(0, new Field(HEAD_PREDICATE_FIELD, headAtom.getPredicate()));
+		Pipe rulePipe = new Each( pipeFields.getPipe(), new Insert( new Fields(HEAD_PREDICATE_FIELD), new IRIWritable(headAtom.getPredicate())), inBodyHeadFields.getFields());
 		
-		
-		/*
-		FieldsList ruleFieldsList = pipeFields.getFieldsList();
-		FieldsList headFieldsList = identifyHeadVariableFields(fieldsVariablesMapping, headAtom, ruleFieldsList);
-						
-		headFieldsList.add(0, HEAD_PREDICATE_FIELD);
-		ruleFieldsList.add(HEAD_PREDICATE_FIELD);
-		Fields headFields = ruleFieldsList.getFields(headFieldsList);
-		rulePipe = new Each( rulePipe, new Insert( new Fields(HEAD_PREDICATE_FIELD), new PredicateWritable(headAtom.getPredicate())), headFields);
-		
-		Fields resultFields = headFieldsList.getFields();
+		Fields resultFields = inBodyHeadFields.getFields();
 		
 		rulePipe = new GroupBy(rulePipe, resultFields); //eliminate duplicates
 		rulePipe = new Every(rulePipe, new Count(), resultFields);
 
 		FlowAssembly flowAssembly = new FlowAssembly(mConfiguration, resultFields, rulePipe);//, countPipe);
 		return flowAssembly;
-		*/
 	}
 	
 	/**

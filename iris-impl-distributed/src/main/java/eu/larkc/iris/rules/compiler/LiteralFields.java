@@ -32,6 +32,7 @@ import org.deri.iris.api.terms.ITerm;
 import org.deri.iris.api.terms.IVariable;
 import org.deri.iris.api.terms.concrete.IIri;
 
+import cascading.operation.Debug;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
 import cascading.pipe.assembly.Rename;
@@ -126,6 +127,7 @@ public class LiteralFields extends eu.larkc.iris.rules.compiler.PipeFields {
 		}
 		
 		pipe = new Pipe(getId().toString(), mainPipe);
+		pipe = new Each(pipe, new Debug(true));
 		pipe = new Rename(pipe, new cascading.tuple.Fields(0, 1, 2), getFields());
 		
 		pipe = filterConstants(pipe);

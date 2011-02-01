@@ -24,17 +24,6 @@ import org.deri.iris.api.terms.IVariable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cascading.operation.Identity;
-import cascading.operation.aggregator.Count;
-import cascading.operation.filter.FilterNotNull;
-import cascading.pipe.CoGroup;
-import cascading.pipe.Each;
-import cascading.pipe.Every;
-import cascading.pipe.GroupBy;
-import cascading.pipe.Pipe;
-import cascading.pipe.cogroup.InnerJoin;
-import cascading.pipe.cogroup.LeftJoin;
-
 /**
  * @author valer
  * 
@@ -63,11 +52,19 @@ public class Fields extends ArrayList<Field> {
 	}
 
 	protected FieldPairs getCommonFields(Fields fields) {
+		return getCommonFields(true, fields);
+	}
+	
+	protected FieldPairs getCommonFields(boolean uniques, Fields fields) {
 		FieldPairs commonItems = new FieldPairs();
-		for (Field item : getVariableFields()) {
-			for (Field anItem : fields.getVariableFields()) {
+		for (Field item : getVariableFields(uniques)) {
+			for (Field anItem : fields.getVariableFields(uniques)) {
+				if (commonItems.contains(anItem)) {
+					continue;
+				}
 				if (item.getSource().equals(anItem.getSource())) {
 					commonItems.add(item, anItem);
+					break;
 				}
 			}
 		}
@@ -75,11 +72,20 @@ public class Fields extends ArrayList<Field> {
 	}
 	
 	public List<Field> getVariableFields() {
+		return getVariableFields(true);
+	}
+	
+	public List<Field> getVariableFields(boolean uniques) {
+		Set<IVariable> variables = new HashSet<IVariable>();
 		List<Field> variableItems = new ArrayList<Field>();
 		for (Field field : this) {
 			if (!field.isVariable()) {
 				continue;
 			}
+			if (uniques && variables.contains(field.getSource())) {
+				continue;
+			}
+			variables.add((IVariable) field.source);
 			variableItems.add(field);
 		}
 		return variableItems;

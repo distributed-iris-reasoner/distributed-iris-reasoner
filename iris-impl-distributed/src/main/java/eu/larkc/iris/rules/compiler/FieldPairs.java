@@ -60,4 +60,12 @@ public class FieldPairs extends ArrayList<FieldPair> {
 		return fields;
 	}
 
+	public boolean contains(Field field) {
+		for (FieldPair fieldPair : this) {
+			if (fieldPair.field1.equals(field) || fieldPair.field2.equals(field)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }
