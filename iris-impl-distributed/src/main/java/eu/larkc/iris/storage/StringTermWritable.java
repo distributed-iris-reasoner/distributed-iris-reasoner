@@ -21,15 +21,19 @@ import java.io.IOException;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.hadoop.io.WritableComparable;
 import org.deri.iris.api.terms.IStringTerm;
 
 /**
  * @author vroman
  *
  */
-public class StringTermWritable implements WritableComparable<StringTermWritable> {
+public class StringTermWritable extends eu.larkc.iris.storage.WritableComparable {
 
+	/**
+	 * serialVersionUID
+	 */
+	private static final long serialVersionUID = 2817388276705997672L;
+	
 	private String stringTerm;
 	
 	public StringTermWritable() {
@@ -47,6 +51,14 @@ public class StringTermWritable implements WritableComparable<StringTermWritable
 		this.stringTerm = value;
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.larkc.iris.storage.WritableComparable#getCompareValue()
+	 */
+	@Override
+	protected String getCompareValue() {
+		return stringTerm;
+	}
+
 	@Override
 	public void write(DataOutput out) throws IOException {
 		out.writeUTF(stringTerm);
@@ -62,11 +74,6 @@ public class StringTermWritable implements WritableComparable<StringTermWritable
 		String stringTerm = in.readUTF();
 		stringTermWritable.stringTerm = stringTerm;
 		return stringTermWritable;
-	}
-
-	@Override
-	public int compareTo(StringTermWritable o) {
-		return stringTerm.compareTo(o.stringTerm);
 	}
 
 	@Override

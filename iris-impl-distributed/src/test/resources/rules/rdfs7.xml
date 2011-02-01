@@ -12,8 +12,8 @@
       
       <!-- RDFS Rules http://www.w3.org/TR/rdf-mt/#RDFSRules -->
         
-      <!--  rdfs6  -->
-      <!-- uuu rdfs:subPropertyOf uuu . :- uuu rdf:type rdf:Property . -->
+      <!--  rdfs7  -->
+      <!-- uuu bbb uuu . :- aaa rdfs:subPropertyOf bbb, uuu aaa yyy . -->
       <sentence>
         <Forall>
           <declare>
