@@ -88,7 +88,11 @@ public class Exporter {
 				Object value = tuple.getObject(i);
 				if (value instanceof IRIWritable) {
 					IRIWritable iri = (IRIWritable) value;
-					sb.append("<" + iri.getValue() + "> ");
+					if (i == 1) {
+						sb.insert(0, "<" + iri.getValue() + "> ");
+					} else {
+						sb.append("<" + iri.getValue() + "> ");
+					}
 				} else if (value instanceof StringTermWritable) {
 					StringTermWritable stringTerm = (StringTermWritable) value;
 					sb.append(stringTerm.getValue() + " ");
