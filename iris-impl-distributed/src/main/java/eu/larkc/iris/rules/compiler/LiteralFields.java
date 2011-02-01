@@ -51,7 +51,7 @@ public class LiteralFields extends eu.larkc.iris.rules.compiler.PipeFields {
 	 */
 	private static final long serialVersionUID = 6351207734635496829L;
 
-	private static final String RIF_HAS_VALUE = "RIF_HAS_VALUE";
+	public static final String RIF_HAS_VALUE = "RIF_HAS_VALUE";
 	
 	private static final String PREDICATE_PREFIX = "P";
 	private static final String VARIABLE_PREFIX = "V";
@@ -127,7 +127,6 @@ public class LiteralFields extends eu.larkc.iris.rules.compiler.PipeFields {
 		}
 		
 		pipe = new Pipe(getId().toString(), mainPipe);
-		pipe = new Each(pipe, new Debug(true));
 		pipe = new Rename(pipe, new cascading.tuple.Fields(0, 1, 2), getFields());
 		
 		pipe = filterConstants(pipe);

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE Document [
+  <!ENTITY rif  "http://www.w3.org/2007/rif#">
+  <!ENTITY xs   "http://www.w3.org/2001/XMLSchema#">
+  <!ENTITY rdf  "http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+]>
+
+<Document xmlns="&rif;">
+  <payload>
+    <Group>
+      
+      <!-- RDFS Rules http://www.w3.org/TR/rdf-mt/#RDFSRules -->
+        
+      <!--  rdfs6  -->
+      <!-- uuu rdfs:subPropertyOf uuu . :- uuu rdf:type rdf:Property . -->
+      <sentence>
+        <Forall>
+          <declare>
+            <Var>uuu</Var>
+          </declare>
+          <formula>
+            <Implies>
+              <if>
+                <And>
+                  <formula>
+                    <Atom>
+                      <op>
+                        <Const type="&rif;iri">http://www.w3.org/2000/01/rdf-schema#subPropertyOf</Const>
+                      </op>
+                      <args>
+                        <Var>aaa</Var>
+                        <Var>bbb</Var>
+                      </args>
+                    </Atom>
+                  </formula>
+                  <formula>
+                    <Frame>
+                      <object>
+                  	    <Var>aaa</Var>
+                      </object>
+                      <slot>
+                        <Var>uuu</Var>
+                        <Var>yyy</Var>
+                      </slot>
+                    </Frame>
+                  </formula>
+                </And>
+              </if>
+              <then>
+                <Frame>
+                  <object>
+                    <Var>bbb</Var>
+                  </object>
+                  <slot>
+                    <Var>uuu</Var>
+                    <Var>yyy</Var>
+                  </slot>
+                </Frame>
+              </then>
+            </Implies>
+          </formula>
+        </Forall>
+      </sentence>
+             
+    </Group>
+  </payload>
+</Document>
+<!--XML document generated on Wed Nov 11 09:12:17 EST 2009-->

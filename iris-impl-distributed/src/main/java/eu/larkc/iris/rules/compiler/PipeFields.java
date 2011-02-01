@@ -121,7 +121,7 @@ public class PipeFields extends Fields {
 		eu.larkc.iris.rules.compiler.Fields inHeadHeadFields = headFields.getCommonFields(this).getLeftFields();
 		eu.larkc.iris.rules.compiler.Fields inBodyHeadFields = headFields.getCommonFields(this).getRightFields();
 		
-		if (headFields.size() != (inBodyHeadFields.size() + 1)) { //+1 is for predicate
+		//if (headFields.getVariableFields(false).size() != (inBodyHeadFields.size())) {
 			eu.larkc.iris.rules.compiler.FieldPairs extraFields = new eu.larkc.iris.rules.compiler.FieldPairs();
 			for (Field field : headFields) {
 				if ((field.getSource() instanceof IPredicate) || inHeadHeadFields.contains(field)) {
@@ -133,6 +133,11 @@ public class PipeFields extends Fields {
 					}
 				}
 			}
+			/**/
+			if (extraFields.isEmpty()) {
+				return this;
+			}
+			/**/
 			eu.larkc.iris.rules.compiler.Fields leftFields = extraFields.getLeftFields();
 			eu.larkc.iris.rules.compiler.Fields rightFields = extraFields.getRightFields();
 			
@@ -141,7 +146,7 @@ public class PipeFields extends Fields {
 			declaredFields.addAll(leftFields);
 			rulePipe = new CoGroup(rulePipe, rightFields.getFields(), 1, declaredFields.getFields());
 			return new PipeFields(rulePipe, declaredFields);
-		}
-		return this;		
+		//}
+		//return this;		
 	}
 }

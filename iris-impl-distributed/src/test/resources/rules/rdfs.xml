@@ -286,7 +286,7 @@
 
       <!--  rdfs10  -->
       <!-- uuu rdfs:subClassOf uuu . :- uuu rdf:type rdfs:Class . -->
-      <!-- sentence>
+      <sentence>
         <Forall>
           <declare>
             <Var>uuu</Var>
@@ -322,7 +322,7 @@
             </Implies>
           </formula>
         </Forall>
-      </sentence -->
+      </sentence>
 
       <!--  rdfs11  -->
       <!-- uuu rdfs:subClassOf xxx . :- uuu rdfs:subClassOf vvv . vvv rdfs:subClassOf xxx . -->

@@ -428,8 +428,11 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		
 		eu.larkc.iris.rules.compiler.Fields inBodyHeadFields = headFields.getCommonFields(false, pipeFields).getRightFields();
 		
-		inBodyHeadFields.add(0, new Field(HEAD_PREDICATE_FIELD, headAtom.getPredicate()));
-		Pipe rulePipe = new Each( pipeFields.getPipe(), new Insert( new Fields(HEAD_PREDICATE_FIELD), new IRIWritable(headAtom.getPredicate())), inBodyHeadFields.getFields());
+		Pipe rulePipe = pipeFields.getPipe();
+		if (!headAtom.getPredicate().getPredicateSymbol().equals(LiteralFields.RIF_HAS_VALUE)) {
+			inBodyHeadFields.add(0, new Field(HEAD_PREDICATE_FIELD, headAtom.getPredicate()));
+			rulePipe = new Each( rulePipe, new Insert( new Fields(HEAD_PREDICATE_FIELD), new IRIWritable(headAtom.getPredicate())), inBodyHeadFields.getFields());
+		}
 		
 		Fields resultFields = inBodyHeadFields.getFields();
 		
