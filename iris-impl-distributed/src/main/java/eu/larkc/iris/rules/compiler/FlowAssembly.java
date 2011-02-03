@@ -110,9 +110,13 @@ public class FlowAssembly {
 			if(iterator.hasNext()) {
 				hasNewInferences = true;
 			}
+			iterator.close();
 		} catch (IOException e) {
 			logger.error("io exception", e);
 			throw new RuntimeException("io exception", e);
+		}
+		if (!hasNewInferences) {
+			deleteResults(new Path(path));
 		}
 		return hasNewInferences;
 	}
@@ -152,4 +156,17 @@ public class FlowAssembly {
 		}		
 	}
 
+	private void deleteResults(Path resultsPath) {
+		try {
+			//delete inference folder if no result found, to minimize number of input splits for next evaluation
+			FileSystem fs = FileSystem.get(mConfiguration.hadoopConfiguration);
+			if (fs.exists(resultsPath)) {
+				logger.info("delete path : " + resultsPath);
+				fs.delete(resultsPath, true);
+			}
+		} catch (IOException e) {
+			logger.error("io exception", e);
+			throw new RuntimeException("io exception", e);
+		}
+	}
 }
