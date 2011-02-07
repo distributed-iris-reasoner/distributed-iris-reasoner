@@ -130,7 +130,7 @@ public class DistributedBottomUpEvaluationStrategy implements
 	}
 	
 	protected void evaluateRecursiveRules(List<IRule> rules) throws EvaluationException {		
-		//Done by DependencyMinimizingStratifier, TODO (fisf) complete 
+		//Done by DependencyMinimizingStratifier
 		List<List<IRule>> stratifiedRules = utils.stratify(rules);
 	
 		IDistributedRuleCompiler rc = new CascadingRuleCompiler(mConfiguration);		
