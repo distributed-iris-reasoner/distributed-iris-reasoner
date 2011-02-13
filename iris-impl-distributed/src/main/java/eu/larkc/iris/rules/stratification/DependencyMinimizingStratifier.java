@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.deri.iris.api.basics.ILiteral;
 import org.deri.iris.api.basics.IPredicate;
 import org.deri.iris.api.basics.IRule;
 import org.deri.iris.api.factory.IGraphFactory;
@@ -158,12 +159,42 @@ public class DependencyMinimizingStratifier implements IRuleStratifier {
 			
 			//calculate return value on the dependencies between the head predicates
 			//this leaves the case open where multiple rules feed into one head predicate
-			int retVal =  pc.compare(o1.getHead().get(0).getAtom().getPredicate(), 
-					o2.getHead().get(0).getAtom().getPredicate());
+			
+			IPredicate o1Head = o1.getHead().get(0).getAtom().getPredicate();
+			IPredicate o2Head = o2.getHead().get(0).getAtom().getPredicate();
+			
+			int retVal =  pc.compare(o1Head, o2Head);
+			
+			boolean dep = false;
 			
 			//check if there really is a dependency
 			if(retVal == 0) {
-				//TODO
+				
+				List<ILiteral> o1body = o1.getBody();
+				for (ILiteral iLiteral : o1body) {
+					IPredicate bodyP = iLiteral.getAtom().getPredicate();
+					if(predicateGraph.getDepends(bodyP).contains(o2Head)) {
+						dep = true;
+					}
+				}	
+				
+				if(dep == false) {
+					return -1;
+				}
+				
+				dep = false;
+				List<ILiteral> o2body = o2.getBody();
+				for (ILiteral iLiteral : o2body) {
+					IPredicate bodyP = iLiteral.getAtom().getPredicate();
+					
+					if(predicateGraph.getDepends(bodyP).contains(o1Head)) {
+						dep = true;
+					}					
+				}
+				
+				if(dep == false) {
+					return 1;
+				}
 			}
 			
 			return retVal;

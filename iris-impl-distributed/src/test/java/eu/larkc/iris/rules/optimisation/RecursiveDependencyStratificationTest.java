@@ -60,17 +60,27 @@ public class RecursiveDependencyStratificationTest extends LangFeaturesTest {
 		assertTrue(strat instanceof DependencyMinimizingStratifier);
 		
 		List<List<IRule>> stratifiedRules = strat.stratify(rules);
-		int i =0;
-		for (List<IRule> list : stratifiedRules) {			
-			System.out.println(i + " " + list);
-			i++;
-			//TODO
-			//compileStrata(list);		
-		}
+		
+		//needs to result in 5 layers
+		assertEquals(5, stratifiedRules.size());
+		List<IRule> secondStratum = stratifiedRules.get(1);
+		
+		//second stratum contains 2 rules
+		assertEquals(2, secondStratum.size());
+		
+		//problematic case in first stratum
+		String bodyPredicateSymbol = stratifiedRules.get(0).get(0).getBody().get(0).getAtom().getPredicate().getPredicateSymbol();
+		assertEquals("i", bodyPredicateSymbol);
+		
+		//fourth stratum depends on p, third stratum outputs p
+		String bodyPredicateSymbolFourth = stratifiedRules.get(3).get(0).getBody().get(0).getAtom().getPredicate().getPredicateSymbol();
+		assertEquals("http://www.w3.org/2000/01/rdf-schema#p", bodyPredicateSymbolFourth);
+		
+		String headPredicateSymbolThird = stratifiedRules.get(2).get(0).getHead().get(0).getAtom().getPredicate().getPredicateSymbol();
+		assertEquals("http://www.w3.org/2000/01/rdf-schema#p", headPredicateSymbolThird);
+		
+		for (int i = 0; i < stratifiedRules.size(); i++) {
+			System.out.println(i + " " + stratifiedRules.get(i));
+		}		
 	}
-	
-	protected void compileStrata(List<IRule> strata) throws Exception {
-		rules = strata;
-		super.compile();
-	}	
 }
