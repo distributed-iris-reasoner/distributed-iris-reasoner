@@ -80,8 +80,6 @@ public abstract class LangFeaturesTest extends EvaluationTest {
 	 */
 	protected void compile() throws Exception {
 		
-		// compile to cascading
-		//IDistributedRuleCompiler rc = new CascadingRuleCompiler(defaultConfiguration);
 		for (IRule rule : rules) {
 			IDistributedRuleCompiler rc = new CascadingRuleCompiler(defaultConfiguration);
 			IDistributedCompiledRule compiledRule = rc.compile(rule);

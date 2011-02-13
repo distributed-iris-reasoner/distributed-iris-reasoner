@@ -38,6 +38,8 @@ import eu.larkc.iris.rules.IRecursiveRulePreProcessor;
 import eu.larkc.iris.rules.NonOptimizingRecursiveRulePreProcessor;
 import eu.larkc.iris.rules.optimisation.JoinOptimizer;
 import eu.larkc.iris.rules.stratification.DependencyMinimizingStratifier;
+import eu.larkc.iris.rules.stratification.IPostStratificationOptimization;
+import eu.larkc.iris.rules.stratification.IPreStratificationOptimization;
 
 /**
  * This class holds all configuration data for a knowledge base.
@@ -66,12 +68,18 @@ public class Configuration extends org.deri.iris.Configuration
 
 	public final List<IRecursiveRulePreProcessor> recursiveRulePreProcessors = new ArrayList<IRecursiveRulePreProcessor>();
 	
+	public final List<IPreStratificationOptimization> preStratificationOptimizer = new ArrayList<IPreStratificationOptimization>();
+	
+	public final List<IPostStratificationOptimization> postStratificationOptimizations = new ArrayList<IPostStratificationOptimization>();
+	
 	public Configuration() {		
 		//include default optimizers
 		super();
 		
 		ruleOptimisers.add(new JoinOptimizer());
 		recursiveRulePreProcessors.add(new NonOptimizingRecursiveRulePreProcessor());
-		stratifiers.add(new DependencyMinimizingStratifier());
+		
+		//TODO: configure language specific pre/post processing
+		stratifiers.add(new DependencyMinimizingStratifier(this));
 	}
 }

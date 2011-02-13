@@ -15,11 +15,59 @@ import org.deri.iris.api.graph.IPredicateGraph;
 import org.deri.iris.graph.GraphFactory;
 import org.deri.iris.rules.IRuleStratifier;
 
+import eu.larkc.iris.Configuration;
+
 /**
  * @author Florian Fischer, fisf, 14.01.2011
  */
 public class DependencyMinimizingStratifier implements IRuleStratifier {
 
+	/**
+	 * Configuration
+	 * 
+	 * @param configuration
+	 */
+	public DependencyMinimizingStratifier(Configuration configuration) {
+		this.configuration = configuration;
+	}
+	
+	
+	/**
+	 * Invoke any post-stratification optimizations (e.g. language specific adjustments).
+	 * 
+	 * @param rules
+	 * @return
+	 */
+	protected List<List<IRule>> invokePostProcessing(List<List<IRule>> rules) {
+		
+		List<IPostStratificationOptimization> post = configuration.postStratificationOptimizations;
+		List<List<IRule>> result = rules;
+		
+		for (IPostStratificationOptimization iPostStratificationOptimization : post) {
+			result = iPostStratificationOptimization.doPostProcessing(result);
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Invoke and pre-stratification optimizations (e.g. language specific adjustments).
+	 * 
+	 * @param rules
+	 * @return
+	 */
+	protected List<IRule> invokePreProcessing(List<IRule> rules) {
+		
+		List<IPreStratificationOptimization> pre = configuration.preStratificationOptimizer;
+		List<IRule> result = rules;
+		
+		for (IPreStratificationOptimization iPreStratificationOptimization : pre) {
+			result = iPreStratificationOptimization.doPreProcessing(result);
+		}
+		
+		return result;	
+	}
+	
 	@Override
 	public List<List<IRule>> stratify(List<IRule> rules) {		
 	
@@ -28,6 +76,9 @@ public class DependencyMinimizingStratifier implements IRuleStratifier {
 		}
 		
 		predicateGraph = graphFactory.createPredicateGraph(rules);	
+		
+		//pre-processing hook
+		rules = invokePreProcessing(rules);
 		
 		//establish initial ordering among rules
 		Collections.sort(rules, rc);
@@ -51,38 +102,46 @@ public class DependencyMinimizingStratifier implements IRuleStratifier {
 			stratum.add(currentRule);			
 			previousRule = currentRule;			
 		}
-		
+		result.add(stratum);		
 		//split done
+		
+		//post-processing hook
+		result = invokePostProcessing(result);
 		
 		return result;
 	}
 		
+	/**
+	 * Configuration objects
+	 */
+	protected Configuration configuration;
 	
 	/**
 	 * The dependency graph.
 	 */
-	private IPredicateGraph predicateGraph;
+	protected IPredicateGraph predicateGraph;
 		
 	/**
 	 * Graphfactory
 	 */
-	private IGraphFactory graphFactory = GraphFactory.getInstance();		
+	protected IGraphFactory graphFactory = GraphFactory.getInstance();		
 	
 	/**
 	 * Compares rules
 	 */
-	private RuleComparator rc = new RuleComparator();
+	protected RuleComparator rc = new RuleComparator();
 	
 	/**
 	 * Compares predicates according to dependencies
 	 */
-	private PredicateComparator pc = new PredicateComparator();
+	protected PredicateComparator pc = new PredicateComparator();
+	
 	
 	//-----------------------------------------------------------------
 	//Comparator classes
 	//-----------------------------------------------------------------
 	
-	private class RuleComparator implements Comparator<IRule> {
+	protected class RuleComparator implements Comparator<IRule> {
 
 		public int compare(final IRule o1, final IRule o2) {
 			if ((o1 == null) || (o2 == null)) {
@@ -97,13 +156,22 @@ public class DependencyMinimizingStratifier implements IRuleStratifier {
 			//two rules are equal if they depend on each other
 			//this means they go in the same strata
 			
-			return pc.compare(o1.getHead().get(0).getAtom().getPredicate(), 
+			//calculate return value on the dependencies between the head predicates
+			//this leaves the case open where multiple rules feed into one head predicate
+			int retVal =  pc.compare(o1.getHead().get(0).getAtom().getPredicate(), 
 					o2.getHead().get(0).getAtom().getPredicate());
+			
+			//check if there really is a dependency
+			if(retVal == 0) {
+				//TODO
+			}
+			
+			return retVal;
 		}
 	}
 
 		
-	private class PredicateComparator implements Comparator<IPredicate> {
+	protected class PredicateComparator implements Comparator<IPredicate> {
 				
 		public int compare(final IPredicate o1, final IPredicate o2) {
 			
