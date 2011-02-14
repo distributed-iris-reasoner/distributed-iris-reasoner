@@ -15,6 +15,8 @@
  */
 package eu.larkc.iris.evaluation;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,6 +27,7 @@ import cascading.operation.BaseOperation;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 import cascading.tuple.TupleEntry;
+import eu.larkc.iris.storage.IRIWritable;
 
 /**
  * This filters according to constants in rules and is set-up during
@@ -48,6 +51,22 @@ public class ConstantFilter extends BaseOperation implements Filter {
 		this.mExpectedconstants = expectedConstants;
 	}
 
+	public ConstantFilter(IRIWritable value) {
+		this(0, value);
+	}
+	
+	public ConstantFilter(int position, IRIWritable value) {
+		Set<eu.larkc.iris.storage.WritableComparable> set = new HashSet<eu.larkc.iris.storage.WritableComparable>();
+		set.add(value);
+		this.position = position;
+		this.values = set;
+	}
+
+	public ConstantFilter(int position, Set<eu.larkc.iris.storage.WritableComparable> values) {
+		this.position = position;
+		this.values = values;
+	}
+
 	/**
 	 * Removes all the tuples that do not match with the specified constants
 	 */
@@ -59,23 +78,36 @@ public class ConstantFilter extends BaseOperation implements Filter {
 		// filter out the current Tuple if values do not match specified constants
 		boolean remove = false;
 		
-		if(mExpectedconstants.size() > arguments.size()) {
-			throw new IllegalArgumentException("Filtering for more constants than actual terms in tuple! Number of constants: " 
-					+ mExpectedconstants.size() + " Size of TupleEntry: " + arguments.size());
-		}
-			
-		Set<String> positions = mExpectedconstants.keySet();	
-		for (String pos : positions) {
-			//we only need to find one value that does not match the constant
-			Object compareTo = mExpectedconstants.get(pos);
-			if(!arguments.get(pos).equals(compareTo)) {
-				remove = true;
-				break;
+		if (!mExpectedconstants.isEmpty()) {
+			if(mExpectedconstants.size() > arguments.size()) {
+				throw new IllegalArgumentException("Filtering for more constants than actual terms in tuple! Number of constants: " 
+						+ mExpectedconstants.size() + " Size of TupleEntry: " + arguments.size());
 			}
+			Set<String> fieldNames = mExpectedconstants.keySet();	
+			for (String fieldName : fieldNames) {
+				//we only need to find one value that does not match the constant
+				Object compareTo = mExpectedconstants.get(fieldName);
+				if(!arguments.get(fieldName).equals(compareTo)) {
+					remove = true;
+					break;
+				}
+			}
+		} else if (values != null) {
+			boolean found = false;
+			for (eu.larkc.iris.storage.WritableComparable comparable : values) {
+				if(arguments.get(position).equals(comparable)) {
+					found =  true;
+					break;
+				}
+			}
+			remove = !found;
 		}
-				
+		
 		return remove;
 	}
 	
-	private Map<String, WritableComparable> mExpectedconstants;
+	private Map<String, WritableComparable> mExpectedconstants = new HashMap<String, WritableComparable>();
+	
+	private int position;
+	private Set<eu.larkc.iris.storage.WritableComparable> values;
 }

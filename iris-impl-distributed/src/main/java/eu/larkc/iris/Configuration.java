@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.mapred.JobConf;
-import org.deri.iris.api.IProgramOptimisation;
-import org.deri.iris.rules.stratification.GlobalStratifier;
 
 import eu.larkc.iris.evaluation.IDistributedEvaluationStrategyFactory;
 import eu.larkc.iris.evaluation.bottomup.DistributedBottomUpEvaluationStrategyFactory;
@@ -47,12 +45,13 @@ import eu.larkc.iris.rules.stratification.RdfsOptimizer;
  */
 public class Configuration extends org.deri.iris.Configuration
 {
-	
 	public String project;
 	public boolean keepResults = false;
 	public String resultsName;
 	public String outputStorageId;
 
+	public boolean doPredicateIndexing = true;
+	
 	public org.apache.hadoop.conf.Configuration hadoopConfiguration = null;
 	public JobConf jobConf = null;
 	
@@ -87,4 +86,5 @@ public class Configuration extends org.deri.iris.Configuration
 		//TODO: configure language specific pre/post processing
 		stratifiers.add(new DependencyMinimizingStratifier(this));
 	}
+	
 }

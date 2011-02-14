@@ -7,6 +7,8 @@ import org.deri.iris.api.basics.IAtom;
 import org.deri.iris.api.basics.ITuple;
 import org.deri.iris.api.terms.ITerm;
 import org.deri.iris.api.terms.IVariable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cascading.tuple.Fields;
 import eu.larkc.iris.storage.FieldsVariablesMapping;
@@ -17,6 +19,8 @@ import eu.larkc.iris.storage.FieldsVariablesMapping;
  */
 public class Utils {
 
+	private static final Logger logger = LoggerFactory.getLogger(Utils.class);
+	
 	public static Fields getFieldsForAtom(FieldsVariablesMapping fieldsVariablesMapping, IAtom atom) {
 		ITuple tuple = atom.getTuple();
 		Fields sourceFields = new Fields();
@@ -44,5 +48,5 @@ public class Utils {
 		}
 		return sourceFields;
 	}
-	
+
 }

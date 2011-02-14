@@ -17,6 +17,8 @@ package eu.larkc.iris.functional;
 
 import java.io.IOException;
 
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,13 +51,26 @@ public class InitAndStartupTest extends CascadingTest {
 		super(name, false);
 	}
 	
+	/* (non-Javadoc)
+	 * @see eu.larkc.iris.CascadingTest#tearDown()
+	 */
+	@Override
+	protected void tearDown() throws Exception {
+		FileSystem fs = FileSystem.get(defaultConfiguration.hadoopConfiguration);
+		if (fs.exists(new Path("test"))) {
+			fs.delete(new Path("test"), true);
+		}
+		super.tearDown();
+	}
+
 	@Override
 	protected  void createFacts() throws IOException {
 		defaultConfiguration.project = "test";
+		defaultConfiguration.doPredicateIndexing = true;
 		if (enableCluster) {
-			new Importer().importFromFile(defaultConfiguration, defaultConfiguration.project, this.getClass().getResource("/facts/default.nt").getPath(), "import");
+			new Importer(defaultConfiguration).importFromFile(this.getClass().getResource("/facts/default.nt").getPath(), "import");
 		} else {
-			new Importer().processNTriple(defaultConfiguration, this.getClass().getResource("/facts/default.nt").getPath(), defaultConfiguration.project, "import");
+			new Importer(defaultConfiguration).processNTriple(this.getClass().getResource("/facts/default.nt").getPath(), "import");
 		}
 	}
 

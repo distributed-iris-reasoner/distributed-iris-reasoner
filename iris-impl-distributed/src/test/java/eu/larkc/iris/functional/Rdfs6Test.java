@@ -52,9 +52,9 @@ public class Rdfs6Test extends CascadingTest {
 	protected  void createFacts() throws IOException {
 		defaultConfiguration.project = "test";
 		if (enableCluster) {
-			new Importer().importFromFile(defaultConfiguration, defaultConfiguration.project, this.getClass().getResource("/facts/rdfs6.nt").getPath(), "import");
+			new Importer(defaultConfiguration).importFromFile(this.getClass().getResource("/facts/rdfs6.nt").getPath(), "import");
 		} else {
-			new Importer().processNTriple(defaultConfiguration, this.getClass().getResource("/facts/rdfs6.nt").getPath(), defaultConfiguration.project, "import");
+			new Importer(defaultConfiguration).processNTriple(this.getClass().getResource("/facts/rdfs6.nt").getPath(), "import");
 		}
 	}
 

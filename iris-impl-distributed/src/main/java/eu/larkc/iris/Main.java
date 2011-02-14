@@ -171,12 +171,12 @@ public class Main extends Configured implements Tool {
 	}
 	
 	public int doRdfImport(eu.larkc.iris.Configuration configuration) {
-		new Importer().importFromRdf(configuration, project, storageId, importName);
+		new Importer(configuration).importFromRdf(storageId, importName);
 		return 0;
 	}
 
 	public int doNTripleImport(eu.larkc.iris.Configuration configuration) {
-		new Importer().importFromFile(configuration, project, inPath, importName);
+		new Importer(configuration).importFromFile(inPath, importName);
 		return 0;
 	}
 
@@ -217,7 +217,6 @@ public class Main extends Configured implements Tool {
 	}
 	
 	public int doProcess() {
-		defaultConfiguration.project = project;
 		defaultConfiguration.keepResults = keepResults;
 		defaultConfiguration.resultsName = resultsName;
 		defaultConfiguration.outputStorageId = outputStorageId;
@@ -243,7 +242,8 @@ public class Main extends Configured implements Tool {
 		Configuration hadoopConf = gop.getConfiguration();
 		defaultConfiguration.hadoopConfiguration = hadoopConf;
 		defaultConfiguration.jobConf = setupJob(hadoopConf);
-
+		defaultConfiguration.project = project;
+		
 		if (rdfImporter) {
 			return doRdfImport(defaultConfiguration);
 		} else if (ntripleImporter) {
