@@ -40,6 +40,7 @@ import eu.larkc.iris.rules.optimisation.JoinOptimizer;
 import eu.larkc.iris.rules.stratification.DependencyMinimizingStratifier;
 import eu.larkc.iris.rules.stratification.IPostStratificationOptimization;
 import eu.larkc.iris.rules.stratification.IPreStratificationOptimization;
+import eu.larkc.iris.rules.stratification.RdfsOptimizer;
 
 /**
  * This class holds all configuration data for a knowledge base.
@@ -75,6 +76,10 @@ public class Configuration extends org.deri.iris.Configuration
 	public Configuration() {		
 		//include default optimizers
 		super();
+		
+		RdfsOptimizer optimizer = new RdfsOptimizer();
+		preStratificationOptimizer.add(optimizer);
+		postStratificationOptimizations.add(optimizer);
 		
 		ruleOptimisers.add(new JoinOptimizer());
 		recursiveRulePreProcessors.add(new NonOptimizingRecursiveRulePreProcessor());
