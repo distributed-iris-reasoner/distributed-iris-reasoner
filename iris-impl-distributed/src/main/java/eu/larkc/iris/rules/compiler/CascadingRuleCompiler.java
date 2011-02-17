@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.ListIterator;
 
 import org.deri.iris.EvaluationException;
-import org.deri.iris.api.basics.IAtom;
 import org.deri.iris.api.basics.ILiteral;
+import org.deri.iris.api.basics.IPredicate;
 import org.deri.iris.api.basics.IRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,15 +77,26 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 * @throws EvaluationException
 	 */
 	public IDistributedCompiledRule compile(IRule rule) throws EvaluationException {
-		mainPipe = new Pipe("main");
-		
-		ruleStreams = new RuleStreams(mainPipe, rule);
+		List<ILiteral> head = rule.getHead();
+		// Only one literal in head
+		if (head.size() != 1) {
+			throw new IllegalArgumentException(
+					"Input rule has more than two literals in head. Setup IRIS' optimizations correctly. Rule: "
+							+ rule.toString());
+		}
+
+		if (!mConfiguration.doPredicateIndexing) {
+			mainPipe = new Pipe("main");
+			ruleStreams = new RuleStreams(mainPipe, rule);
+		} else {
+			ruleStreams = new RuleStreams(rule);
+		}
 		
 		headFields = ruleStreams.getHeadStream();
 		
 		eu.larkc.iris.rules.compiler.PipeFields bodyPipe = compileBody(ruleStreams);
 		
-		FlowAssembly compiledCascadingRuleFlowAssembly = attachTaps(bodyPipe, rule);
+		FlowAssembly compiledCascadingRuleFlowAssembly = attachTaps(ruleStreams, bodyPipe);
 
 		return new CascadingCompiledRule(rule, compiledCascadingRuleFlowAssembly,
 				mConfiguration);
@@ -282,7 +293,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		return buildJoin(leftJoinApplied, pipeFielded, subgoalsIterator);
 	}*/
 	
-	public eu.larkc.iris.rules.compiler.PipeFields buildJoin(boolean leftJoinApplied, eu.larkc.iris.rules.compiler.PipeFields lhsJoin, ListIterator<eu.larkc.iris.rules.compiler.PipeFields> fieldsIterator) {
+	public eu.larkc.iris.rules.compiler.PipeFields buildJoin(boolean leftJoinApplied, eu.larkc.iris.rules.compiler.PipeFields lhsJoin, ListIterator<eu.larkc.iris.rules.compiler.LiteralFields> fieldsIterator) {
 		eu.larkc.iris.rules.compiler.PipeFields leftJoin = null;
 		if (!leftJoinApplied) {
 			leftJoin = eliminateOldInferencedData(lhsJoin);
@@ -397,7 +408,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 				"Cannot setup joins with no subgoals.");			
 		}
 
-		ListIterator<eu.larkc.iris.rules.compiler.PipeFields> listIteratorFields = ruleStreams.getBodyStreamIterator();
+		ListIterator<eu.larkc.iris.rules.compiler.LiteralFields> listIteratorFields = ruleStreams.getBodyStreamIterator();
 		return buildJoin(false, listIteratorFields.next(), listIteratorFields);
 	}
 
@@ -411,16 +422,8 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	 * @param originalRule
 	 * @return
 	 */
-	protected FlowAssembly attachTaps(eu.larkc.iris.rules.compiler.PipeFields pipeFields, IRule originalRule) {
-		List<ILiteral> head = originalRule.getHead();
-		// Only one literal in head
-		if (head.size() != 1) {
-			throw new IllegalArgumentException(
-					"Input rule has more than two literals in head. Setup IRIS' optimizations correctly. Rule: "
-							+ originalRule.toString());
-		}
-
-		IAtom headAtom = head.get(0).getAtom();
+	protected FlowAssembly attachTaps(RuleStreams ruleStreams, eu.larkc.iris.rules.compiler.PipeFields pipeFields) {
+		LiteralFields headStream = ruleStreams.getHeadStream();
 		
 		//it could be that the head literal has several times the same variable p(x,x)
 		//we have to insert in the result stream another field for the second variable x, to be able to select then both x
@@ -429,9 +432,10 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		eu.larkc.iris.rules.compiler.Fields inBodyHeadFields = headFields.getCommonFields(false, pipeFields).getRightFields();
 		
 		Pipe rulePipe = pipeFields.getPipe();
-		if (!headAtom.getPredicate().getPredicateSymbol().equals(LiteralFields.RIF_HAS_VALUE)) {
-			inBodyHeadFields.add(0, new Field(HEAD_PREDICATE_FIELD, headAtom.getPredicate()));
-			rulePipe = new Each( rulePipe, new Insert( new Fields(HEAD_PREDICATE_FIELD), new IRIWritable(headAtom.getPredicate())), inBodyHeadFields.getFields());
+		IPredicate predicate = headStream.getPredicate();
+		if (predicate != null) {
+			inBodyHeadFields.add(0, new Field(HEAD_PREDICATE_FIELD, predicate));
+			rulePipe = new Each( rulePipe, new Insert( new Fields(HEAD_PREDICATE_FIELD), new IRIWritable(predicate)), inBodyHeadFields.getFields());
 		}
 		
 		Fields resultFields = inBodyHeadFields.getFields();
@@ -439,7 +443,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		rulePipe = new GroupBy(rulePipe, resultFields); //eliminate duplicates
 		rulePipe = new Every(rulePipe, new Count(), resultFields);
 
-		FlowAssembly flowAssembly = new FlowAssembly(mConfiguration, resultFields, rulePipe);//, countPipe);
+		FlowAssembly flowAssembly = new FlowAssembly(mConfiguration, ruleStreams, resultFields, rulePipe);//, countPipe);
 		return flowAssembly;
 	}
 	

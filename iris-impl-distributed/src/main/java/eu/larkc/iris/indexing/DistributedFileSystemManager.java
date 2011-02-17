@@ -12,19 +12,21 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.deri.iris.api.basics.IPredicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.larkc.iris.Configuration;
+import eu.larkc.iris.rules.compiler.LiteralFields;
 import eu.larkc.iris.storage.IRIWritable;
 
 /**
  * @author valer
  *
  */
-public class IndexingManager {
+public class DistributedFileSystemManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(IndexingManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(DistributedFileSystemManager.class);
 	
 	public final static Long BLOCK_MIN_RECORDS = new Long(1024);
 
@@ -33,12 +35,13 @@ public class IndexingManager {
 	public static final String PREDICATES_CONFIG_FILE= "predicates_config";
 	public static final String PREDICATE_COUNT_FOLDER = "count";
 	public static final String TMP_FOLDER = "_tmp";
-
+	public static final String INFERENCES_FOLDER = "inferences";
+	
 	private Configuration configuration;
 	
 	private List<PredicateData> predicatesConfig;
 	
-	public IndexingManager(Configuration configuration) {
+	public DistributedFileSystemManager(Configuration configuration) {
 		this.configuration = configuration;
 		try {
 			List<PredicateData> aPredicatesConfig = new ArrayList<PredicateData>();
@@ -51,11 +54,14 @@ public class IndexingManager {
 			FSDataInputStream predicatesConfigInputStream = fs.open(predicatesConfigFilePath);
 			try {
 				while (true) {
-					aPredicatesConfig.add(PredicateData.read(predicatesConfigInputStream));
+					PredicateData predicateData = PredicateData.read(predicatesConfigInputStream);
+					logger.info("read predicate data : " + predicateData);
+					aPredicatesConfig.add(predicateData);
 				}
 			} catch (EOFException e) {
 				logger.info("eof exception no more data");
 			}
+			predicatesConfigInputStream.close();
 			this.predicatesConfig = aPredicatesConfig;
 		} catch (IOException e) {
 			logger.error("io exception", e);
@@ -63,32 +69,79 @@ public class IndexingManager {
 		}
 	}
 	
+	public List<PredicateData> getPredicateData() {
+		return predicatesConfig;
+	}
+	
+	public String getFactsPath() {
+		return configuration.project + "/" + FACTS_FOLDER + "/";
+	}
+
+	public String getFactsPath(LiteralFields fields) {
+		IPredicate predicate = fields.getPredicate();
+		PredicateData predicateData = getPredicateData(new IRIWritable(predicate));
+		return configuration.project + "/" + FACTS_FOLDER + "/" + predicateData.getLocation().toString() + "/";
+	}
+
+	public String getInferencesPath() {
+		return configuration.project + "/" + INFERENCES_FOLDER + "/";
+	}
+
+	public String getInferencesPath(LiteralFields fields) {
+		IPredicate predicate = fields.getPredicate();
+		PredicateData predicateData = null;
+		if (predicate != null) {
+			predicateData = getPredicateData(new IRIWritable(predicate));
+		}
+		if (predicateData == null) {
+			return getInferencesPath();
+		} else {
+			return configuration.project + "/" + INFERENCES_FOLDER + "/" + predicateData.getLocation().toString() + "/";
+		}
+	}
+
+	public String getTempInferencesPath(String resultName, String flowIdentificator) {
+		return configuration.project + "/" + TMP_FOLDER + "/" + INFERENCES_FOLDER + "/" + resultName + "/" + resultName + flowIdentificator + "/";
+	}
+
+	public String getInferencesPath(LiteralFields fields, String resultName, String flowIdentificator) {
+		return getInferencesPath(fields) + resultName + "/" + resultName + flowIdentificator + "/";
+	}
+
+	public String getPredicateInferencesPath(Integer predicateLocation) {
+		return configuration.project + "/" + DistributedFileSystemManager.INFERENCES_FOLDER + "/" + String.valueOf(predicateLocation) + "/";
+	}
+
+	public String getPredicateInferencesPath(Integer predicateLocation, String resultName, String flowIdentificator) {
+		return getPredicateInferencesPath(predicateLocation) + resultName + "/" + resultName + flowIdentificator + "/";
+	}
+
 	public String getImportPath(String importName) {
 		if (!configuration.doPredicateIndexing) {
-			return configuration.project + "/" + IndexingManager.FACTS_FOLDER + "/" + importName;
+			return configuration.project + "/" + DistributedFileSystemManager.FACTS_FOLDER + "/" + importName;
 		} else {
-			return configuration.project + "/" + IndexingManager.TMP_FOLDER + "/" + IndexingManager.FACTS_FOLDER + "/" + importName;
+			return configuration.project + "/" + DistributedFileSystemManager.TMP_FOLDER + "/" + DistributedFileSystemManager.FACTS_FOLDER + "/" + importName;
 		}
 	}
 	
 	public String getPredicateGroupsTempPath(String importName) {
-		return configuration.project + "/" + IndexingManager.TMP_FOLDER + "/" + IndexingManager.PREDICATES_FOLDER + "/" + importName;
+		return configuration.project + "/" + DistributedFileSystemManager.TMP_FOLDER + "/" + DistributedFileSystemManager.PREDICATES_FOLDER + "/" + importName;
 	}
 	
 	public String getPredicatePath(List<PredicateData> predicatesConfig, IRIWritable predicate) {
-		return configuration.project + "/" + IndexingManager.FACTS_FOLDER + "/" + getPredicateData(predicate).getLocation();
+		return configuration.project + "/" + DistributedFileSystemManager.FACTS_FOLDER + "/" + getPredicateData(predicate).getLocation();
 	}
 	
 	public String getPredicateCountPath(List<PredicateData> predicatesConfig, IRIWritable predicate) {
-		return getPredicatePath(predicatesConfig, predicate) + "/" + IndexingManager.PREDICATE_COUNT_FOLDER; 
+		return getPredicatePath(predicatesConfig, predicate) + "/" + DistributedFileSystemManager.PREDICATE_COUNT_FOLDER; 
 	}
 
 	public String getPredicatesConfigFilePath(String project) {
-		return configuration.project + "/" + IndexingManager.PREDICATES_CONFIG_FILE;
+		return configuration.project + "/" + DistributedFileSystemManager.PREDICATES_CONFIG_FILE;
 	}
 	
-	public String getPredicateFactsPath(Integer predicateId) {
-		return configuration.project + "/" + IndexingManager.FACTS_FOLDER + "/" + String.valueOf(predicateId) + "/";
+	public String getPredicateFactsPath(Integer predicateLocation) {
+		return configuration.project + "/" + DistributedFileSystemManager.FACTS_FOLDER + "/" + String.valueOf(predicateLocation) + "/";
 	}
 	
 	public String getPredicateFactsImportPath(Integer predicateLocation, String importName) {
@@ -104,7 +157,7 @@ public class IndexingManager {
 		return null;
 	}
 
-	private void savePredicateConfig() {
+	public void savePredicateConfig() {
 		try {
 			FileSystem fs = FileSystem.get(configuration.hadoopConfiguration);
 			String predicatesConfigFileTemp = getPredicatesConfigFilePath(configuration.project);
@@ -116,6 +169,7 @@ public class IndexingManager {
 			}
 			predicatesConfigOutputStream = fs.create(predicatesConfigFileTempPath);
 			for (PredicateData predicateData : predicatesConfig) {
+				logger.info("save predicate data : " + predicateData);
 				predicateData.write(predicatesConfigOutputStream);
 			}
 			predicatesConfigOutputStream.close();
@@ -145,10 +199,12 @@ public class IndexingManager {
 
 	public void addPredicates(List<PredicateCount> predicateCounts) {
 		for (PredicateCount predicateCount : predicateCounts) {
+			logger.info("add predicate count : " + predicateCount);
 			IRIWritable predicate = predicateCount.getPredicate();
 			Long count = predicateCount.getCount();
 			boolean found = false;
 			for (PredicateData predicateData : predicatesConfig) {
+				logger.info("check predicate data : " + predicateData);
 				if (predicateData.getValue().equals(predicate.getValue())) {
 					predicateData.setCount(predicateData.getCount() + count);
 					found = true;
@@ -164,7 +220,6 @@ public class IndexingManager {
 				predicatesConfig.add(predicateData);				
 			}
 		}
-		savePredicateConfig();
 	}
 
 	/*

@@ -36,8 +36,8 @@ public class RuleStreams {
 	private static final String HEAD_LITERAL_PREFIX = "HL";
 	private static final String BODY_LITERAL_PREFIX = "L";
 	
-	private PipeFields headStream = null;
-	private List<PipeFields> bodyStreams = new ArrayList<PipeFields>();
+	private LiteralFields headStream = null;
+	private List<LiteralFields> bodyStreams = new ArrayList<LiteralFields>();
 	
 	public class LiteralId {
 		private int index = -1;
@@ -88,7 +88,11 @@ public class RuleStreams {
 	
 	public RuleStreams(Pipe mainPipe, IRule rule) {
 		ILiteral headLiteral = rule.getHead().get(0);
-		headStream = new LiteralFields(mainPipe, new LiteralId(), headLiteral);
+		if (mainPipe != null) {
+			headStream = new LiteralFields(mainPipe, new LiteralId(), headLiteral);
+		} else {
+			headStream = new LiteralFields(new LiteralId(), headLiteral);
+		}
 		for (int i = 0; i < rule.getBody().size(); i++) {
 			ILiteral literal = rule.getBody().get(i);
 			
@@ -99,19 +103,27 @@ public class RuleStreams {
 				throw new IllegalArgumentException("Negation is not supported: " + literal);
 			}
 			
-			bodyStreams.add(new LiteralFields(mainPipe, new LiteralId(i), literal));
+			if (mainPipe != null) {
+				bodyStreams.add(new LiteralFields(mainPipe, new LiteralId(i), literal));
+			} else {
+				bodyStreams.add(new LiteralFields(new LiteralId(i), literal));
+			}
 		}
 	}
 
-	public PipeFields getHeadStream() {
+	public RuleStreams(IRule rule) {
+		this(null, rule);
+	}
+
+	public LiteralFields getHeadStream() {
 		return headStream;
 	}
 	
-	public List<PipeFields> getBodyStreams() {
+	public List<LiteralFields> getBodyStreams() {
 		return bodyStreams;
 	}
 
-	public ListIterator<PipeFields> getBodyStreamIterator() {
+	public ListIterator<LiteralFields> getBodyStreamIterator() {
 		return bodyStreams.listIterator();
 	}
 }

@@ -21,10 +21,13 @@ package eu.larkc.iris.rules.compiler;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.deri.iris.api.basics.IPredicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +42,10 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryIterator;
 import eu.larkc.iris.Configuration;
+import eu.larkc.iris.Utils;
 import eu.larkc.iris.evaluation.EvaluationContext;
+import eu.larkc.iris.indexing.DistributedFileSystemManager;
+import eu.larkc.iris.indexing.PredicateCount;
 
 /**
  * @author valer.roman@softgress.com
@@ -52,57 +58,64 @@ public class FlowAssembly {
 	//private static final String RESULT_TAIL = "resultTail";
 	
 	private Configuration mConfiguration;
-	
+	private DistributedFileSystemManager distributedFileSystemManager;
+	private RuleStreams ruleStreams;
 	private Fields fields;
 	private Pipe pipe;
 	
 	private Flow flow = null;
 	private String path = null;
 	
-	public FlowAssembly (Configuration configuration, Fields fields, Pipe pipe) {
+	public FlowAssembly (Configuration configuration, RuleStreams ruleStreams, Fields fields, Pipe pipe) {
 		this.mConfiguration = configuration;
+		this.ruleStreams = ruleStreams;
 		this.fields = fields;
 		this.pipe = pipe;
 	}
 	
-	private Flow createFlow(String flowName, String output) {
-		Tap source = prepareSourceTaps(fields);
+	private void setupPredicateCounts(Pipe pipe, Map<String, Tap> sinks, List<Pipe> pipes) throws IOException {
+		String predicateGroupsTempPath = distributedFileSystemManager.getPredicateGroupsTempPath(mConfiguration.resultsName);
+
+		FileSystem fs = FileSystem.get(mConfiguration.hadoopConfiguration);
+		if (fs.exists(new Path(predicateGroupsTempPath))) {
+			fs.delete(new Path(predicateGroupsTempPath), true);
+		}
+
+		Tap predicatesSink = new Hfs(new Fields(0, 1), predicateGroupsTempPath);
+		Pipe predicatesPipe = Utils.buildPredicateCountPipe(pipe);
 		
-		//Map<String, Tap> sinks = new HashMap<String, Tap>();
+		sinks.put("predicatesPipe", predicatesSink);
+		pipes.add(predicatesPipe);
+	}
+	
+	private boolean processFlow(String resultName, String flowIdentificator, String output) throws IOException {
+		boolean hasNewInferences = false;
+		String flowName = resultName + flowIdentificator;
+		Map<String, Tap> sources = prepareSourceTaps();
+		
 		SequenceFile sinkScheme = new SequenceFile(fields);
 		sinkScheme.setNumSinkParts(1);
 		Tap headSink = new Hfs(sinkScheme, output, true );
-		//sinks.put(RESULT_TAIL, headSink);
+
+		Map<String, Tap> sinks = new HashMap<String, Tap>();
+		List<Pipe> pipes = new ArrayList<Pipe>();
+		if (mConfiguration.doPredicateIndexing) {
+			//calculate the count of the result and write it in the configuration
+			//if the predicate is a variable then we have to split also the result and put it in the right location
+			sinks.put(pipe.getName(), headSink);
+			pipes.add(pipe);
+			setupPredicateCounts(pipe, sinks, pipes);
+		}
 		
-		Flow flow = new FlowConnector(mConfiguration.flowProperties).connect(flowName, source, headSink, pipe);
-		
+		Flow flow = null;
+		if (sinks.isEmpty()) {
+			flow = new FlowConnector(mConfiguration.flowProperties).connect(flowName, sources, headSink, pipe);
+		} else {
+			flow = new FlowConnector(mConfiguration.flowProperties).connect(flowName, sources, sinks, pipes.toArray(new Pipe[0]));
+		}
 		if(flow != null) {
 			flow.writeDOT("flow.dot");
 		}
-		
-		return flow;
-	}
-	
-	public void evaluate(Integer ruleNumber) {
-		//TODO: ensure this works correctly
-		String resultName = mConfiguration.keepResults ? mConfiguration.resultsName : "inference";
-		String flowIdentificator = "_" + ruleNumber;
-		path = mConfiguration.project + "/inferences/" + resultName + "/" + resultName + flowIdentificator;
-		
-		String flowName = resultName + flowIdentificator;
-		flow = createFlow(flowName, path);
-		flow.complete();		
-	}
-	
-	public boolean evaluate(EvaluationContext evaluationContext) {
-		boolean hasNewInferences = false;
-		
-		String flowIdentificator = "_" + evaluationContext.getIterationNumber() + "_" + evaluationContext.getRuleNumber();
-		String resultName = mConfiguration.resultsName != null ? mConfiguration.resultsName : "inference";
-		String flowName = resultName + flowIdentificator;
-		path = mConfiguration.project + "/inferences/" + resultName + "/" + resultName + flowIdentificator;
-		
-		flow = createFlow(flowName, path);
 		flow.complete();
 		
 		try {
@@ -118,7 +131,48 @@ public class FlowAssembly {
 		if (!hasNewInferences) {
 			deleteResults(new Path(path));
 		}
+
+		if (hasNewInferences && mConfiguration.doPredicateIndexing) {
+			FileSystem fs = FileSystem.get(mConfiguration.hadoopConfiguration);
+			
+			//update counts in configuration
+			List<PredicateCount> predicateCounts = Utils.readPredicateCounts(flow, "predicatesPipe");
+			
+			distributedFileSystemManager.addPredicates(predicateCounts);
+			
+			if (ruleStreams.getHeadStream().getPredicate() == null) {
+				//split result to the right locations (for variable predicate)
+				Tap source = new Hfs(sinkScheme, output, true );
+				Utils.splitStreamPerPredicates(mConfiguration, distributedFileSystemManager, source, predicateCounts, resultName, flowIdentificator);
+				
+				fs.delete(new Path(output), true);
+			}
+			
+			distributedFileSystemManager.savePredicateConfig();
+			String predicateGroupsTempPath = distributedFileSystemManager.getPredicateGroupsTempPath(mConfiguration.resultsName);
+			fs.delete(new Path(predicateGroupsTempPath), true);
+		}
+				
 		return hasNewInferences;
+	}
+	
+	public boolean evaluate(EvaluationContext evaluationContext) {
+		this.distributedFileSystemManager = new DistributedFileSystemManager(mConfiguration);
+
+		String flowIdentificator = "_" + evaluationContext.getIterationNumber() + "_" + evaluationContext.getRuleNumber();
+		String resultName = mConfiguration.resultsName != null ? mConfiguration.resultsName : "inference";
+		if (ruleStreams.getHeadStream().getPredicate() != null) {
+			path = distributedFileSystemManager.getInferencesPath(ruleStreams.getHeadStream(), resultName, flowIdentificator);
+		} else {
+			path = distributedFileSystemManager.getTempInferencesPath(resultName, flowIdentificator);
+		}
+		
+		try {
+			return processFlow(resultName, flowIdentificator, path);
+		} catch (IOException e) {
+			logger.error("io exception creating flow", e);
+			throw new RuntimeException("io exception creating flow", e);
+		}
 	}
 	
 	public TupleEntryIterator openSink() throws IOException {
@@ -130,30 +184,74 @@ public class FlowAssembly {
 		//return hfs.openForRead(mConfiguration.jobConf);
 	}
 	
-	private MultiSourceTap prepareSourceTaps(Fields fields) {
-		SequenceFile sourceScheme = new SequenceFile(fields);
-		List<Tap> sources = new ArrayList<Tap>();
-		Tap factsTap = new Hfs(sourceScheme, mConfiguration.project + "/facts/");
-		Tap inferencesTap = getInferencesTap(sourceScheme);
-		sources.add(factsTap);
-		if (inferencesTap != null) {
-			sources.add(inferencesTap);
+	private void prepareIndexedSource(SequenceFile sourceScheme, Map<String, List<Tap>> sources, LiteralFields fields) {
+		IPredicate predicate = fields.getPredicate();
+		String literalId = fields.getId().toString();
+		sources.put(literalId, new ArrayList<Tap>());
+		if (predicate == null) {
+			sources.get(literalId).add(new Hfs(sourceScheme, distributedFileSystemManager.getFactsPath()));
+		} else {
+			sources.get(literalId).add(new Hfs(sourceScheme, distributedFileSystemManager.getFactsPath(fields)));
 		}
-		return new MultiSourceTap(sources.toArray(new Tap[0])); //we can assume that the number of fields are the same as the head;s tuple size + 1 (the predicate)		
+		Map<String, Tap> inferencesTaps = getInferencesTap(sourceScheme);
+		if (inferencesTaps.containsKey(literalId)) {
+			sources.get(literalId).add(inferencesTaps.get(literalId));
+		}
 	}
 	
-	private Tap getInferencesTap(Scheme scheme) {
-		try {
-			String path = mConfiguration.project + "/inferences/";
-			FileSystem fs = FileSystem.get(mConfiguration.hadoopConfiguration);
-			if (!fs.exists(new Path(path))) {
-				return null;
+	private Map<String, Tap> prepareSourceTaps() {
+		SequenceFile sourceScheme = new SequenceFile(fields);
+		Map<String, List<Tap>> sources = new HashMap<String, List<Tap>>();
+		if (mConfiguration.doPredicateIndexing) {
+			LiteralFields headStream = ruleStreams.getHeadStream();
+			prepareIndexedSource(sourceScheme, sources, headStream);
+			for (LiteralFields fields : ruleStreams.getBodyStreams()) {
+				prepareIndexedSource( sourceScheme, sources, fields);
 			}
-			return new Hfs(scheme, path);
+		} else {
+			Tap factsTap = new Hfs(sourceScheme, distributedFileSystemManager.getFactsPath());
+			sources.put("main", new ArrayList<Tap>());
+			sources.get("main").add(factsTap);
+			Map<String, Tap> inferencesTaps = getInferencesTap(sourceScheme);
+			if (inferencesTaps.containsKey("main")) {
+				sources.get("main").add(inferencesTaps.get("main"));
+			}
+		}
+		Map<String, Tap> sourceTaps = new HashMap<String, Tap>();
+		for (String name : sources.keySet()) {
+			sourceTaps.put(name, new MultiSourceTap(sources.get(name).toArray(new Tap[0]))); //we can assume that the number of fields are the same as the head;s tuple size + 1 (the predicate)
+		}
+		return sourceTaps;		
+	}
+	
+	private Map<String, Tap> getInferencesTap(Scheme scheme) {
+		Map<String, Tap> inferencesTap = new HashMap<String, Tap>();
+		try {
+			String path = null;
+			FileSystem fs = FileSystem.get(mConfiguration.hadoopConfiguration);
+			if (mConfiguration.doPredicateIndexing) {
+				LiteralFields headStream = ruleStreams.getHeadStream();
+				path = distributedFileSystemManager.getInferencesPath(headStream);
+				if (fs.exists(new Path(path))) {
+					inferencesTap.put(headStream.getId().toString(), new Hfs(scheme, path));
+				}
+				for (LiteralFields fields : ruleStreams.getBodyStreams()) {
+					path = distributedFileSystemManager.getInferencesPath(fields);
+					if (fs.exists(new Path(path))) {
+						inferencesTap.put(fields.getId().toString(), new Hfs(scheme, path));
+					}
+				}
+			} else {
+				path = distributedFileSystemManager.getInferencesPath();
+				if (fs.exists(new Path(path))) {
+					inferencesTap.put("main", new Hfs(scheme, path));
+				}
+			}
 		} catch (IOException e) {
 			logger.error("io exception", e);
 			throw new RuntimeException("io exception", e);
-		}		
+		}
+		return inferencesTap;
 	}
 
 	private void deleteResults(Path resultsPath) {

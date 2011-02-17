@@ -37,8 +37,9 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryIterator;
 import eu.larkc.iris.Configuration;
+import eu.larkc.iris.Utils;
 import eu.larkc.iris.evaluation.ConstantFilter;
-import eu.larkc.iris.indexing.IndexingManager;
+import eu.larkc.iris.indexing.DistributedFileSystemManager;
 import eu.larkc.iris.indexing.PredicateCount;
 import eu.larkc.iris.indexing.PredicateData;
 import eu.larkc.iris.storage.FactsFactory;
@@ -54,15 +55,15 @@ public class Importer {
 	private static final Logger logger = LoggerFactory.getLogger(Importer.class);
 
 	private Configuration configuration = null;
-	private IndexingManager indexingManager = null;
+	private DistributedFileSystemManager distributedFileSystemManager = null;
 	
 	public Importer(Configuration configuration) {
 		this.configuration = configuration;
-		this.indexingManager = new IndexingManager(configuration);
+		this.distributedFileSystemManager = new DistributedFileSystemManager(configuration);
 	}
 	
 	public void importFromRdf(String storageId, String importName) {
-		IndexingManager indexingManager = new IndexingManager(configuration);
+		DistributedFileSystemManager indexingManager = new DistributedFileSystemManager(configuration);
 		
 		Tap source = FactsFactory.getInstance(storageId).getFacts();
 		
@@ -102,7 +103,7 @@ public class Importer {
 
 		SequenceFile sinkScheme = new SequenceFile(new Fields(0, 1, 2));
 		sinkScheme.setNumSinkParts(1);
-		String importPath = indexingManager.getImportPath(importName);
+		String importPath = distributedFileSystemManager.getImportPath(importName);
 		Tap sink = new Hfs(sinkScheme, importPath, true );
 		
 		int[] groups = {2, 1, 3};
@@ -123,67 +124,26 @@ public class Importer {
 	
 	private void processIndexing(String importName) throws IOException {
 		//process indexing
-		String predicateGroupsTempPath = indexingManager.getPredicateGroupsTempPath(importName);
+		String predicateGroupsTempPath = distributedFileSystemManager.getPredicateGroupsTempPath(importName);
 		FileSystem fs = FileSystem.get(configuration.hadoopConfiguration);
 		if (fs.exists(new Path(predicateGroupsTempPath))) {
 			fs.delete(new Path(predicateGroupsTempPath), true);
 		}
 		
-		Tap predicatesSource = new Hfs(new Fields(0, 1, 2), indexingManager.getImportPath(importName), true );
+		Tap predicatesSource = new Hfs(new Fields(0, 1, 2), distributedFileSystemManager.getImportPath(importName), true );
 		Tap predicatesSink = new Hfs(new Fields(0, 1), predicateGroupsTempPath);
-		Pipe predicatesPipe = new Pipe("predicatesPipe");
-		predicatesPipe = new GroupBy(predicatesPipe, new Fields(0)); //group by predicates
-		predicatesPipe = new Every(predicatesPipe, new Count(new Fields("count")), new Fields(0, "count"));
-		predicatesPipe = new Each(predicatesPipe, new Debug(true));
+		Pipe predicatesPipe = Utils.buildPredicateCountPipe(null);
 		Flow predicatesFlow = new FlowConnector(configuration.flowProperties).connect(predicatesSource, predicatesSink, predicatesPipe);
 		predicatesFlow.complete();
 		
-		List<PredicateCount> predicateCounts = new ArrayList<PredicateCount>();
+		List<PredicateCount> predicateCounts = Utils.readPredicateCounts(predicatesFlow, null);
 		
-		TupleEntryIterator predicatesEntryIterator = predicatesFlow.openSink();
-		while (predicatesEntryIterator.hasNext()) {
-			TupleEntry predicatesEntry = predicatesEntryIterator.next();
-			Tuple predicatesTuple = predicatesEntry.getTuple();
-			IRIWritable predicate = (IRIWritable) predicatesTuple.getObject(0);
-			Long count = predicatesTuple.getLong(1);
-			predicateCounts.add(new PredicateCount(predicate, count));
-		}
-
-		indexingManager.addPredicates(predicateCounts);
+		distributedFileSystemManager.addPredicates(predicateCounts);
 		
-		Tap importSource = new Hfs(new Fields(0, 1, 2), indexingManager.getImportPath(importName), true );
-		Map<String, Tap> sinks = new HashMap<String, Tap>();
-		List<Pipe> pipes = new ArrayList<Pipe>();
-		Pipe sourcePipe = new Pipe("sourcePipe");
-		Map<Integer, Set<WritableComparable>> locationPredicates = new HashMap<Integer, Set<WritableComparable>>();
-		for (PredicateCount predicateCount : predicateCounts) {
-			IRIWritable predicate = predicateCount.getPredicate();
-			PredicateData predicateData = indexingManager.getPredicateData(predicate);
-			
-			if (!locationPredicates.containsKey(predicateData.getLocation())) {
-				locationPredicates.put(predicateData.getLocation(), new HashSet<WritableComparable>());
-			}
-			Set<WritableComparable> locationPredicate = locationPredicates.get(predicateData.getLocation());
-			locationPredicate.add(predicate);
-			logger.info("add predicate : " + predicate);
-		}
-		for (Integer location : locationPredicates.keySet()) {
-			String streamId = importName + String.valueOf(location);
+		Tap importSource = new Hfs(new Fields(0, 1, 2), distributedFileSystemManager.getImportPath(importName), true );
+		Utils.splitStreamPerPredicates(configuration, distributedFileSystemManager, importSource, predicateCounts, importName);
 
-			Scheme predicateScheme = new SequenceFile(new Fields(0, 1, 2));
-			predicateScheme.setNumSinkParts(1);
-			Tap predicateSink = new Hfs(predicateScheme, indexingManager.getPredicateFactsImportPath(location, importName), true);
-			sinks.put(streamId, predicateSink);
-
-			Pipe locationPipe = new Pipe(streamId, sourcePipe);
-			locationPipe = new Each(locationPipe, new ConstantFilter(0, locationPredicates.get(location)));
-			locationPipe = new GroupBy(locationPipe, new Fields(0, 1, 2)); //make group to force reduce
-			//predicatePipe = new Each(predicatePipe, new Identity(), new Fields(1, 2));
-			pipes.add(locationPipe);
-		}
-		Flow filterFlow = new FlowConnector(configuration.flowProperties).connect(importSource, sinks, pipes);
-		filterFlow.complete();
-
+		distributedFileSystemManager.savePredicateConfig();
 		fs.delete(new Path(predicateGroupsTempPath), true);
 	}
 

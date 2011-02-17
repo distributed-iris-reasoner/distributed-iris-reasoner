@@ -44,6 +44,8 @@ import eu.larkc.iris.evaluation.bottomup.DistributedBottomUpEvaluationStrategyFa
 import eu.larkc.iris.evaluation.bottomup.naive.DistributedNaiveEvaluatorFactory;
 import eu.larkc.iris.exports.Exporter;
 import eu.larkc.iris.imports.Importer;
+import eu.larkc.iris.indexing.DistributedFileSystemManager;
+import eu.larkc.iris.indexing.PredicateData;
 
 /**
  * @author valer
@@ -68,6 +70,7 @@ public class Main extends Configured implements Tool {
 	private boolean processer = false;
 	private boolean rdfExporter = false;
 	private boolean ntripleExporter = false;
+	private boolean viewConfig = false;
 	
 	//rdf importer args
 	private String storageId = null;
@@ -139,6 +142,8 @@ public class Main extends Configured implements Tool {
 		} else if (operation.equals("-test")) {
 			tester = true;
 			sourcePath = args[2];
+		} else if (operation.equals("-viewConfig")) {
+			viewConfig = true;
 		}
 	}
 	
@@ -215,7 +220,16 @@ public class Main extends Configured implements Tool {
 		
 		return 0;
 	}
-	
+
+	public int doViewConfig(eu.larkc.iris.Configuration configuration) {
+		DistributedFileSystemManager distributedFileSystemManager = new DistributedFileSystemManager(configuration);
+		List<PredicateData> predicatesData = distributedFileSystemManager.getPredicateData();
+		for (PredicateData predicateData : predicatesData) {
+			logger.info(predicateData.toString());
+		}
+		return 0;
+	}
+
 	public int doProcess() {
 		defaultConfiguration.keepResults = keepResults;
 		defaultConfiguration.resultsName = resultsName;
@@ -256,6 +270,8 @@ public class Main extends Configured implements Tool {
 			return doRdfExport(defaultConfiguration);
 		} else if (ntripleExporter) {
 			return doNTripleExport(defaultConfiguration);
+		} else if (viewConfig) {
+			return doViewConfig(defaultConfiguration);
 		}
 		
 		return -1;

@@ -32,7 +32,6 @@ import org.deri.iris.api.terms.ITerm;
 import org.deri.iris.api.terms.IVariable;
 import org.deri.iris.api.terms.concrete.IIri;
 
-import cascading.operation.Debug;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
 import cascading.pipe.assembly.Rename;
@@ -126,12 +125,20 @@ public class LiteralFields extends eu.larkc.iris.rules.compiler.PipeFields {
 			}
 		}
 		
-		pipe = new Pipe(getId().toString(), mainPipe);
+		if (mainPipe != null) {
+			pipe = new Pipe(getId().toString(), mainPipe);
+		} else {
+			pipe = new Pipe(getId().toString());
+		}
 		pipe = new Rename(pipe, new cascading.tuple.Fields(0, 1, 2), getFields());
 		
 		pipe = filterConstants(pipe);
 	}
-	
+
+	LiteralFields(LiteralId literalId, ILiteral literal) {
+		this(null, literalId, literal);
+	}
+
 	public LiteralId getId() {
 		return id;
 	}
@@ -208,4 +215,16 @@ public class LiteralFields extends eu.larkc.iris.rules.compiler.PipeFields {
 		return attachTo;
 	}
 
+	public IPredicate getPredicate() {
+		for (Field field : this) {
+			if (!(field instanceof LiteralField)) {
+				continue;
+			}
+			LiteralField literalField = (LiteralField) field;
+			if (literalField.getSource() instanceof IPredicate) {
+				return (IPredicate) literalField.getSource();
+			}
+		}
+		return null;
+	}
 }

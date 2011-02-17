@@ -48,8 +48,9 @@ public class CascadingCompiledRule implements IDistributedCompiledRule {
 		if(flowAssembly == null) {
 			throw new IllegalArgumentException("Flow assembly must not be null");
 		}			
-				
-		flowAssembly.evaluate(ruleNumber);
+
+		throw new RuntimeException();
+		//flowAssembly.evaluate(ruleNumber);
 	}
 
 
