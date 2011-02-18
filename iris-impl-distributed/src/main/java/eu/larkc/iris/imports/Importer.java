@@ -4,12 +4,9 @@
 package eu.larkc.iris.imports;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -18,33 +15,21 @@ import org.slf4j.LoggerFactory;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
-import cascading.operation.Debug;
 import cascading.operation.Identity;
-import cascading.operation.aggregator.Count;
 import cascading.operation.regex.RegexParser;
 import cascading.pipe.Each;
-import cascading.pipe.Every;
-import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.scheme.Scheme;
 import cascading.scheme.SequenceFile;
 import cascading.scheme.TextLine;
 import cascading.tap.Hfs;
 import cascading.tap.Lfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryIterator;
 import eu.larkc.iris.Configuration;
 import eu.larkc.iris.Utils;
-import eu.larkc.iris.evaluation.ConstantFilter;
 import eu.larkc.iris.indexing.DistributedFileSystemManager;
 import eu.larkc.iris.indexing.PredicateCount;
-import eu.larkc.iris.indexing.PredicateData;
 import eu.larkc.iris.storage.FactsFactory;
-import eu.larkc.iris.storage.IRIWritable;
-import eu.larkc.iris.storage.WritableComparable;
 
 /**
  * @author valer
@@ -63,13 +48,12 @@ public class Importer {
 	}
 	
 	public void importFromRdf(String storageId, String importName) {
-		DistributedFileSystemManager indexingManager = new DistributedFileSystemManager(configuration);
-		
 		Tap source = FactsFactory.getInstance(storageId).getFacts();
 		
 		SequenceFile sinkScheme = new SequenceFile(source.getSourceFields());
 		sinkScheme.setNumSinkParts(1);
-		Tap sink = new Hfs(sinkScheme, indexingManager.getImportPath(importName), true );
+		String importPath = distributedFileSystemManager.getImportPath(importName);
+		Tap sink = new Hfs(sinkScheme, importPath, true );
 
 		Map<String, Tap> sources = new HashMap<String, Tap>();
 		sources.put("source", source);
@@ -87,6 +71,18 @@ public class Importer {
 		
 		Flow aFlow = new FlowConnector(configuration.flowProperties).connect(sources, sink, identity);
 		aFlow.complete();
+		
+		if (configuration.doPredicateIndexing) {
+			try {
+				processIndexing(importName);
+				
+				FileSystem fs = FileSystem.get(configuration.hadoopConfiguration);
+				fs.delete(new Path(importPath), true);
+			} catch (IOException e) {
+				logger.error("io exception", e);
+				throw new RuntimeException("io exception", e);				
+			}
+		}
 	}
 
 	public void importFromFile(String inputPath, String importName) {

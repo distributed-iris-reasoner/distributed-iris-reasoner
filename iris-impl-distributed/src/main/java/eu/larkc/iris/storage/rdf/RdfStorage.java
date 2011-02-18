@@ -88,12 +88,20 @@ public class RdfStorage implements FactsStorage {
 		IConcreteFactory concreteFactory = ConcreteFactory.getInstance();
 		ITerm object = null;
 		if (statement.getObject() instanceof Resource) {
-			object = concreteFactory.createIri(statement.getObject().toString());
+			String value = statement.getObject().toString();
+			if (value.startsWith("_:node")) {
+				value = "http://www.w3.org/2011/node#" + value.substring(2);
+			}
+			object = concreteFactory.createIri(value);
 		} else {
 			object = termFactory.createString(statement.getObject().toString());
 		}
+		String subject = statement.getSubject().toString();
+		if (subject.startsWith("_:node")) {
+			subject = "http://www.w3.org/2011/node#" + subject.substring(2);
+		}
 		IAtom atom = basicFactory.createAtom(basicFactory.createPredicate(statement.getPredicate().toString(), 2), 
-				basicFactory.createTuple(concreteFactory.createIri(statement.getSubject().toString()), object));
+				basicFactory.createTuple(concreteFactory.createIri(subject), object));
 		if (logger.isInfoEnabled()) {
 			logger.info("returning atom : " + atom);
 		}

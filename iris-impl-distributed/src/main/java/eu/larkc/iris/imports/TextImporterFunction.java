@@ -30,7 +30,13 @@ public class TextImporterFunction extends BaseOperation implements Function {
 			String value = tuple.getString(i);
 			if ((value.startsWith("<") && value.endsWith(">") || value.startsWith("_:node"))) {
 				IRIWritable iriWritable = new IRIWritable();
-				iriWritable.setValue(value.substring(1, value.length() - 1));
+				String aValue = null;
+				if (value.startsWith("_:node")) {
+					aValue = "http://www.w3.org/2011/node#" + value.substring(2);
+				} else {
+					aValue = value.substring(1, value.length() - 1);
+				}
+				iriWritable.setValue(aValue);
 				outTuple.add(iriWritable);
 			} else {
 				StringTermWritable stWritable = new StringTermWritable();

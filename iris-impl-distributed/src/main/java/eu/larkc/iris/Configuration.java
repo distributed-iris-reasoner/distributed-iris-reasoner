@@ -76,9 +76,9 @@ public class Configuration extends org.deri.iris.Configuration
 		//include default optimizers
 		super();
 		
-		RdfsOptimizer optimizer = new RdfsOptimizer();
-		preStratificationOptimizer.add(optimizer);
-		postStratificationOptimizations.add(optimizer);
+		//RdfsOptimizer optimizer = new RdfsOptimizer();
+		//preStratificationOptimizer.add(optimizer);
+		//postStratificationOptimizations.add(optimizer);
 		
 		ruleOptimisers.add(new JoinOptimizer());
 		recursiveRulePreProcessors.add(new NonOptimizingRecursiveRulePreProcessor());
