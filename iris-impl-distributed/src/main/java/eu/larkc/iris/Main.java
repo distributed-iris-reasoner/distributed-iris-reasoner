@@ -186,12 +186,12 @@ public class Main extends Configured implements Tool {
 	}
 
 	public int doRdfExport(eu.larkc.iris.Configuration configuration) {
-		new Exporter().exportToRdf(configuration, project, storageId, resultsName);
+		new Exporter(configuration).exportToRdf(storageId, resultsName);
 		return 0;
 	}
 
 	public int doNTripleExport(eu.larkc.iris.Configuration configuration) {
-		new Exporter().exportToFile(configuration, project, outPath, resultsName);
+		new Exporter(configuration).exportToFile(outPath, resultsName);
 		return 0;
 	}
 

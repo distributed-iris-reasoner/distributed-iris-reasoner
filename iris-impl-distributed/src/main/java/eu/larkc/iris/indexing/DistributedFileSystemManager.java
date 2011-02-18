@@ -87,17 +87,20 @@ public class DistributedFileSystemManager {
 		return configuration.project + "/" + INFERENCES_FOLDER + "/";
 	}
 
+	public String getInferencesPath(PredicateData predicateData) {
+		if (predicateData == null) {
+			return getInferencesPath();
+		} else {
+			return configuration.project + "/" + INFERENCES_FOLDER + "/" + predicateData.getLocation().toString() + "/";
+		}		
+	}
 	public String getInferencesPath(LiteralFields fields) {
 		IPredicate predicate = fields.getPredicate();
 		PredicateData predicateData = null;
 		if (predicate != null) {
 			predicateData = getPredicateData(new IRIWritable(predicate));
 		}
-		if (predicateData == null) {
-			return getInferencesPath();
-		} else {
-			return configuration.project + "/" + INFERENCES_FOLDER + "/" + predicateData.getLocation().toString() + "/";
-		}
+		return getInferencesPath(predicateData);
 	}
 
 	public String getTempInferencesPath(String resultName, String flowIdentificator) {
@@ -169,7 +172,6 @@ public class DistributedFileSystemManager {
 			}
 			predicatesConfigOutputStream = fs.create(predicatesConfigFileTempPath);
 			for (PredicateData predicateData : predicatesConfig) {
-				logger.info("save predicate data : " + predicateData);
 				predicateData.write(predicatesConfigOutputStream);
 			}
 			predicatesConfigOutputStream.close();
@@ -199,12 +201,10 @@ public class DistributedFileSystemManager {
 
 	public void addPredicates(List<PredicateCount> predicateCounts) {
 		for (PredicateCount predicateCount : predicateCounts) {
-			logger.info("add predicate count : " + predicateCount);
 			IRIWritable predicate = predicateCount.getPredicate();
 			Long count = predicateCount.getCount();
 			boolean found = false;
 			for (PredicateData predicateData : predicatesConfig) {
-				logger.info("check predicate data : " + predicateData);
 				if (predicateData.getValue().equals(predicate.getValue())) {
 					predicateData.setCount(predicateData.getCount() + count);
 					found = true;
