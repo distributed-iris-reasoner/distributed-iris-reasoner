@@ -3,6 +3,7 @@
  */
 package eu.larkc.iris.rules.optimisation;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.deri.iris.api.basics.IRule;
@@ -12,6 +13,8 @@ import org.deri.iris.rules.stratification.GlobalStratifier;
 import eu.larkc.iris.Configuration;
 import eu.larkc.iris.functional.features.LangFeaturesTest;
 import eu.larkc.iris.rules.stratification.DependencyMinimizingStratifier;
+import eu.larkc.iris.rules.stratification.IPostStratificationOptimization;
+import eu.larkc.iris.rules.stratification.IPreStratificationOptimization;
 
 /**
  * Tests if multiple rules are stratified correctly according to their dependencies in the presence of recursion.
@@ -34,7 +37,10 @@ public class RecursiveDependencyStratificationTest extends LangFeaturesTest {
 
 	public RecursiveDependencyStratificationTest(String string) {
 		super(string);
-		defaultConfiguration = new Configuration();
+		defaultConfiguration = new Configuration();	
+		//not enabled here
+		defaultConfiguration.postStratificationOptimizations = new ArrayList<IPostStratificationOptimization>();
+		defaultConfiguration.preStratificationOptimizer = new ArrayList<IPreStratificationOptimization>();
 	}
 
 	@Override
@@ -56,7 +62,7 @@ public class RecursiveDependencyStratificationTest extends LangFeaturesTest {
 		List<IRuleStratifier> stratifiers = defaultConfiguration.stratifiers;
 		
 		assertNotNull(stratifiers);
-		IRuleStratifier strat = stratifiers.get(0);
+		IRuleStratifier strat = new DependencyMinimizingStratifier(defaultConfiguration);
 		assertTrue(strat instanceof DependencyMinimizingStratifier);
 		
 		List<List<IRule>> stratifiedRules = strat.stratify(rules);

@@ -68,22 +68,22 @@ public class Configuration extends org.deri.iris.Configuration
 
 	public final List<IRecursiveRulePreProcessor> recursiveRulePreProcessors = new ArrayList<IRecursiveRulePreProcessor>();
 	
-	public final List<IPreStratificationOptimization> preStratificationOptimizer = new ArrayList<IPreStratificationOptimization>();
+	public List<IPreStratificationOptimization> preStratificationOptimizer = new ArrayList<IPreStratificationOptimization>();
 	
-	public final List<IPostStratificationOptimization> postStratificationOptimizations = new ArrayList<IPostStratificationOptimization>();
+	public List<IPostStratificationOptimization> postStratificationOptimizations = new ArrayList<IPostStratificationOptimization>();
 	
 	public Configuration() {		
 		//include default optimizers
 		super();
 		
-		//RdfsOptimizer optimizer = new RdfsOptimizer();
-		//preStratificationOptimizer.add(optimizer);
-		//postStratificationOptimizations.add(optimizer);
+		//RDFS specific optimizations
+		RdfsOptimizer optimizer = new RdfsOptimizer();
+		preStratificationOptimizer.add(optimizer);
+		postStratificationOptimizations.add(optimizer);
 		
 		ruleOptimisers.add(new JoinOptimizer());
-		recursiveRulePreProcessors.add(new NonOptimizingRecursiveRulePreProcessor());
-		
-		//TODO: configure language specific pre/post processing
+		recursiveRulePreProcessors.add(new NonOptimizingRecursiveRulePreProcessor());		
+	
 		stratifiers.add(new DependencyMinimizingStratifier(this));
 	}
 	
