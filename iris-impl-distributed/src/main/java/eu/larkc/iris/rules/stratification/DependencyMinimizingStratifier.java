@@ -15,8 +15,11 @@ import org.deri.iris.api.factory.IGraphFactory;
 import org.deri.iris.api.graph.IPredicateGraph;
 import org.deri.iris.graph.GraphFactory;
 import org.deri.iris.rules.IRuleStratifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.larkc.iris.Configuration;
+import eu.larkc.iris.storage.FactsFactory;
 
 /**
  * @author Florian Fischer, fisf, 14.01.2011
@@ -71,18 +74,28 @@ public class DependencyMinimizingStratifier implements IRuleStratifier {
 	
 	@Override
 	public List<List<IRule>> stratify(List<IRule> rules) {		
-	
+		String methodName = "stratify(List<IRule>)";
+		
 		if(rules.size() < 2) {
 			throw new IllegalArgumentException("Cannot order less than 2 rules...");
 		}
 		
 		predicateGraph = graphFactory.createPredicateGraph(rules);	
 		
+		if(logger.isInfoEnabled())
+			logger.info(methodName +": Resolving dependencies for rules: " + rules);
+		
 		//pre-processing hook
 		rules = invokePreProcessing(rules);
 		
+		if(logger.isInfoEnabled())
+			logger.info(methodName +": Preprocessed rules: " + rules);
+		
 		//establish initial ordering among rules
 		Collections.sort(rules, rc);
+		
+		if(logger.isInfoEnabled())
+			logger.info(methodName +": Sorted rules: " + rules);
 		
 		//split rules, one additional iteration			
 		List<List<IRule>> result = new ArrayList<List<IRule>>();
@@ -106,6 +119,11 @@ public class DependencyMinimizingStratifier implements IRuleStratifier {
 		result.add(stratum);		
 		//split done
 		
+		for (int i = 0; i < result.size(); i++) {			
+			if(logger.isInfoEnabled())
+				logger.info(methodName +": Stratum " + i + " contains" + result.get(i));			
+		}		
+	
 		//post-processing hook
 		result = invokePostProcessing(result);
 		
@@ -136,6 +154,12 @@ public class DependencyMinimizingStratifier implements IRuleStratifier {
 	 * Compares predicates according to dependencies
 	 */
 	protected PredicateComparator pc = new PredicateComparator();
+	
+	
+	/**
+	 * field for logger
+	 */
+	private static final Logger logger = LoggerFactory.getLogger(DependencyMinimizingStratifier.class);
 	
 	
 	//-----------------------------------------------------------------

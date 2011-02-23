@@ -57,6 +57,7 @@ public class RdfsOptimizer implements IPostStratificationOptimization,
 		ITuple tuple1 = factory.createTuple(term1, term2);
 		ITuple tuple2 = factory.createTuple(term4, term1, term3);
 		ITuple tuple3 = factory.createTuple(term4, term2);		
+	
 		
 		IPredicate head2Predicate = factory.createPredicate("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", 2);
 		ILiteral head2literal = factory.createLiteral(true, head2Predicate, tuple1);
@@ -100,9 +101,31 @@ public class RdfsOptimizer implements IPostStratificationOptimization,
 				
 		IRule rdfs7 = factory.createRule(headRDFS7, bodyRDFS7);
 		
+		//rdfs3
+//		aaa rdfs:range xxx .
+//		uuu aaa vvv .
+//		then vvv rdf:type xxx .
+		ITuple tuple7 = factory.createTuple(term4, term1, term3);
+		ITuple tuple8 = factory.createTuple(term3, term2);
+		IPredicate body3Predicate1 = factory.createPredicate("http://www.w3.org/2000/01/rdf-schema#range", 2);
+		ILiteral body3literal1= factory.createLiteral(true, body3Predicate1, tuple3);
+		ILiteral body3literal2= factory.createLiteral(true, body2Predicate1, tuple7);
+		
+		List<ILiteral> bodyRDFS3 = new ArrayList<ILiteral>();
+		bodyRDFS3.add(body3literal1);
+		bodyRDFS3.add(body3literal2);
+		
+		ILiteral head3literal = factory.createLiteral(true, head2Predicate, tuple8);
+		List<ILiteral> headRDFS3 = new ArrayList<ILiteral>();
+		headRDFS3.add(head3literal);
+		
+		IRule rdfs3 = factory.createRule(headRDFS3, bodyRDFS3);
+		
+		//end		
+		
 		delayRules.add(rdfs2);
 		delayRules.add(rdfs7);
-		
+		delayRules.add(rdfs3);
 	}
 
 	/* (non-Javadoc)

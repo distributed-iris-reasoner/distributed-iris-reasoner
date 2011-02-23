@@ -85,8 +85,5 @@ public class RecursiveDependencyStratificationTest extends LangFeaturesTest {
 		String headPredicateSymbolThird = stratifiedRules.get(2).get(0).getHead().get(0).getAtom().getPredicate().getPredicateSymbol();
 		assertEquals("http://www.w3.org/2000/01/rdf-schema#p", headPredicateSymbolThird);
 		
-		for (int i = 0; i < stratifiedRules.size(); i++) {
-			System.out.println(i + " " + stratifiedRules.get(i));
-		}		
 	}
 }
