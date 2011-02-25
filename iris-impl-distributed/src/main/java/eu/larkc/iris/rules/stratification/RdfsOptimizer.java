@@ -63,10 +63,10 @@ public class RdfsOptimizer implements IPostStratificationOptimization,
 		ILiteral head2literal = factory.createLiteral(true, head2Predicate, tuple1);
 		
 		IPredicate body2Predicate1 = factory.createPredicate("RIF_HAS_VALUE", 3);
-		ILiteral body2literal1 = factory.createLiteral(true, body2Predicate1, tuple2);
+		ILiteral body2literal2 = factory.createLiteral(true, body2Predicate1, tuple2);
 		
 		IPredicate body2Predicate2 = factory.createPredicate("http://www.w3.org/2000/01/rdf-schema#domain", 2);
-		ILiteral body2literal2 = factory.createLiteral(true, body2Predicate2, tuple3);
+		ILiteral body2literal1 = factory.createLiteral(true, body2Predicate2, tuple3);
 		
 		List<ILiteral> bodyRDFS2 = new ArrayList<ILiteral>();
 		bodyRDFS2.add(body2literal1);
@@ -89,8 +89,8 @@ public class RdfsOptimizer implements IPostStratificationOptimization,
 		IPredicate body7predicate2 = factory.createPredicate("http://www.w3.org/2000/01/rdf-schema#subPropertyOf", 2);
 		
 		ILiteral head7literal = factory.createLiteral(true, body2Predicate1, tuple4);
-		ILiteral body7literal1 = factory.createLiteral(true, body2Predicate1, tuple5);
-		ILiteral body7literal2 = factory.createLiteral(true, body7predicate2, tuple6);
+		ILiteral body7literal2 = factory.createLiteral(true, body2Predicate1, tuple5);
+		ILiteral body7literal1 = factory.createLiteral(true, body7predicate2, tuple6);
 		
 		List<ILiteral> bodyRDFS7 = new ArrayList<ILiteral>();		
 		bodyRDFS7.add(body7literal1);
@@ -102,11 +102,8 @@ public class RdfsOptimizer implements IPostStratificationOptimization,
 		IRule rdfs7 = factory.createRule(headRDFS7, bodyRDFS7);
 		
 		//rdfs3
-//		aaa rdfs:range xxx .
-//		uuu aaa vvv .
-//		then vvv rdf:type xxx .
 		ITuple tuple7 = factory.createTuple(term4, term1, term3);
-		ITuple tuple8 = factory.createTuple(term3, term2);
+		ITuple tuple8 = factory.createTuple(term1, term2);
 		IPredicate body3Predicate1 = factory.createPredicate("http://www.w3.org/2000/01/rdf-schema#range", 2);
 		ILiteral body3literal1= factory.createLiteral(true, body3Predicate1, tuple3);
 		ILiteral body3literal2= factory.createLiteral(true, body2Predicate1, tuple7);
