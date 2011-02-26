@@ -127,6 +127,10 @@ public class DependencyMinimizingStratifier implements IRuleStratifier {
 		//post-processing hook
 		result = invokePostProcessing(result);
 		
+		for (int i = 0; i < result.size(); i++) {
+			logger.info(methodName +": Postprocessed rules, Stratum " + i + " contains" + result.get(i));
+		}
+		
 		return result;
 	}
 		

@@ -63,7 +63,7 @@ public class CascadingRuleCompilerTest extends CascadingTest {
 	public void testAvoidOldInferencedData() throws Exception {
 		CascadingRuleCompiler crc = new CascadingRuleCompiler(defaultConfiguration);
 		IDistributedCompiledRule dcr = crc.compile(rules.get(0));
-		dcr.evaluate(new EvaluationContext(1, 1));
+		dcr.evaluate(new EvaluationContext(1, 1, 1));
 		FlowAssembly fa = dcr.getFlowAssembly();
 		
 		TupleEntryIterator tei = fa.openSink();

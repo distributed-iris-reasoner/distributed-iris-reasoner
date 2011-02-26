@@ -34,6 +34,8 @@ import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.cogroup.InnerJoin;
 import cascading.tuple.Fields;
+import eu.larkc.iris.indexing.DistributedFileSystemManager;
+import eu.larkc.iris.indexing.PredicateData;
 import eu.larkc.iris.storage.IRIWritable;
 
 /**
@@ -87,9 +89,9 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 
 		if (!mConfiguration.doPredicateIndexing) {
 			mainPipe = new Pipe("main");
-			ruleStreams = new RuleStreams(mainPipe, rule);
+			ruleStreams = new RuleStreams(mConfiguration, mainPipe, rule);
 		} else {
-			ruleStreams = new RuleStreams(rule);
+			ruleStreams = new RuleStreams(mConfiguration, rule);
 		}
 		
 		headFields = ruleStreams.getHeadStream();
@@ -323,7 +325,7 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 
 			Pipe joinPipe = new CoGroup(lhsPipe, new Fields("LCF"), rhsPipe, new Fields("RCF"), new InnerJoin());
 			
-			join = new PipeFields(joinPipe, lhsJoin, stream);
+			join = new PipeFields(joinPipe, lhsJoin, stream, lhsJoin.getCount()*stream.getCount());
 		}
 		
 		join = join.getUniqueVariableFields();

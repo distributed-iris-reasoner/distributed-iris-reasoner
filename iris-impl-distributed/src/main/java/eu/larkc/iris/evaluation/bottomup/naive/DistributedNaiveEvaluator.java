@@ -31,7 +31,7 @@ public class DistributedNaiveEvaluator implements IDistributedRuleEvaluator {
 	private static final Logger logger = LoggerFactory.getLogger(DistributedNaiveEvaluator.class);
 	
 	@Override
-	public void evaluateRules(List<IDistributedCompiledRule> rules, eu.larkc.iris.Configuration configuration)
+	public void evaluateRules( Integer stratumNumber, List<IDistributedCompiledRule> rules, eu.larkc.iris.Configuration configuration)
 			throws EvaluationException {
 		int iterationNumber = 1;
 		boolean cont = true;
@@ -43,8 +43,8 @@ public class DistributedNaiveEvaluator implements IDistributedRuleEvaluator {
 			// For each rule in the collection (stratum)
 			for (final IDistributedCompiledRule rule : rules )
 			{
-				logger.info("evaluate iteration : " + iterationNumber + ", ruleNumber : " + ruleNumber + ", rule : " + rule.getRule());
-				boolean delta = rule.evaluate(new EvaluationContext(iterationNumber, ruleNumber));
+				logger.info("evaluate stratum : " + stratumNumber + ", iteration : " + iterationNumber + ", ruleNumber : " + ruleNumber + ", rule : " + rule.getRule());
+				boolean delta = rule.evaluate(new EvaluationContext(stratumNumber, iterationNumber, ruleNumber));
 				cont = delta ?  delta : cont;
 				ruleNumber++;
 			}

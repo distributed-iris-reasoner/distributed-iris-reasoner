@@ -49,6 +49,11 @@ public class PipeFields extends Fields {
 	
 	protected Pipe pipe = null;
 	
+	//the maximal possible number of records that this stream can contained, is calculated from the joins of 
+	//literal fields used create it (it's value is the minimal count fo the literal fields used for join
+	//only used when with predicate indexing
+	protected Long count = new Long(0);
+	
 	protected PipeFields() {}
 	
 	public PipeFields(Fields fields) {
@@ -60,21 +65,34 @@ public class PipeFields extends Fields {
 		this.pipe = pipe;
 	}
 
-	public PipeFields(Pipe pipe, Fields leftFields, Fields rightFields) {
+	public PipeFields(Pipe pipe, Fields leftFields, Fields rightFields, Long approxCount) {
 		this(pipe, leftFields);
 		addAll(rightFields);
+		this.count = approxCount;
 	}
 
 	public Pipe getPipe() {
 		return pipe;
 	}
 
+	/**
+	 * @return the maxCount
+	 */
+	public Long getCount() {
+		return count;
+	}
+
 	public PipeFields innerJoin(PipeFields fields) {
 		FieldPairs fieldGroup = getCommonFields(fields);
 		
-		Pipe join = new CoGroup(getPipe(), fieldGroup.getLeftFields().getFields(), fields.getPipe(), fieldGroup.getRightFields().getFields(), new InnerJoin());
+		Pipe join = null;
+		if (getCount() > fields.getCount()) {
+			join = new CoGroup(getPipe(), fieldGroup.getLeftFields().getFields(), fields.getPipe(), fieldGroup.getRightFields().getFields(), new InnerJoin());
+		} else {
+			join = new CoGroup(fields.getPipe(), fieldGroup.getRightFields().getFields(), getPipe(), fieldGroup.getLeftFields().getFields(), new InnerJoin());
+		}
 		
-		return new PipeFields(join, this, fields);
+		return new PipeFields(join, this, fields, Math.min(getCount(), fields.getCount()));
 	}
 
 	public PipeFields getUniqueVariableFields() {

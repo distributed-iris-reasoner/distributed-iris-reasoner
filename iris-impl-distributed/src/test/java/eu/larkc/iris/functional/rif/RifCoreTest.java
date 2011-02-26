@@ -144,7 +144,7 @@ public abstract class RifCoreTest extends CascadingTest {
 		try {
 			dcr = crc.compile(rules.get(0));
 
-			dcr.evaluate(new EvaluationContext(1, 1));
+			dcr.evaluate(new EvaluationContext(1, 1, 1));
 			FlowAssembly fa = dcr.getFlowAssembly();
 
 			// parse conclusion to a Formula object

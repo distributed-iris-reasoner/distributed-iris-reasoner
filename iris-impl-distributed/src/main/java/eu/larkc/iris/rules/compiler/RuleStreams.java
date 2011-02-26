@@ -25,6 +25,7 @@ import org.deri.iris.api.basics.ILiteral;
 import org.deri.iris.api.basics.IRule;
 
 import cascading.pipe.Pipe;
+import eu.larkc.iris.Configuration;
 
 
 /**
@@ -86,12 +87,12 @@ public class RuleStreams {
 		}
 	}
 	
-	public RuleStreams(Pipe mainPipe, IRule rule) {
+	public RuleStreams(Configuration configuration, Pipe mainPipe, IRule rule) {
 		ILiteral headLiteral = rule.getHead().get(0);
-		if (mainPipe != null) {
-			headStream = new LiteralFields(mainPipe, new LiteralId(), headLiteral);
+		if (!configuration.doPredicateIndexing) {
+			headStream = new LiteralFields(configuration, mainPipe, new LiteralId(), headLiteral);
 		} else {
-			headStream = new LiteralFields(new LiteralId(), headLiteral);
+			headStream = new LiteralFields(configuration, new LiteralId(), headLiteral);
 		}
 		for (int i = 0; i < rule.getBody().size(); i++) {
 			ILiteral literal = rule.getBody().get(i);
@@ -103,16 +104,16 @@ public class RuleStreams {
 				throw new IllegalArgumentException("Negation is not supported: " + literal);
 			}
 			
-			if (mainPipe != null) {
-				bodyStreams.add(new LiteralFields(mainPipe, new LiteralId(i), literal));
+			if (!configuration.doPredicateIndexing) {
+				bodyStreams.add(new LiteralFields(configuration, mainPipe, new LiteralId(i), literal));
 			} else {
-				bodyStreams.add(new LiteralFields(new LiteralId(i), literal));
+				bodyStreams.add(new LiteralFields(configuration, new LiteralId(i), literal));
 			}
 		}
 	}
 
-	public RuleStreams(IRule rule) {
-		this(null, rule);
+	public RuleStreams(Configuration configuration, IRule rule) {
+		this(configuration, null, rule);
 	}
 
 	public LiteralFields getHeadStream() {

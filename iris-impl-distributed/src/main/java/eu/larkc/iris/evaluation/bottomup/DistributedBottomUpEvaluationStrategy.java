@@ -15,32 +15,22 @@
 package eu.larkc.iris.evaluation.bottomup;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
-import java.util.Set;
 
 import org.deri.iris.EvaluationException;
 import org.deri.iris.ProgramNotStratifiedException;
 import org.deri.iris.RuleUnsafeException;
 import org.deri.iris.api.basics.ILiteral;
-import org.deri.iris.api.basics.IPredicate;
 import org.deri.iris.api.basics.IQuery;
 import org.deri.iris.api.basics.IRule;
 import org.deri.iris.api.terms.IVariable;
 import org.deri.iris.evaluation.IEvaluationStrategy;
 import org.deri.iris.evaluation.stratifiedbottomup.EvaluationUtilities;
+import org.deri.iris.rules.IRuleStratifier;
 import org.deri.iris.storage.IRelation;
-
-import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
-import cascading.operation.Identity;
-import cascading.pipe.Each;
-import cascading.pipe.Pipe;
-import cascading.tap.Hfs;
-import cascading.tap.Tap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.larkc.iris.evaluation.PredicateCounts;
 import eu.larkc.iris.rules.IRecursiveRulePreProcessor;
@@ -57,6 +47,8 @@ import eu.larkc.iris.rules.compiler.IDistributedRuleCompiler;
 public class DistributedBottomUpEvaluationStrategy implements
 		IEvaluationStrategy {
 
+	private static final Logger logger = LoggerFactory.getLogger(DistributedBottomUpEvaluationStrategy.class);
+	
 	/** 
 	 * @param configuration
 	 * @param ruleEvaluatorFactory
@@ -126,7 +118,7 @@ public class DistributedBottomUpEvaluationStrategy implements
 			compiledRules.add(compiledRule);
 		}
 
-		singlePass.evaluateRules(compiledRules, mConfiguration);		
+		singlePass.evaluateRules(null, compiledRules, mConfiguration);		
 	}
 	
 	protected void evaluateRecursiveRules(List<IRule> rules) throws EvaluationException {		
@@ -135,11 +127,13 @@ public class DistributedBottomUpEvaluationStrategy implements
 	
 		IDistributedRuleCompiler rc = new CascadingRuleCompiler(mConfiguration);		
 		IDistributedRuleEvaluator evaluator = mRuleEvaluatorFactory.createEvaluator(IDistributedRuleEvaluatorFactory.RECURSIONAWAREEVALUATOR);		
-		PredicateCounts predicateCounts = PredicateCounts.getInstance(mConfiguration);
+		//PredicateCounts predicateCounts = PredicateCounts.getInstance(mConfiguration);
 		
 		//process each rule layer independently, no recomputations outside of each layer are required
+		Integer stratumNumber = 1;
 		for (List<IRule> stratum : stratifiedRules) {
 			
+			/*
 			for (IRule rule : stratum) {
 				ListIterator<ILiteral> iterator = rule.getBody().listIterator();
 				while (iterator.hasNext()) {
@@ -149,6 +143,7 @@ public class DistributedBottomUpEvaluationStrategy implements
 					//Long count = predicateCounts.getCount(literal.getAtom());
 				}
 			}
+			*/
 			
 			//reorder rules within stratum
 			List<IRule> reorderedRules = utils.reOrderRules(stratum);		
@@ -161,7 +156,9 @@ public class DistributedBottomUpEvaluationStrategy implements
 				compiledRules.add(compiledRule);
 			}
 
-			evaluator.evaluateRules(compiledRules, mConfiguration);
+			evaluator.evaluateRules(stratumNumber, compiledRules, mConfiguration);
+			
+			stratumNumber++;
 		}
 	}
 	

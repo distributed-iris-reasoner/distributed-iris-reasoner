@@ -159,7 +159,7 @@ public class FlowAssembly {
 	public boolean evaluate(EvaluationContext evaluationContext) {
 		this.distributedFileSystemManager = new DistributedFileSystemManager(mConfiguration);
 
-		String flowIdentificator = "_" + evaluationContext.getIterationNumber() + "_" + evaluationContext.getRuleNumber();
+		String flowIdentificator = "_" + evaluationContext.getStratumNumber() + "_" + evaluationContext.getIterationNumber() + "_" + evaluationContext.getRuleNumber();
 		String resultName = mConfiguration.resultsName != null ? mConfiguration.resultsName : "inference";
 		if (ruleStreams.getHeadStream().getPredicate() != null) {
 			path = distributedFileSystemManager.getInferencesPath(ruleStreams.getHeadStream(), resultName, flowIdentificator);

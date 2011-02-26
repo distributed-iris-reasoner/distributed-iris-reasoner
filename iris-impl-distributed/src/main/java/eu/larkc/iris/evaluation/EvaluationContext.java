@@ -25,10 +25,12 @@ package eu.larkc.iris.evaluation;
  */
 public class EvaluationContext {
 
+	private int stratumNumber;
 	private int iterationNumber;
 	private int ruleNumber;
 	
-	public EvaluationContext(int iterationNumber, int ruleNumber) {
+	public EvaluationContext(int stratumNumber, int iterationNumber, int ruleNumber) {
+		this.stratumNumber = stratumNumber;
 		this.iterationNumber = iterationNumber;
 		this.ruleNumber = ruleNumber;
 	}
@@ -38,6 +40,13 @@ public class EvaluationContext {
 	}
 	public int getRuleNumber() {
 		return ruleNumber;
+	}
+
+	/**
+	 * @return the stratumNumber
+	 */
+	public int getStratumNumber() {
+		return stratumNumber;
 	}
 	
 }

@@ -22,7 +22,7 @@ public class DistributedOnePassEvaluator implements IDistributedRuleEvaluator {
 	 * @see eu.larkc.iris.evaluation.bottomup.IDistributedRuleEvaluator#evaluateRules(java.util.List, eu.larkc.iris.Configuration)
 	 */
 	@Override
-	public void evaluateRules(List<IDistributedCompiledRule> rules,
+	public void evaluateRules(Integer stratumNumber, List<IDistributedCompiledRule> rules,
 			Configuration configuration) throws EvaluationException {
 		
 		int ruleNumber = 1;

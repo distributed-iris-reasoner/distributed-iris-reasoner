@@ -35,8 +35,12 @@ import org.deri.iris.api.terms.concrete.IIri;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
 import cascading.pipe.assembly.Rename;
+import eu.larkc.iris.Configuration;
 import eu.larkc.iris.evaluation.ConstantFilter;
+import eu.larkc.iris.indexing.DistributedFileSystemManager;
+import eu.larkc.iris.indexing.PredicateData;
 import eu.larkc.iris.rules.compiler.RuleStreams.LiteralId;
+import eu.larkc.iris.storage.IRIWritable;
 import eu.larkc.iris.storage.WritableFactory;
 
 /**
@@ -107,8 +111,9 @@ public class LiteralFields extends eu.larkc.iris.rules.compiler.PipeFields {
 		}
 	}
 	
-	LiteralFields(Pipe mainPipe, LiteralId literalId, ILiteral literal) {
+	LiteralFields(Configuration configuration, Pipe mainPipe, LiteralId literalId, ILiteral literal) {
 		this.id = literalId;
+		this.count = calculateCount(configuration);
 		IAtom atom = literal.getAtom();
 		IPredicate predicate = atom.getPredicate();
 		if (!predicate.getPredicateSymbol().equals(RIF_HAS_VALUE)) {
@@ -135,14 +140,24 @@ public class LiteralFields extends eu.larkc.iris.rules.compiler.PipeFields {
 		pipe = filterConstants(pipe);
 	}
 
-	LiteralFields(LiteralId literalId, ILiteral literal) {
-		this(null, literalId, literal);
+	LiteralFields(Configuration configuration, LiteralId literalId, ILiteral literal) {
+		this(configuration, null, literalId, literal);
 	}
 
 	public LiteralId getId() {
 		return id;
 	}
-		
+	
+	private Long calculateCount(Configuration configuration) {
+		DistributedFileSystemManager dfsm = new DistributedFileSystemManager(configuration);
+		IPredicate predicate = this.getPredicate();
+		if (predicate != null) {
+			PredicateData predicateData = dfsm.getPredicateData(new IRIWritable(predicate));
+			return predicateData.getCount();
+		}
+		return Long.MAX_VALUE;
+	}
+
 	public boolean fromBuiltInAtom() {
 		return false;
 	}

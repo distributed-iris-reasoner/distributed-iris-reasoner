@@ -64,6 +64,14 @@ public class JoinOptimizer implements IRuleOptimiser {
 		}
 		
 		/* (non-Javadoc)
+		 * @see java.util.AbstractCollection#toString()
+		 */
+		@Override
+		public String toString() {
+			return "score:" + score + super.toString();
+		}
+
+		/* (non-Javadoc)
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)
 		 */
 		@Override
@@ -103,7 +111,7 @@ public class JoinOptimizer implements IRuleOptimiser {
 			List<Literals> literalsList = null;
 			int aScore = 0;
 			if (literal == null) {
-				literalsList = findPath(++aDepth, aLiteral, aProcessedLiterals);
+				literalsList = findPath(aDepth - 1, aLiteral, aProcessedLiterals);
 			} else {
 				IAtom aAtom = aLiteral.getAtom();
 				ITuple aTuple = aAtom.getTuple();
@@ -116,11 +124,11 @@ public class JoinOptimizer implements IRuleOptimiser {
 				
 				aScore += commonVariablesNb > 0 ? (commonVariablesNb * depth) : -depth;
 				
-				literalsList = findPath(++aDepth, aLiteral, aProcessedLiterals);
+				literalsList = findPath(aDepth - 1, aLiteral, aProcessedLiterals);
 			}
 			for (Literals literals : literalsList) {
-				logger.info("depth : " + aDepth + " add : " + aLiteral + " score : " + aScore);
-				literals.add(aLiteral);
+				logger.info("depth : " + aDepth + ", processed literals : " + aProcessedLiterals + ", literal : " + aLiteral + ", score : " + aScore + ", total score : " + (literals.score + aScore));
+				literals.add(0, aLiteral);
 				literals.score += aScore;
 			}
 			
@@ -141,12 +149,17 @@ public class JoinOptimizer implements IRuleOptimiser {
 	 */
 	@Override
 	public IRule optimise(IRule rule) {
+		logger.info("optimize rule : " + rule);
+		
 		IRule aRule = null;
 		literals = rule.getBody();
-		List<Literals> resultLiterals = findPath(0, null, new ArrayList<ILiteral>());
+		List<Literals> resultLiterals = findPath(literals.size(), null, new ArrayList<ILiteral>());
 		if (!resultLiterals.isEmpty()) {
+			logger.info("results : " + resultLiterals);
 			aRule = BasicFactory.getInstance().createRule(rule.getHead(), resultLiterals.get(0));
 		}
+
+		logger.info("optimized rule : " + aRule);
 		
 		return aRule;
 	}

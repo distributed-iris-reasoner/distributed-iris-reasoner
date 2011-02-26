@@ -31,6 +31,6 @@ public interface IDistributedRuleEvaluator {
 	 * @param configuration The knowledge-base configuration object.
 	 * @throws EvaluationException 
 	 */
-	void evaluateRules( List<IDistributedCompiledRule> rules, eu.larkc.iris.Configuration configuration ) throws EvaluationException;
+	void evaluateRules( Integer stratumNumber, List<IDistributedCompiledRule> rules, eu.larkc.iris.Configuration configuration ) throws EvaluationException;
 
 }
