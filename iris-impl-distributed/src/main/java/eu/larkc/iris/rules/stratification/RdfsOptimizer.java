@@ -146,13 +146,15 @@ public class RdfsOptimizer implements IPostStratificationOptimization,
 	@Override
 	public List<IRule> doPreProcessing(List<IRule> rules) {
 		
+		List<IRule> resultList = new ArrayList<IRule>();
+		
 		for (IRule iRule : rules) {		
-			if(delayRules.contains(iRule)) {
-				rules.remove(iRule);
+			if(!delayRules.contains(iRule)) {
+				resultList.add(iRule);
 			}
 		}
 
-		return rules;
+		return resultList;
 	}
 
 }
