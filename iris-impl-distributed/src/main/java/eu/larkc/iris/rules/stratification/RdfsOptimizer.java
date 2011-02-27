@@ -118,10 +118,9 @@ public class RdfsOptimizer implements IPostStratificationOptimization,
 		
 		IRule rdfs3 = factory.createRule(headRDFS3, bodyRDFS3);
 		
-		//end		
-		
-		delayRules.add(rdfs2);
+		//ordering here is important, was 2 7 3		
 		delayRules.add(rdfs7);
+		delayRules.add(rdfs2);
 		delayRules.add(rdfs3);
 	}
 
@@ -132,11 +131,14 @@ public class RdfsOptimizer implements IPostStratificationOptimization,
 	public List<List<IRule>> doPostProcessing(List<List<IRule>> rules) {
 		
 		//append at end
+		ArrayList<ArrayList<IRule>> toInsert = new ArrayList<ArrayList<IRule>>();
 		for (IRule rule : delayRules) {
 			ArrayList<IRule> toAdd = new ArrayList<IRule>();
 			toAdd.add(rule);
-			rules.add(toAdd);
+			toInsert.add(toAdd);
 		}
+		
+		rules.addAll(0, toInsert);
 		return rules;
 	}
 
