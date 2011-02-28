@@ -68,11 +68,7 @@ public class DistributedBottomUpEvaluationStrategy implements
 	public IRelation evaluateQuery(IQuery query, List<IVariable> outputVariables)
 			throws ProgramNotStratifiedException, RuleUnsafeException,
 			EvaluationException {
-		
-		// Real query answering should be delegated to an external store.
-		// this requires 1.) Wrapping up e.g. a sparql query in a IQuery implementation, and 2.) accessing the external store hidden behind
-		// an IFacts implementation
-		
+			
 		initBottomUpEvaluation(mRules);
 		
 		return null;		
@@ -131,7 +127,6 @@ public class DistributedBottomUpEvaluationStrategy implements
 			
 			//reorder rules within stratum
 			List<IRule> reorderedRules = utils.reOrderRules(stratum);		
-			//TODO(fisf): apply optimizer for outer joins
 			List<IRule> optimisedRules = utils.applyRuleOptimisers(reorderedRules);
 
 			List<IDistributedCompiledRule> compiledRules = new ArrayList<IDistributedCompiledRule>();			
