@@ -22,8 +22,6 @@ import org.deri.iris.EvaluationException;
 import org.deri.iris.api.basics.ILiteral;
 import org.deri.iris.api.basics.IPredicate;
 import org.deri.iris.api.basics.IRule;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import cascading.operation.Insert;
 import cascading.operation.aggregator.Count;
@@ -34,8 +32,6 @@ import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.cogroup.InnerJoin;
 import cascading.tuple.Fields;
-import eu.larkc.iris.indexing.DistributedFileSystemManager;
-import eu.larkc.iris.indexing.PredicateData;
 import eu.larkc.iris.storage.IRIWritable;
 
 /**
@@ -48,7 +44,7 @@ import eu.larkc.iris.storage.IRIWritable;
  */
 public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 
-	private static final Logger logger = LoggerFactory.getLogger(CascadingRuleCompiler.class);
+	//private static final Logger logger = LoggerFactory.getLogger(CascadingRuleCompiler.class);
 	
 	/*
 	 * Field name used for head predicate
@@ -122,66 +118,12 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 	protected eu.larkc.iris.rules.compiler.PipeFields compileBody(RuleStreams ruleStreams) {
 
 		eu.larkc.iris.rules.compiler.PipeFields result;
-		for (int l = 0; l < ruleStreams.getBodyStreams().size(); ++l) {
-			eu.larkc.iris.rules.compiler.Fields literalStream = ruleStreams.getBodyStreams().get(l);
-
-			/*
-			// (variables and constants)
-			//atom instanceof IBuiltinAtom
-			if (literalStream.fromBuiltInAtom()) {
-				//processBuiltin((IBuiltinAtom) atom);
-			} else {
-				// construct pipe assembly, one pipe per atom
-				
-				Pipe pipe = new Pipe(literalStream.getId().toString(), mainPipe);
-				pipe = new Each(pipe, new Fields(0, 1, 2), new PredicateFilter(atom.getPredicate()));
-				
-				pipe = filterConstants(pipe, atom.getTuple());
-				
-				//Pipe pipe = AtomPipeFactory.getInstance(mainPipe).getPipe(atom);
-				
-				//Fields atomFields = Utils.getFieldsForAtom(fieldsVariablesMapping, atom);
-				//pipe = new Each(pipe, Fields.ALL, new Identity(atomFields));
-				
-				subGoals.add(new SubGoal(atom, pipe));
-			}
-			*/
-		}
 
 		result = setupJoins(ruleStreams);
 
 		return result;
 	}
 		
-	/*
-	private Pipe eliminateOldInferencedData(PipeFielded lhsJoin) {
-		if (lhsJoin == null) {
-			return null;
-		}
-		// check whether all head's variable fields are in the stream, do the outer join if so
-		FieldsList lhsFieldsList = lhsJoin.getFieldsList();
-		FieldsList identifiedHeadFieldsList = identifyHeadVariableFields(fieldsVariablesMapping, head, lhsFieldsList);
-		Pipe leftJoin = null;
-		if (identifiedHeadFieldsList != null) {
-			Pipe headPipe = new Pipe(head.toString(), mainPipe);
-			headPipe = new Each(headPipe, Fields.ALL, new PredicateFilter(head.getPredicate()));
-			
-			FieldsList headFieldsList = Utils.getFieldsFromAtom(fieldsVariablesMapping, head);
-			AtomsCommonFields headCommonFields = new AtomsCommonFields(fieldsVariablesMapping, lhsFieldsList, head);
-			Fields lhsFields = lhsFieldsList.getFields(headCommonFields.getLhsFields());
-			Fields rhsFields = headFieldsList.getFields(headCommonFields.getRhsFields());
-			
-			leftJoin = new CoGroup(headPipe, rhsFields, lhsJoin.getPipe(), lhsFields, new RightJoin());
-			
-			FieldsList allFields = new FieldsList(headFieldsList);
-			allFields.addAll(lhsFieldsList);
-			leftJoin = new Each( leftJoin, allFields.getFields(headFieldsList), new FilterNotNull());	// outgoing -> "keepField"
-			leftJoin = new Each( leftJoin, allFields.getFields(lhsFieldsList), new Identity());	// outgoing -> "keepField"
-		}
-		return leftJoin;
-	}
-    */
-	
 	private eu.larkc.iris.rules.compiler.PipeFields eliminateOldInferencedData(eu.larkc.iris.rules.compiler.PipeFields lhsJoin) {
 		if (lhsJoin == null) {
 			return null;
@@ -193,108 +135,8 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		}
 
 		return lhsJoin.eliminateExistingResults(headFields);
-		
-		/*
-		// check whether all head's variable fields are in the stream, do the outer join if so
-		FieldsList lhsFieldsList = lhsJoin.getFieldsList();
-		FieldsList identifiedHeadFieldsList = identifyHeadVariableFields(fieldsVariablesMapping, head, lhsFieldsList);
-		Pipe leftJoin = null;
-		if (identifiedHeadFieldsList != null) {
-			Pipe headPipe = new Pipe(head.toString(), mainPipe);
-			headPipe = new Each(headPipe, Fields.ALL, new PredicateFilter(head.getPredicate()));
-			
-			FieldsList headFieldsList = Utils.getFieldsFromAtom(fieldsVariablesMapping, head);
-			AtomsCommonFields headCommonFields = new AtomsCommonFields(fieldsVariablesMapping, lhsFieldsList, head);
-			Fields lhsFields = lhsFieldsList.getFields(headCommonFields.getLhsFields());
-			Fields rhsFields = headFieldsList.getFields(headCommonFields.getRhsFields());
-			
-			leftJoin = new CoGroup(headPipe, rhsFields, lhsJoin.getPipe(), lhsFields, new RightJoin());
-			
-			FieldsList allFields = new FieldsList(headFieldsList);
-			allFields.addAll(lhsFieldsList);
-			leftJoin = new Each( leftJoin, allFields.getFields(headFieldsList), new FilterNotNull());	// outgoing -> "keepField"
-			leftJoin = new Each( leftJoin, allFields.getFields(lhsFieldsList), new Identity());	// outgoing -> "keepField"
-		}
-		return leftJoin;
-		*/
 	}
 
-	/**
-	 * Build a join between all the literals of the rule
-	 * 
-	 * @param fieldsVariablesMapping
-	 * @param lhsJoin
-	 * @param fieldsIterator
-	 * @return
-	 */
-	/*public PipeFielded buildJoin(boolean leftJoinApplied, PipeFielded lhsJoin, 
-			ListIterator<Stream> subgoalsIterator) {
-		Pipe leftJoin = null;
-		if (!leftJoinApplied) {
-			leftJoin = eliminateOldInferencedData(lhsJoin);
-			leftJoinApplied = leftJoin != null;
-		}
-		
-		//if not subgoals left return the last join
-		if (!subgoalsIterator.hasNext()) {
-			if (leftJoin != null) {
-				return new PipeFielded(leftJoin, lhsJoin.getFieldsList());
-			}
-			return lhsJoin;
-		}
-		SubGoal subgoal = subgoalsIterator.next();
-		IAtom atom = subgoal.getAtom();
-		Pipe pipe = subgoal.getPipe();
-		
-		//first call, create pipe for the first subgoal, nothing to join
-		if (lhsJoin == null) {
-			PipeFielded pipeFielded = new PipeFielded(pipe, Utils.getFieldsFromAtom(fieldsVariablesMapping, atom));
-			return buildJoin(leftJoinApplied, pipeFielded, subgoalsIterator);
-		}
-
-		FieldsList lhsFieldsList = lhsJoin.getFieldsList();
-		FieldsList rhsFieldsList = Utils.getFieldsFromAtom(fieldsVariablesMapping, atom);
-		AtomsCommonFields atomsCommonFields = new AtomsCommonFields(fieldsVariablesMapping, lhsFieldsList, atom);
-		
-		FieldsList commonLhsFieldsList = atomsCommonFields.getLhsFields();
-		FieldsList commonRhsFieldsList = atomsCommonFields.getRhsFields();
-		
-		Pipe lhsPipe = (leftJoin == null) ? lhsJoin.getPipe() : leftJoin;
-		//compose the output fields list
-		FieldsList outputFieldsList = composeOutputFields(lhsJoin.getFieldsList(), atom);
-
-		Pipe join = null;
-		if (!commonLhsFieldsList.isEmpty()) {
-			//join the previous join's pipe with the pipe for this literal
-			Fields lhsFields = lhsFieldsList.getFields(commonLhsFieldsList);
-			Fields rhsFields = rhsFieldsList.getFields(commonRhsFieldsList);
-			
-			join = new CoGroup(lhsPipe, lhsFields, pipe, rhsFields, new InnerJoin());
-		} else {
-			//this is not effective, joining without common fields, but it has to be done for some unoptimized rules
-			lhsFieldsList.add("LCF");
-			lhsPipe = new Each(lhsPipe, new Insert(new Fields("LCF"), new Integer(1)), lhsFieldsList.getFields());
-			
-			rhsFieldsList.add("RCF");
-			pipe = new Each(pipe, new Insert(new Fields("RCF"), new Integer(1)), rhsFieldsList.getFields());
-
-			join = new CoGroup(lhsPipe, new Fields(lhsFieldsList.size() - 1), pipe, new Fields(rhsFieldsList.size() - 1), new InnerJoin());
-
-			outputFieldsList.add(lhsJoin.getFieldsList().size(), "LCF");
-			outputFieldsList.add("RCF");
-		}
-		
-		FieldsList keepFieldsList = fieldsToKeep(outputFieldsList);
-		Fields keepFields = outputFieldsList.getFields(keepFieldsList);
-		join = new Each( join, keepFields, new Identity());	// outgoing -> "keepField"
-		
-		join = new GroupBy(join, keepFieldsList.getFields()); //eliminate duplicates
-		join = new Every(join, new Count(), keepFieldsList.getFields());
-		
-		PipeFielded pipeFielded = new PipeFielded(join, keepFieldsList);
-		return buildJoin(leftJoinApplied, pipeFielded, subgoalsIterator);
-	}*/
-	
 	public eu.larkc.iris.rules.compiler.PipeFields buildJoin(boolean leftJoinApplied, eu.larkc.iris.rules.compiler.PipeFields lhsJoin, ListIterator<eu.larkc.iris.rules.compiler.LiteralFields> fieldsIterator) {
 		eu.larkc.iris.rules.compiler.PipeFields leftJoin = null;
 		if (!leftJoinApplied) {
@@ -334,49 +176,6 @@ public class CascadingRuleCompiler implements IDistributedRuleCompiler {
 		
 		return buildJoin(leftJoinApplied, join, fieldsIterator);
 		
-		/*
-		FieldsList lhsFieldsList = lhsJoin.getFieldsList();
-		FieldsList rhsFieldsList = Utils.getFieldsFromAtom(fieldsVariablesMapping, atom);
-		AtomsCommonFields atomsCommonFields = new AtomsCommonFields(fieldsVariablesMapping, lhsFieldsList, atom);
-		
-		FieldsList commonLhsFieldsList = atomsCommonFields.getLhsFields();
-		FieldsList commonRhsFieldsList = atomsCommonFields.getRhsFields();
-		
-		Pipe lhsPipe = (leftJoin == null) ? lhsJoin.getPipe() : leftJoin;
-		//compose the output fields list
-		FieldsList outputFieldsList = composeOutputFields(lhsJoin.getFieldsList(), atom);
-
-		Pipe join = null;
-		if (!commonLhsFieldsList.isEmpty()) {
-			//join the previous join's pipe with the pipe for this literal
-			Fields lhsFields = lhsFieldsList.getFields(commonLhsFieldsList);
-			Fields rhsFields = rhsFieldsList.getFields(commonRhsFieldsList);
-			
-			join = new CoGroup(lhsPipe, lhsFields, pipe, rhsFields, new InnerJoin());
-		} else {
-			//this is not effective, joining without common fields, but it has to be done for some unoptimized rules
-			lhsFieldsList.add("LCF");
-			lhsPipe = new Each(lhsPipe, new Insert(new Fields("LCF"), new Integer(1)), lhsFieldsList.getFields());
-			
-			rhsFieldsList.add("RCF");
-			pipe = new Each(pipe, new Insert(new Fields("RCF"), new Integer(1)), rhsFieldsList.getFields());
-
-			join = new CoGroup(lhsPipe, new Fields(lhsFieldsList.size() - 1), pipe, new Fields(rhsFieldsList.size() - 1), new InnerJoin());
-
-			outputFieldsList.add(lhsJoin.getFieldsList().size(), "LCF");
-			outputFieldsList.add("RCF");
-		}
-		
-		FieldsList keepFieldsList = fieldsToKeep(outputFieldsList);
-		Fields keepFields = outputFieldsList.getFields(keepFieldsList);
-		join = new Each( join, keepFields, new Identity());	// outgoing -> "keepField"
-		
-		join = new GroupBy(join, keepFieldsList.getFields()); //eliminate duplicates
-		join = new Every(join, new Count(), keepFieldsList.getFields());
-		
-		PipeFielded pipeFielded = new PipeFielded(join, keepFieldsList);
-		return buildJoin(leftJoinApplied, pipeFielded, fieldsIterator);
-		*/
 	}
 	
 	/**

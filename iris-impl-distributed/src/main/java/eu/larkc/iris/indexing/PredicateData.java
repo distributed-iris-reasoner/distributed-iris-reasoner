@@ -1,5 +1,17 @@
-/**
+/*
+ * Copyright 2010 Softgress - http://www.softgress.com/
  * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package eu.larkc.iris.indexing;
 
@@ -9,14 +21,32 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 
 /**
- * @author valer
+ * Contains the configuration data of a predicate in an predicate indexing enabled environment
+ * 
+ * @author valer.roman@softgress.com
  *
  */
 public class PredicateData {
 
+	/**
+	 * The value of the predicate
+	 */
 	private String value;
+	
+	/**
+	 * The id of the predicate. An incrementing integer
+	 */
 	private Integer id;
+	
+	/**
+	 * The location where the predicate facts are stored
+	 * Is an incrementing integer. some predicates might share the same location because they contain a small number of facts
+	 */
 	private Integer location;
+	
+	/**
+	 * The number of facts for this predicate
+	 */
 	private Long count;
 
 	public PredicateData(String value, Integer id, Integer location, Long count) {
@@ -26,6 +56,12 @@ public class PredicateData {
 		this.count = count;
 	}
 	
+	/**
+	 * Writes the predicate to output stream
+	 * 
+	 * @param fsDataOutputStream output stream
+	 * @throws IOException
+	 */
 	public void write(FSDataOutputStream fsDataOutputStream) throws IOException {
 		fsDataOutputStream.writeUTF(getValue());
 		fsDataOutputStream.writeInt(getId());
@@ -33,6 +69,13 @@ public class PredicateData {
 		fsDataOutputStream.writeLong(getCount());
 	}
 	
+	/**
+	 * Reads a predicate data from an input stream
+	 * 
+	 * @param fsDataInputStream the input stream
+	 * @return the predicate data
+	 * @throws IOException
+	 */
 	public static PredicateData read(FSDataInputStream fsDataInputStream) throws IOException {
 		return new PredicateData(fsDataInputStream.readUTF(), fsDataInputStream.readInt(), 
 				fsDataInputStream.readInt(), fsDataInputStream.readLong());

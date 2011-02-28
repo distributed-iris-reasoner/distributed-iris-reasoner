@@ -17,7 +17,7 @@ package eu.larkc.iris.evaluation;
 
 /**
  * 
- * Maintains information about the evaluation context
+ * Maintains information about the evaluation context (under which context a rule is evaluated, stratum, iteration, rule identifier)
  * For now it stores the iteration number through the set of rules evaluations and the number of rule evaluated in the rules list
  * 
  * @author vroman@softgress.com

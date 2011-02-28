@@ -35,7 +35,10 @@ import cascading.pipe.cogroup.InnerJoin;
 import cascading.pipe.cogroup.LeftJoin;
 
 /**
- * @author valer
+ * Streams resulted from joining other streams
+ * Such a stream has always a cascading pipe next to it.
+ * 
+ * @author valer.roman@softgress.com
  *
  */
 public class PipeFields extends Fields {
@@ -95,6 +98,10 @@ public class PipeFields extends Fields {
 		return new PipeFields(join, this, fields, Math.min(getCount(), fields.getCount()));
 	}
 
+	@SuppressWarnings("rawtypes")
+	/**
+	 * Gets the unique variable fields for this stream
+	 */
 	public PipeFields getUniqueVariableFields() {
 		PipeFields keepFieldsList = new PipeFields();
 		Set<Comparable> fieldTerms = new HashSet<Comparable>();
@@ -116,6 +123,11 @@ public class PipeFields extends Fields {
 		return keepFieldsList;
 	}
 
+	/**
+	 * Returns a new stream where the duplicates founded on this stream were removed
+	 * 
+	 * @return new stream with no duplciates
+	 */
 	public PipeFields eliminateDuplicates() {
 		Pipe join = new GroupBy(getPipe(), getFields()); //eliminate duplicates
 		join = new Every(join, new Count(), getFields());
@@ -124,6 +136,13 @@ public class PipeFields extends Fields {
 		return fields;
 	}
 	
+	/**
+	 * Creates a new stream which only has data that is not already in to storage.
+	 * It only checks the fields of the stream from the parameter {@code headFields}
+	 * 
+	 * @param headFields the fields for which to search if the same values are in the storage
+	 * @return a new stream with only data that is not already in the storage
+	 */
 	public PipeFields eliminateExistingResults(PipeFields headFields) {
 		FieldPairs fieldGroup = getCommonFields(headFields);
 		
@@ -135,6 +154,12 @@ public class PipeFields extends Fields {
 		return new PipeFields(leftJoin, this);
 	}
 
+	/**
+	 * Adds to the stream new fields needed for the head literal
+	 * 
+	 * @param headFields the stream for the head literal
+	 * @return new stream with the new needed fields added
+	 */
 	public PipeFields generateHeadVariablesInStream(PipeFields headFields) {
 		eu.larkc.iris.rules.compiler.Fields inHeadHeadFields = headFields.getCommonFields(this).getLeftFields();
 		eu.larkc.iris.rules.compiler.Fields inBodyHeadFields = headFields.getCommonFields(this).getRightFields();

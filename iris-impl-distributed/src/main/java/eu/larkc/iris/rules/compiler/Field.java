@@ -20,9 +20,12 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.deri.iris.api.terms.IVariable;
 
 /**
- * @author valer
+ * Represents a field in the streams used to do the rule evaluation
+ * 
+ * @author valer.roman@softgress.com
  *
  */
+@SuppressWarnings("rawtypes")
 public class Field {
 
 	private String name;

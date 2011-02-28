@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package eu.larkc.iris.evaluation;
 
 import java.util.List;
@@ -22,6 +21,12 @@ import org.deri.iris.EvaluationException;
 import org.deri.iris.api.basics.IRule;
 import org.deri.iris.evaluation.IEvaluationStrategy;
 
+/**
+ * Factory for creating distributed evaluation strategies
+ * 
+ * @author valer.roman@softgress.com
+ *
+ */
 public interface IDistributedEvaluationStrategyFactory {
 
 	/**

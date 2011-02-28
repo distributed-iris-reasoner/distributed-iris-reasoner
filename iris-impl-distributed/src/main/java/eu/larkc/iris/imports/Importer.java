@@ -1,5 +1,17 @@
-/**
+/*
+ * Copyright 2010 Softgress - http://www.softgress.com/
  * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package eu.larkc.iris.imports;
 
@@ -32,7 +44,10 @@ import eu.larkc.iris.indexing.PredicateCount;
 import eu.larkc.iris.storage.FactsFactory;
 
 /**
- * @author valer
+ * Imports facts from different types of sources.
+ * Current source types are n-triple file and Sesame RDF HTTP/memory repositories
+ * 
+ * @author valer.roman@softgress.com
  *
  */
 public class Importer {
@@ -47,6 +62,12 @@ public class Importer {
 		this.distributedFileSystemManager = new DistributedFileSystemManager(configuration);
 	}
 	
+	/**
+	 * Imports facts into {@code importName} from an RDF storage identified by {@code storageId}
+	 * 
+	 * @param storageId the RDF storage id
+	 * @param importName the name to give to the import
+	 */
 	public void importFromRdf(String storageId, String importName) {
 		Tap source = FactsFactory.getInstance(storageId).getFacts();
 		
@@ -60,14 +81,10 @@ public class Importer {
 
 		Map<String, Tap> sinks = new HashMap<String, Tap>();
 		sinks.put("sink", sink);
-		//sinks.put("sink1", sink1);
 
 		Pipe sourcePipe = new Pipe("source");
 		sourcePipe = new Each(sourcePipe, Fields.ALL, new Identity());
 		Pipe identity = new Pipe("sink", sourcePipe);
-		//identity = new Each(identity, source.getSourceFields(), new Identity(source.getSourceFields()));
-		//Pipe identity1 = new Pipe("sink1", sourcePipe);
-		//identity1 = new Each(identity1, source.getSourceFields(), new Identity(source.getSourceFields()));
 		
 		Flow aFlow = new FlowConnector(configuration.flowProperties).connect(sources, sink, identity);
 		aFlow.complete();
@@ -85,6 +102,12 @@ public class Importer {
 		}
 	}
 
+	/**
+	 * Imports facts into {@code importName} from an n-triple format file located at {@code inputPath}
+	 * 
+	 * @param inputPath the file path
+	 * @param importName the name of the import
+	 */
 	public void importFromFile(String inputPath, String importName) {
 		try {
 			processNTriple(inputPath, importName);
@@ -94,6 +117,9 @@ public class Importer {
 		}
 	}
 	
+	/*
+	 * Does the actual import from a n-triple file
+	 */
 	public void processNTriple(String inPath, String importName) throws IOException {
 		Tap source = new Lfs(new TextLine(), inPath);
 
@@ -118,6 +144,10 @@ public class Importer {
 		}
 	}
 	
+	/*
+	 * perform an indexing of the data based on the RDF predicates
+	 * It groups the data by predicate into different locations 
+	 */
 	private void processIndexing(String importName) throws IOException {
 		//process indexing
 		String predicateGroupsTempPath = distributedFileSystemManager.getPredicateGroupsTempPath(importName);

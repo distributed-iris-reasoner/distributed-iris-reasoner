@@ -13,13 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package eu.larkc.iris.evaluation.bottomup.naive;
 
 import eu.larkc.iris.evaluation.bottomup.IDistributedRuleEvaluator;
 import eu.larkc.iris.evaluation.bottomup.IDistributedRuleEvaluatorFactory;
 
-
+/**
+ * Factory to create distributed naive evaluators
+ * Two types of evaluators are used the single-pass and naive. Single-pass is used for non-recursive rules and naive for recursive stratified rules.
+ * 
+ * @author valer.roman@softgress.com
+ *
+ */
 public class DistributedNaiveEvaluatorFactory implements IDistributedRuleEvaluatorFactory {
 
 	

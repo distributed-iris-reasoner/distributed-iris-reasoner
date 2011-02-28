@@ -23,6 +23,8 @@ import org.deri.iris.storage.IRelation;
 import eu.larkc.iris.evaluation.EvaluationContext;
 
 /**
+ * Represents a compiled rule in a distributed environment
+ * 
  * @author valer.roman@softgress.com
  *
  */

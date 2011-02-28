@@ -29,7 +29,9 @@ import eu.larkc.iris.Configuration;
 
 
 /**
- * @author valer
+ * This object gourps ll the streams for a rule, the head stream and a list of the body streams
+ * 
+ * @author valer.roman@softgress.com
  *
  */
 public class RuleStreams {
@@ -40,6 +42,12 @@ public class RuleStreams {
 	private LiteralFields headStream = null;
 	private List<LiteralFields> bodyStreams = new ArrayList<LiteralFields>();
 	
+	/**
+	 * Identificator class used for fields of iris literal
+	 * 
+	 * @author valer.roman@softgress.com
+	 *
+	 */
 	public class LiteralId {
 		private int index = -1;
 

@@ -13,12 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package eu.larkc.iris.rules.compiler;
 
 import org.deri.iris.EvaluationException;
 import org.deri.iris.api.basics.IRule;
 
+/**
+ * Compiler for the rules
+ * 
+ * @author valer.roman@softgress.com
+ *
+ */
 public interface IDistributedRuleCompiler {
 
 	/**

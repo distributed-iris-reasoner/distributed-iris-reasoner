@@ -20,7 +20,9 @@ import java.util.ArrayList;
 import eu.larkc.iris.rules.compiler.FieldPairs.FieldPair;
 
 /**
- * @author valer
+ * A pair of fields used usually for joining two streams. It associates to a field from the left stream a field on the right stream.
+ * 
+ * @author valer.roman@softgress.com
  *
  */
 public class FieldPairs extends ArrayList<FieldPair> {

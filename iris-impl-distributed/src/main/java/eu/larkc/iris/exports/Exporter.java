@@ -1,5 +1,17 @@
-/**
+/*
+ * Copyright 2010 Softgress - http://www.softgress.com/
  * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package eu.larkc.iris.exports;
 
@@ -38,7 +50,10 @@ import eu.larkc.iris.storage.IRIWritable;
 import eu.larkc.iris.storage.StringTermWritable;
 
 /**
- * @author valer
+ * Used to export the inferred results to different storages.
+ * The current storages are n-triple files and Sesame HTTP and memory repositories
+ *  
+ * @author valer.roman@softgress.com
  *
  */
 public class Exporter {
@@ -53,6 +68,9 @@ public class Exporter {
 		this.distributedFileSystemManager = new DistributedFileSystemManager(configuration);
 	}
 	
+	/*
+	 * Returns the {@code Tap} for the inferences of {@code resultsName}   
+	 */
 	private Tap getSource(String resultsName) {
 		if (!configuration.doPredicateIndexing) {
 			return new Hfs(new Fields(0, 1, 2), distributedFileSystemManager.getInferencesPath() + resultsName, true );
@@ -78,6 +96,12 @@ public class Exporter {
 		return new MultiSourceTap(taps.toArray(new Tap[0]));
 	}
 	
+	/**
+	 * Exports the inferences of {@code resultsName} to a RDF storage identified by {@code storageId}
+	 * 
+	 * @param storageId the storage id
+	 * @param resultsName the results name
+	 */
 	public void exportToRdf(String storageId, String resultsName) {
 		Tap source= getSource(resultsName); //new Hfs(new Fields(0, 1, 2), project + "/inferences/" + resultsName, true );
 		
@@ -101,11 +125,20 @@ public class Exporter {
 		aFlow.complete();
 	}
 
+	/**
+	 * Exports the inferences of {@code resultsName} to a n-triple file format stored at {@code outputPath}
+	 * 
+	 * @param outPath the file path
+	 * @param resultsName the results name
+	 */
 	public void exportToFile(String outPath, String resultsName) {
 		processNTriple(outPath, resultsName);
 	}
 	
-	public void processNTriple(String outPath, String resultsName) {
+	/*
+	 * Does the actual export to n-triple file
+	 */
+	protected void processNTriple(String outPath, String resultsName) {
 		File file = new File(outPath);
 		BufferedWriter bw = null;
 		try {

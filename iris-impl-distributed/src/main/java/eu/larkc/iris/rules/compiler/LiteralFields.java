@@ -44,6 +44,8 @@ import eu.larkc.iris.storage.IRIWritable;
 import eu.larkc.iris.storage.WritableFactory;
 
 /**
+ * Stream containing only literal fields
+ * 
  * @author valer
  *
  */
@@ -148,6 +150,9 @@ public class LiteralFields extends eu.larkc.iris.rules.compiler.PipeFields {
 		return id;
 	}
 	
+	/*
+	 * Gets the record count for a predicate from indexed predicate storage
+	 */
 	private Long calculateCount(Configuration configuration) {
 		DistributedFileSystemManager dfsm = new DistributedFileSystemManager(configuration);
 		IPredicate predicate = this.getPredicate();
@@ -205,6 +210,7 @@ public class LiteralFields extends eu.larkc.iris.rules.compiler.PipeFields {
 	 * @param tuple
 	 * @return
 	 */
+	@SuppressWarnings("rawtypes")
 	protected Pipe filterConstants(Pipe attachTo) {
 		Map<String, WritableComparable> constantTerms = new HashMap<String, WritableComparable>();
 
@@ -230,6 +236,11 @@ public class LiteralFields extends eu.larkc.iris.rules.compiler.PipeFields {
 		return attachTo;
 	}
 
+	/**
+	 * Get the predicate literal for this stream.
+	 * 
+	 * @return the predicate or null if none found
+	 */
 	public IPredicate getPredicate() {
 		for (Field field : this) {
 			if (!(field instanceof LiteralField)) {

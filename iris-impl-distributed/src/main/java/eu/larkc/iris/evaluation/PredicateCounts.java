@@ -1,19 +1,27 @@
-/**
+/*
+ * Copyright 2010 Softgress - http://www.softgress.com/
  * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package eu.larkc.iris.evaluation;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 
 import org.apache.hadoop.mapred.JobConf;
 import org.deri.iris.api.basics.IAtom;
-import org.deri.iris.api.basics.ILiteral;
 import org.deri.iris.api.basics.IPredicate;
-import org.deri.iris.api.basics.IRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,8 +39,8 @@ import cascading.tuple.TupleEntryIterator;
 import eu.larkc.iris.Configuration;
 
 /**
- * @author valer
- *
+ * @author valer.roman@softgress.com
+ * @deprecated
  */
 public class PredicateCounts {
 
@@ -41,32 +49,18 @@ public class PredicateCounts {
 	private static Map<String, PredicateCounts> predicateCounts = new HashMap<String, PredicateCounts>();
 	
 	private Configuration mConfiguration;
-	private String project;
-	private List<IRule> mRules;
 	private Map<IPredicate, Long> counts = new HashMap<IPredicate, Long>();
 	
 	public static PredicateCounts getInstance(Configuration configuration) {
 		if (predicateCounts.containsKey(configuration.project)) {
 			return predicateCounts.get(configuration.project);
 		}
-		predicateCounts.put(configuration.project, new PredicateCounts(configuration, configuration.project));
+		predicateCounts.put(configuration.project, new PredicateCounts(configuration));
 		return predicateCounts.get(configuration.project);
 	}
 
-	private PredicateCounts(Configuration configuration, String project) {
+	private PredicateCounts(Configuration configuration) {
 		this.mConfiguration = configuration;
-		this.project = project;
-	}
-	
-	private void compute() {
-		for (IRule rule : mRules) {
-			ListIterator<ILiteral> iterator = rule.getBody().listIterator();
-			while (iterator.hasNext()) {
-				ILiteral literal = iterator.next();
-				//Tap facts = mFactsFactory.getFacts(literal.getAtom());
-			}
-		}
-
 	}
 	
 	private void compute(IAtom atom) {

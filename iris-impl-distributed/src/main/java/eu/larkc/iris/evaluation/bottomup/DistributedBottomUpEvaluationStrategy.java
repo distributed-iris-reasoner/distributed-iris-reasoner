@@ -1,4 +1,5 @@
 /*
+ * Copyright 2010 Softgress - http://www.softgress.com/
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +17,17 @@ package eu.larkc.iris.evaluation.bottomup;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 
 import org.deri.iris.EvaluationException;
 import org.deri.iris.ProgramNotStratifiedException;
 import org.deri.iris.RuleUnsafeException;
-import org.deri.iris.api.basics.ILiteral;
 import org.deri.iris.api.basics.IQuery;
 import org.deri.iris.api.basics.IRule;
 import org.deri.iris.api.terms.IVariable;
 import org.deri.iris.evaluation.IEvaluationStrategy;
 import org.deri.iris.evaluation.stratifiedbottomup.EvaluationUtilities;
-import org.deri.iris.rules.IRuleStratifier;
 import org.deri.iris.storage.IRelation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import eu.larkc.iris.evaluation.PredicateCounts;
 import eu.larkc.iris.rules.IRecursiveRulePreProcessor;
 import eu.larkc.iris.rules.NonOptimizingRecursiveRulePreProcessor;
 import eu.larkc.iris.rules.compiler.CascadingRuleCompiler;
@@ -40,6 +35,7 @@ import eu.larkc.iris.rules.compiler.IDistributedCompiledRule;
 import eu.larkc.iris.rules.compiler.IDistributedRuleCompiler;
 
 /**
+ * Iris bottom up evaluation strategy adapter for our distributed environment
  * 
  * @History 14.09.2010 fisf, Creation
  * @author Florian Fischer
@@ -47,7 +43,7 @@ import eu.larkc.iris.rules.compiler.IDistributedRuleCompiler;
 public class DistributedBottomUpEvaluationStrategy implements
 		IEvaluationStrategy {
 
-	private static final Logger logger = LoggerFactory.getLogger(DistributedBottomUpEvaluationStrategy.class);
+	//private static final Logger logger = LoggerFactory.getLogger(DistributedBottomUpEvaluationStrategy.class);
 	
 	/** 
 	 * @param configuration
@@ -133,18 +129,6 @@ public class DistributedBottomUpEvaluationStrategy implements
 		Integer stratumNumber = 1;
 		for (List<IRule> stratum : stratifiedRules) {
 			
-			/*
-			for (IRule rule : stratum) {
-				ListIterator<ILiteral> iterator = rule.getBody().listIterator();
-				while (iterator.hasNext()) {
-					ILiteral literal = iterator.next();
-					//TODO: fisf, attach predicatecount to each literal so that it can be fed to the ruleoptimizer.
-					//Should then be processed in applyRuleOptimizers similarly to ReOrderLiteralsOptimiser
-					//Long count = predicateCounts.getCount(literal.getAtom());
-				}
-			}
-			*/
-			
 			//reorder rules within stratum
 			List<IRule> reorderedRules = utils.reOrderRules(stratum);		
 			//TODO(fisf): apply optimizer for outer joins
@@ -160,46 +144,6 @@ public class DistributedBottomUpEvaluationStrategy implements
 			
 			stratumNumber++;
 		}
-	}
-	
-	protected void loadDataHFS(List<IRule> rules) {
-		//extract all predicates, used to load all data into HFS
-		/*
-		Set<IPredicate> predicates = new HashSet<IPredicate>();
-		for (IRule rule : optimisedRules) {
-			predicates.add(rule.getHead().get(0).getAtom().getPredicate());
-			for (ILiteral literal : rule.getBody()) {
-				IPredicate predicate = literal.getAtom().getPredicate();
-				predicates.add(predicate);
-			}
-		}
-		FactsTap source = mFacts.getFacts(predicates.toArray(new IPredicate[0]));
-		//FactsTap source = mFacts.getFacts(optimisedRules.get(0).getHead().get(0).getAtom());
-		
-		String output = mConfiguration.HADOOP_HFS_PATH + "/" + mFacts.getStorageId();
-		Tap sink = new Hfs(source.getSourceFields(), output , true );
-
-		//String output1 = mConfiguration.HADOOP_HFS_PATH + "/" + mFacts.getStorageId() + "1";
-		//Tap sink1 = new Hfs( source.getSourceFields(), output1 , true );
-
-		Map<String, Tap> sources = new HashMap<String, Tap>();
-		sources.put("source", source);
-
-		Map<String, Tap> sinks = new HashMap<String, Tap>();
-		sinks.put("sink", sink);
-		//sinks.put("sink1", sink1);
-
-		Pipe sourcePipe = new Pipe("source");
-		sourcePipe = new Each(sourcePipe, source.getSourceFields(), new Identity(source.getSourceFields()));
-		Pipe identity = new Pipe("sink", sourcePipe);
-		//identity = new Each(identity, source.getSourceFields(), new Identity(source.getSourceFields()));
-		//Pipe identity1 = new Pipe("sink1", sourcePipe);
-		//identity1 = new Each(identity1, source.getSourceFields(), new Identity(source.getSourceFields()));
-		
-		//Flow aFlow = new FlowConnector(mConfiguration.flowProperties).connect(sources, sink, identity);
-		Flow aFlow = new FlowConnector(mConfiguration.flowProperties).connect(sources, sinks, identity);
-		aFlow.complete();
-		*/
 	}
 	
 	protected EvaluationUtilities utils;

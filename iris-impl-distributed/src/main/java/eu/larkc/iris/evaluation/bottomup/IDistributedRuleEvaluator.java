@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package eu.larkc.iris.evaluation.bottomup;
 
 import java.util.List;
@@ -22,6 +21,12 @@ import org.deri.iris.EvaluationException;
 
 import eu.larkc.iris.rules.compiler.IDistributedCompiledRule;
 
+/**
+ * A Rule evaluator for the distributed environment
+ * 
+ * @author valer.rpman@softgress.com
+ *
+ */
 public interface IDistributedRuleEvaluator {
 
 	/**

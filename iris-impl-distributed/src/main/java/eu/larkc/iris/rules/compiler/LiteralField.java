@@ -24,10 +24,18 @@ import org.deri.iris.api.terms.concrete.IIri;
 
 import eu.larkc.iris.rules.compiler.LiteralFields.TermId;
 
+/**
+ * Field used for streams created from Iris literals.
+ * Their sources is the literal
+ */
 public class LiteralField extends Field {
 
+	/**
+	 * The id of the field
+	 */
 	TermId id;
 	
+	@SuppressWarnings("rawtypes")
 	public LiteralField(TermId termId, Comparable source) {
 		super(source);
 		this.id = termId;

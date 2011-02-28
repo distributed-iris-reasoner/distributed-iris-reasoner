@@ -45,16 +45,29 @@ public class ConstantFilter extends BaseOperation implements Filter {
 	private static final long serialVersionUID = -2355263716242780692L;
 
 	/**
-	 * @param expectedConstants Constants in a subgoal.
+	 * Filter by several fields
+	 * 
+	 * @param expectedConstants map of fields and their filtering values
 	 */
 	public ConstantFilter(Map<String, WritableComparable> expectedConstants) {
 		this.mExpectedconstants = expectedConstants;
 	}
 
+	/**
+	 * Filter the first position in the stream by this value
+	 * 
+	 * @param value an {@link IRIWritable} to use as filter 
+	 */
 	public ConstantFilter(IRIWritable value) {
 		this(0, value);
 	}
 	
+	/**
+	 * Filter the field in {@code position} by this {@code value}
+	 * 
+	 * @param position the filtering position in the stream
+	 * @param value an {@code IRIWritable} to use as filter
+	 */
 	public ConstantFilter(int position, IRIWritable value) {
 		Set<eu.larkc.iris.storage.WritableComparable> set = new HashSet<eu.larkc.iris.storage.WritableComparable>();
 		set.add(value);
@@ -62,6 +75,12 @@ public class ConstantFilter extends BaseOperation implements Filter {
 		this.values = set;
 	}
 
+	/**
+	 * Filter the field at {@code position} by the {@code values}. Use an OR operator for filter.
+	 *  
+	 * @param position the filtering position in the stream
+	 * @param values a set of {@code eu.larkc.iris.storage.WritableComparable} used to filter. An OR operator is used
+	 */
 	public ConstantFilter(int position, Set<eu.larkc.iris.storage.WritableComparable> values) {
 		this.position = position;
 		this.values = values;

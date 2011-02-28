@@ -1,5 +1,17 @@
-/**
+/*
+ * Copyright 2010 Softgress - http://www.softgress.com/
  * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package eu.larkc.iris;
 
@@ -51,6 +63,7 @@ import eu.larkc.iris.indexing.PredicateData;
  * @author valer
  *
  */
+@SuppressWarnings("deprecation")
 public class Main extends Configured implements Tool {
 
 	private static final Logger logger = LoggerFactory.getLogger(Main.class);
@@ -244,7 +257,6 @@ public class Main extends Configured implements Tool {
 	    return 0; 		
 	}
 	
-	@SuppressWarnings("deprecation")
 	@Override
 	public int run(String[] args) throws Exception {
 		GenericOptionsParser gop = new GenericOptionsParser(getConf(), new org.apache.commons.cli.Options(), args);
@@ -355,6 +367,7 @@ public class Main extends Configured implements Tool {
 		IEvaluationStrategy strategy = configuration.evaluationStrategyFactory
 			.createEvaluator(rules, configuration); 
 		
+		@SuppressWarnings("unused")
 		IRelation relation = strategy.evaluateQuery(query, outputVariables);		
 	}
 	

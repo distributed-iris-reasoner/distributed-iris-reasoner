@@ -107,6 +107,7 @@ public class CascadingCompiledRule implements IDistributedCompiledRule {
 	}
 
 
+	@SuppressWarnings("unused")
 	private final eu.larkc.iris.Configuration mConfiguration;
 
 	private IRule rule;

@@ -22,10 +22,11 @@ import org.deri.iris.api.basics.IRule;
 import org.deri.iris.evaluation.IEvaluationStrategy;
 
 import eu.larkc.iris.evaluation.IDistributedEvaluationStrategyFactory;
-import eu.larkc.iris.storage.FactsFactory;
 
 
 /**
+ * Factory for creating distributed bottom up evaluation strategy
+ * 
  * @history 15.09.2010, fisf, creation
  * @author Florian Fischer
  */

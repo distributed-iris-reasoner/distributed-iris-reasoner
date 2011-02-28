@@ -1,6 +1,3 @@
-/**
- * 
- */
 /*
  * Copyright 2010 Softgress - http://www.softgress.com/
  * 
@@ -16,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package eu.larkc.iris.rules.compiler;
 
 import java.io.IOException;
@@ -48,6 +44,10 @@ import eu.larkc.iris.indexing.DistributedFileSystemManager;
 import eu.larkc.iris.indexing.PredicateCount;
 
 /**
+ * The pipes for a rule are evaluated using this flow assembly.
+ * The evaluation consist in setting the right sources and taps for the pipes.
+ * A fllow is created and completed to get the inferences.
+ * 
  * @author valer.roman@softgress.com
  *
  */
@@ -73,6 +73,9 @@ public class FlowAssembly {
 		this.pipe = pipe;
 	}
 	
+	/*
+	 * creates a pipe for predicate counts
+	 */
 	private void setupPredicateCounts(Pipe pipe, Map<String, Tap> sinks, List<Pipe> pipes) throws IOException {
 		String predicateGroupsTempPath = distributedFileSystemManager.getPredicateGroupsTempPath(mConfiguration.resultsName);
 
@@ -88,6 +91,10 @@ public class FlowAssembly {
 		pipes.add(predicatesPipe);
 	}
 	
+	/*
+	 * creates and processes a flow identified by {@code flowIdentificator}
+	 * results are stored at {@code output} under the result named {@code resultName}
+	 */
 	private boolean processFlow(String resultName, String flowIdentificator, String output) throws IOException {
 		boolean hasNewInferences = false;
 		String flowName = resultName + flowIdentificator;
@@ -156,6 +163,12 @@ public class FlowAssembly {
 		return hasNewInferences;
 	}
 	
+	/**
+	 * Evaluates this flow assembly
+	 * 
+	 * @param evaluationContext the evaluation context, stratum, iteration, rule number
+	 * @return true if new inferences were stored, false otherwise
+	 */
 	public boolean evaluate(EvaluationContext evaluationContext) {
 		this.distributedFileSystemManager = new DistributedFileSystemManager(mConfiguration);
 
@@ -175,6 +188,12 @@ public class FlowAssembly {
 		}
 	}
 	
+	/**
+	 * Opens the sink the flow. Only valid after evaluation was completed
+	 * 
+	 * @return a tuple entry iterator
+	 * @throws IOException
+	 */
 	public TupleEntryIterator openSink() throws IOException {
 		if (flow == null) {
 			return null;
@@ -184,6 +203,9 @@ public class FlowAssembly {
 		//return hfs.openForRead(mConfiguration.jobConf);
 	}
 	
+	/*
+	 * Put into the sources the taps for and predicate indexed storage
+	 */
 	private void prepareIndexedSource(SequenceFile sourceScheme, Map<String, List<Tap>> sources, LiteralFields fields) {
 		IPredicate predicate = fields.getPredicate();
 		String literalId = fields.getId().toString();
@@ -199,6 +221,9 @@ public class FlowAssembly {
 		}
 	}
 	
+	/*
+	 * Prepares the source taps
+	 */
 	private Map<String, Tap> prepareSourceTaps() {
 		SequenceFile sourceScheme = new SequenceFile(fields);
 		Map<String, List<Tap>> sources = new HashMap<String, List<Tap>>();
@@ -224,6 +249,9 @@ public class FlowAssembly {
 		return sourceTaps;		
 	}
 	
+	/*
+	 * Returns the tap for inferences
+	 */
 	private Map<String, Tap> getInferencesTap(Scheme scheme) {
 		Map<String, Tap> inferencesTap = new HashMap<String, Tap>();
 		try {
@@ -254,6 +282,9 @@ public class FlowAssembly {
 		return inferencesTap;
 	}
 
+	/*
+	 * Delete the folder created for a result
+	 */
 	private void deleteResults(Path resultsPath) {
 		try {
 			//delete inference folder if no result found, to minimize number of input splits for next evaluation

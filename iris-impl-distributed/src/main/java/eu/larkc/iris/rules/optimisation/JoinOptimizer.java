@@ -1,5 +1,17 @@
-/**
+/*
+ * Copyright 2010 Softgress - http://www.softgress.com/
  * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package eu.larkc.iris.rules.optimisation;
 
@@ -21,7 +33,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author valer
+ * It does a re-ordering of the rule body literals and find the best way to join the literals.
+ * The main optimization is avoiding the cartesian joins.
+ * The literals with the more common variables are set first in the body.
+ * TODO for predicate indexing environment set to the left of the body the literals with smaller amount of records, 
+ * to filter the date from the first joins. This should not be done by breaking the first two optimizations.
+ * 
+ * @author valer.roman@softgress
  *
  */
 public class JoinOptimizer implements IRuleOptimiser {
@@ -156,6 +174,8 @@ public class JoinOptimizer implements IRuleOptimiser {
 		List<Literals> resultLiterals = findPath(literals.size(), null, new ArrayList<ILiteral>());
 		if (!resultLiterals.isEmpty()) {
 			logger.info("results : " + resultLiterals);
+			//TODO pick from the to score rules the one having on the left side the predicates with 
+			//fewer counts to filter most of the data from the beginning of the rule evaluation
 			aRule = BasicFactory.getInstance().createRule(rule.getHead(), resultLiterals.get(0));
 		}
 

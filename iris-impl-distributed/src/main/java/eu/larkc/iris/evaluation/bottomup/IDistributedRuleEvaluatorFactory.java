@@ -13,10 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package eu.larkc.iris.evaluation.bottomup;
 
-
+/**
+ * Factory for creating distributed rule evaluators
+ * 
+ * @author valer.roman@softgress.com
+ *
+ */
 public interface IDistributedRuleEvaluatorFactory {
 
 	public final static int SINGLEPASSEVALUATOR = 0;
