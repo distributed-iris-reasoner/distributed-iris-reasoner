@@ -24,14 +24,9 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.RecordReader;
-import org.apache.hadoop.mapred.Reporter;
 import org.deri.iris.api.basics.IAtom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import eu.larkc.iris.storage.rdf.RdfFactsConfiguration;
-import eu.larkc.iris.storage.rdf.RdfFactsRecordReader;
 
 
 public abstract class FactsInputFormat<T extends AtomRecord> implements

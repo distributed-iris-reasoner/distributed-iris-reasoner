@@ -174,7 +174,7 @@ public class FlowAssembly {
 
 		String flowIdentificator = "_" + evaluationContext.getStratumNumber() + "_" + evaluationContext.getIterationNumber() + "_" + evaluationContext.getRuleNumber();
 		String resultName = mConfiguration.resultsName != null ? mConfiguration.resultsName : "inference";
-		if (ruleStreams.getHeadStream().getPredicate() != null) {
+		if (ruleStreams.getHeadStream().getPredicate() != null || !mConfiguration.doPredicateIndexing) {
 			path = distributedFileSystemManager.getInferencesPath(ruleStreams.getHeadStream(), resultName, flowIdentificator);
 		} else {
 			path = distributedFileSystemManager.getTempInferencesPath(resultName, flowIdentificator);

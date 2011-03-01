@@ -270,6 +270,8 @@ public class Main extends Configured implements Tool {
 		defaultConfiguration.jobConf = setupJob(hadoopConf);
 		defaultConfiguration.project = project;
 		
+		logger.info("predicate indexing is " + (defaultConfiguration.doPredicateIndexing ? "ON" : "OFF"));
+		
 		if (rdfImporter) {
 			return doRdfImport(defaultConfiguration);
 		} else if (ntripleImporter) {
