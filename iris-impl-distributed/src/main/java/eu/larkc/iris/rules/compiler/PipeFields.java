@@ -144,6 +144,11 @@ public class PipeFields extends Fields {
 	 * @return a new stream with only data that is not already in the storage
 	 */
 	public PipeFields eliminateExistingResults(PipeFields headFields) {
+		//TODO we must check for predicate indexing if the predicates head is in the indexing
+		//if it is not then no need to eliminate old results becasue there is none
+		//only applies to predicate indexing
+		//remember also to remove the source from flow processing for the head's literal
+		
 		FieldPairs fieldGroup = getCommonFields(headFields);
 		
 		Pipe leftJoin = new CoGroup(getPipe(), fieldGroup.getLeftFields().getFields(), headFields.getPipe(), fieldGroup.getRightFields().getFields(), new LeftJoin());
