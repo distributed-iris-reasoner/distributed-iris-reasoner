@@ -39,7 +39,7 @@ public class RecursiveRuleTest extends CascadingTest {
 	private static final Logger logger = LoggerFactory.getLogger(RecursiveRuleTest.class);
 
 	public RecursiveRuleTest(String name) {
-		super(name, true);
+		super(name, false);
 	}
 	
 	@Override

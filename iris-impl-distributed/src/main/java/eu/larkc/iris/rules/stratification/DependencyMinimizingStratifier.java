@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.larkc.iris.Configuration;
-import eu.larkc.iris.storage.FactsFactory;
 
 /**
  * @author Florian Fischer, fisf, 14.01.2011

@@ -39,7 +39,7 @@ public class CascadingRuleCompilerTest extends CascadingTest {
 	private static final Logger logger = LoggerFactory.getLogger(CascadingRuleCompilerTest.class);
 
 	public CascadingRuleCompilerTest(String name) {
-		super(name, true);
+		super(name, false);
 	}
 	
 	@Override

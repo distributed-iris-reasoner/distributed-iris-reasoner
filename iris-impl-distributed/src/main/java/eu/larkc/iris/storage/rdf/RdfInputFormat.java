@@ -24,8 +24,6 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
 import org.ontoware.rdf2go.model.ModelSet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import eu.larkc.iris.storage.AtomRecord;
 import eu.larkc.iris.storage.FactsConfigurationFactory;
@@ -34,8 +32,6 @@ import eu.larkc.iris.storage.FactsInputSplit;
 
 public class RdfInputFormat<T extends AtomRecord> extends FactsInputFormat<T> {
 
-	private static final Logger logger = LoggerFactory.getLogger(RdfInputFormat.class);
-	
 	@Override
 	public long getTotalSize(JobConf jobConf) {
 		RdfFactsConfiguration rdfFactsConfiguration = (RdfFactsConfiguration) FactsConfigurationFactory.getFactsConfiguration(jobConf);

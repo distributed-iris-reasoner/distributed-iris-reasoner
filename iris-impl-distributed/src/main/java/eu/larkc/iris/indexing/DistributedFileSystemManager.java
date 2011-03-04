@@ -73,11 +73,10 @@ public class DistributedFileSystemManager {
 			try {
 				while (true) {
 					PredicateData predicateData = PredicateData.read(predicatesConfigInputStream);
-					logger.info("read predicate data : " + predicateData);
 					aPredicatesConfig.add(predicateData);
 				}
 			} catch (EOFException e) {
-				logger.info("eof exception no more data");
+				logger.debug("eof exception no more data");
 			}
 			predicatesConfigInputStream.close();
 			this.predicatesConfig = aPredicatesConfig;
@@ -104,7 +103,7 @@ public class DistributedFileSystemManager {
 	public String getFactsPath() {
 		return configuration.project + "/" + FACTS_FOLDER + "/";
 	}
-
+	
 	/**
 	 * Returns the facts path for the predicate of a {@code LiteralFields}
 	 * 
@@ -114,6 +113,10 @@ public class DistributedFileSystemManager {
 	public String getFactsPath(LiteralFields fields) {
 		IPredicate predicate = fields.getPredicate();
 		PredicateData predicateData = getPredicateData(new IRIWritable(predicate));
+		if (predicateData == null) {
+			logger.error("Try to load a predicate " + predicate + " which does not exis in he indexed storage !");
+			throw new RuntimeException("Try to load a predicate " + predicate + " which does not exis in he indexed storage !");
+		}
 		return configuration.project + "/" + FACTS_FOLDER + "/" + predicateData.getLocation().toString() + "/";
 	}
 

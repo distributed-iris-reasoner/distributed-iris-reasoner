@@ -27,8 +27,6 @@ import org.deri.iris.api.terms.IVariable;
 import org.deri.iris.evaluation.IEvaluationStrategy;
 import org.deri.iris.storage.IRelation;
 
-import eu.larkc.iris.evaluation.bottomup.DistributedBottomUpEvaluationStrategyFactory;
-import eu.larkc.iris.evaluation.bottomup.naive.DistributedNaiveEvaluatorFactory;
 import eu.larkc.iris.storage.FactsFactory;
 
 /**

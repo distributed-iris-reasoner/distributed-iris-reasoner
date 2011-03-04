@@ -42,6 +42,7 @@ public class RdfRecord extends AtomRecord {
 		super(tuple);
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public void write(FactsStorage storage) {
 		RdfStorage rdfStorage = (RdfStorage) storage;

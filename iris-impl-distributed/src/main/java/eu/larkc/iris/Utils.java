@@ -23,16 +23,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.deri.iris.api.basics.IAtom;
-import org.deri.iris.api.basics.ITuple;
-import org.deri.iris.api.terms.ITerm;
-import org.deri.iris.api.terms.IVariable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
-import cascading.operation.Debug;
 import cascading.operation.aggregator.Count;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
@@ -50,7 +45,6 @@ import eu.larkc.iris.evaluation.ConstantFilter;
 import eu.larkc.iris.indexing.DistributedFileSystemManager;
 import eu.larkc.iris.indexing.PredicateCount;
 import eu.larkc.iris.indexing.PredicateData;
-import eu.larkc.iris.storage.FieldsVariablesMapping;
 import eu.larkc.iris.storage.IRIWritable;
 import eu.larkc.iris.storage.WritableComparable;
 
@@ -64,34 +58,6 @@ public class Utils {
 
 	private static final Logger logger = LoggerFactory.getLogger(Utils.class);
 	
-	public static Fields getFieldsForAtom(FieldsVariablesMapping fieldsVariablesMapping, IAtom atom) {
-		ITuple tuple = atom.getTuple();
-		Fields sourceFields = new Fields();
-		if (fieldsVariablesMapping != null) {
-			sourceFields = sourceFields.append(new Fields(fieldsVariablesMapping.getField(atom, atom.getPredicate())));
-		} else {
-			sourceFields = sourceFields.append(new Fields(atom.getPredicate().getPredicateSymbol()));
-		}
-		for (int i = 0; i < tuple.size(); i++) {
-			ITerm term = tuple.get(i);
-			String field = null;
-			if (fieldsVariablesMapping != null) {
-				field = fieldsVariablesMapping.getField(atom, term);
-			} else {
-				//when no field variable mapping is not give (normally this should not happen in real distributed iris usage)
-				if (term instanceof IVariable) {
-					field = ((IVariable) term).getValue();
-				} else {
-					field ="CNST";
-				}
-			}
-			// TODO check which types can the value have. also decide what field
-			// name should we give for constants
-			sourceFields = sourceFields.append(new Fields(field));
-		}
-		return sourceFields;
-	}
-
 	public static Pipe buildPredicateCountPipe(Pipe previousPipe) {
 		Pipe predicatesPipe = null;
 		if (previousPipe != null) {
@@ -101,7 +67,6 @@ public class Utils {
 		}
 		predicatesPipe = new GroupBy(predicatesPipe, new Fields(0)); //group by predicates
 		predicatesPipe = new Every(predicatesPipe, new Count(new Fields("count")), new Fields(0, "count"));
-		predicatesPipe = new Each(predicatesPipe, new Debug(true));
 		
 		return predicatesPipe;
 	}

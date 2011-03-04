@@ -33,7 +33,6 @@ import cascading.tap.TapException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import eu.larkc.iris.Utils;
 
 /**
  * Scheme used with a facts tap the source fields are the variable names of the
@@ -81,11 +80,11 @@ public class FactsScheme extends Scheme {
 		setSourceFields(sourceFields);
 	}
 	
-	public FactsScheme(String storageId, FieldsVariablesMapping fieldsVariablesMapping, IAtom atom) {
+	public FactsScheme(String storageId, IAtom atom) {
 		this(storageId);
 		this.atom = atom;
 
-		setSourceFields(Utils.getFieldsForAtom(fieldsVariablesMapping, atom));
+		setSourceFields(new Fields(0, 1, 2));
 		//setSinkFields(sourceFields); // TODO the sink fields I guess will be the
 										// variables of the head of the rule
 	}
@@ -160,6 +159,7 @@ public class FactsScheme extends Scheme {
 		return tuple;
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public void sink(TupleEntry tupleEntry, OutputCollector outputCollector)
 			throws IOException {

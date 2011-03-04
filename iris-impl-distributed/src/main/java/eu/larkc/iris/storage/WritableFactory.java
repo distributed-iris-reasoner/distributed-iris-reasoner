@@ -27,6 +27,7 @@ import org.deri.iris.api.terms.concrete.IIri;
  */
 public class WritableFactory {
 
+	@SuppressWarnings("rawtypes")
 	public static WritableComparable fromTerm(ITerm term) {
 		if (term instanceof IIri) {
 			return new IRIWritable((IIri) term);
@@ -36,6 +37,7 @@ public class WritableFactory {
 		return null;
 	}
 
+	@SuppressWarnings("rawtypes")
 	public static WritableComparable fromPredicate(IPredicate predicate) {
 		return new IRIWritable(predicate);
 	}

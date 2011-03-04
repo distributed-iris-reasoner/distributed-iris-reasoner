@@ -18,8 +18,6 @@ package eu.larkc.iris.storage;
 
 import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputFormat;
@@ -27,17 +25,14 @@ import org.apache.hadoop.mapred.RecordWriter;
 
 
 /**
- * A OutputFormat that sends the reduce output to a SQL table.
+ * A OutputFormat that sends the reduce output to a facts storage.
  * <p/>
  * {@link FactsOutputFormat} accepts &lt;key,value&gt; pairs, where key has a
- * type extending DBWritable. Returned {@link RecordWriter} writes <b>only the
- * key</b> to the database with a batch SQL query.
+ * type extending AtomRecord. Returned {@link RecordWriter} writes <b>only the
+ * key</b> to the facts storage.
  */
 public abstract class FactsOutputFormat<K extends AtomRecord, V> implements
 		OutputFormat<K, V> {
-	private static final Log LOG = LogFactory.getLog(FactsOutputFormat.class);
-
-
 	/** {@inheritDoc} */
 	public void checkOutputSpecs(FileSystem filesystem, JobConf job)
 			throws IOException {

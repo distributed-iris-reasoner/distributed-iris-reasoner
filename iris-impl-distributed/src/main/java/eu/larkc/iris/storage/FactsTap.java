@@ -49,11 +49,8 @@ public class FactsTap extends Tap {
 	private IAtom atom = null;
 	private String storageId;
 	
-	private FactsScheme factsScheme = null;
-	
 	private FactsTap(FactsScheme scheme) {
 		super(scheme);
-		factsScheme = scheme;
 	}
 
 	FactsTap(String factsConfigurationClass, String storageId, IPredicate... predicates) {
@@ -63,8 +60,8 @@ public class FactsTap extends Tap {
 		this.storageId = storageId;
 	}
 
-	FactsTap(String factsConfigurationClass, String storageId, FieldsVariablesMapping fieldsVariablesMapping, IAtom atom) {
-		this(new FactsScheme(storageId, fieldsVariablesMapping, atom));
+	FactsTap(String factsConfigurationClass, String storageId, IAtom atom) {
+		this(new FactsScheme(storageId, atom));
 		this.factsConfigurationClass = factsConfigurationClass;
 		this.atom = atom;
 		this.storageId = storageId;

@@ -3,7 +3,6 @@
  */
 package eu.larkc.iris.rules.stratification;
 
-import java.awt.HeadlessException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,12 +13,8 @@ import org.deri.iris.api.basics.ITuple;
 import org.deri.iris.api.factory.IBasicFactory;
 import org.deri.iris.api.factory.ITermFactory;
 import org.deri.iris.api.terms.ITerm;
-import org.deri.iris.basics.Rule;
-import org.deri.iris.compiler.Parser;
 import org.deri.iris.compiler.ParserException;
 import org.deri.iris.factory.Factory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Florian Fischer, fisf
@@ -27,8 +22,6 @@ import org.slf4j.LoggerFactory;
 public class RdfsOptimizer implements IPostStratificationOptimization,
 		IPreStratificationOptimization {
 
-	private static final Logger logger = LoggerFactory.getLogger(RdfsOptimizer.class);
-	
 	/**
 	 * Factory for rule elements
 	 */

@@ -174,10 +174,9 @@ public class RdfFactsTapTest extends TestCase {
 	}
 
 	public void testSink() throws IOException {
-		IPredicate predicate = BasicFactory.getInstance().createPredicate("name", 2);
-		ITuple tuple = BasicFactory.getInstance().createTuple(TermFactory.getInstance().createVariable("X"), 
-				TermFactory.getInstance().createVariable("Y"));
-		IAtom atom = BasicFactory.getInstance().createAtom(predicate, tuple);
+		//IPredicate predicate = BasicFactory.getInstance().createPredicate("name", 2);
+		//ITuple tuple = BasicFactory.getInstance().createTuple(TermFactory.getInstance().createVariable("X"), TermFactory.getInstance().createVariable("Y"));
+		//IAtom atom = BasicFactory.getInstance().createAtom(predicate, tuple);
 		
 		//FactsFactory humansFactsFactory = FactsFactory.getInstance("humans");
 		//FactsTap nameFactsTap = humansFactsFactory.getFacts(atom);

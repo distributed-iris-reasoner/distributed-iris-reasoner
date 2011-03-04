@@ -34,7 +34,6 @@ import org.openrdf.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cascading.tuple.Tuple;
 import eu.larkc.iris.storage.AtomRecord;
 import eu.larkc.iris.storage.FactsConfiguration;
 
@@ -156,11 +155,13 @@ public class RdfFactsConfiguration extends FactsConfiguration {
 		return RdfRecord.class;
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public Class<? extends InputFormat> getInputFormat() {
 		return RdfInputFormat.class;
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public Class<? extends OutputFormat> getOutputFormat() {
 		return RdfOutputFormat.class;

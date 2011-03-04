@@ -106,27 +106,22 @@ public class FlowAssembly {
 
 		Map<String, Tap> sinks = new HashMap<String, Tap>();
 		List<Pipe> pipes = new ArrayList<Pipe>();
+		sinks.put(pipe.getName(), headSink);
+		pipes.add(pipe);
 		if (mConfiguration.doPredicateIndexing) {
 			//calculate the count of the result and write it in the configuration
 			//if the predicate is a variable then we have to split also the result and put it in the right location
-			sinks.put(pipe.getName(), headSink);
-			pipes.add(pipe);
 			setupPredicateCounts(pipe, sinks, pipes);
 		}
 		
-		Flow flow = null;
-		if (sinks.isEmpty()) {
-			flow = new FlowConnector(mConfiguration.flowProperties).connect(flowName, sources, headSink, pipe);
-		} else {
-			flow = new FlowConnector(mConfiguration.flowProperties).connect(flowName, sources, sinks, pipes.toArray(new Pipe[0]));
-		}
+		flow = new FlowConnector(mConfiguration.flowProperties).connect(flowName, sources, sinks, pipes.toArray(new Pipe[0]));
 		if(flow != null) {
 			flow.writeDOT("flow.dot");
 		}
 		flow.complete();
 		
 		try {
-			TupleEntryIterator iterator = flow.openSink();
+			TupleEntryIterator iterator = flow.openSink(pipe.getName());
 			if(iterator.hasNext()) {
 				hasNewInferences = true;
 			}
@@ -198,13 +193,13 @@ public class FlowAssembly {
 		if (flow == null) {
 			return null;
 		}
-		return flow.openSink();
+		return flow.openSink(pipe.getName());
 		//Hfs hfs = new Hfs(Fields.ALL, path);
 		//return hfs.openForRead(mConfiguration.jobConf);
 	}
 	
 	/*
-	 * Put into the sources the taps for and predicate indexed storage
+	 * Put into the sources the taps for the predicate indexed storage
 	 */
 	private void prepareIndexedSource(SequenceFile sourceScheme, Map<String, List<Tap>> sources, LiteralFields fields) {
 		IPredicate predicate = fields.getPredicate();

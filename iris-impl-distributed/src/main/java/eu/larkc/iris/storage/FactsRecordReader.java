@@ -25,6 +25,7 @@ import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.deri.iris.api.basics.IAtom;
 
+@SuppressWarnings("deprecation")
 public class FactsRecordReader<T extends AtomRecord> implements RecordReader<LongWritable, T> {
 
 	private Class<T> inputClass;

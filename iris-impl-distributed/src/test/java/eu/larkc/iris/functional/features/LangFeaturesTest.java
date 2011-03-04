@@ -82,6 +82,7 @@ public abstract class LangFeaturesTest extends EvaluationTest {
 		
 		for (IRule rule : rules) {
 			IDistributedRuleCompiler rc = new CascadingRuleCompiler(defaultConfiguration);
+			@SuppressWarnings("unused")
 			IDistributedCompiledRule compiledRule = rc.compile(rule);
 		}	
 	}

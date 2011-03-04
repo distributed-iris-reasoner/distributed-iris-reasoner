@@ -6,11 +6,7 @@ package eu.larkc.iris.rules.optimisation;
 import java.util.List;
 
 import org.deri.iris.api.basics.IRule;
-import org.deri.iris.compiler.Parser;
 import org.deri.iris.rules.IRuleStratifier;
-import org.deri.iris.rules.stratification.GlobalStratifier;
-
-import cascading.operation.assertion.AssertEquals;
 
 import eu.larkc.iris.Configuration;
 import eu.larkc.iris.functional.features.LangFeaturesTest;

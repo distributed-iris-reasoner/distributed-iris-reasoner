@@ -13,9 +13,7 @@ import org.deri.iris.api.basics.IPredicate;
 import org.deri.iris.api.basics.IRule;
 import org.deri.iris.api.factory.IGraphFactory;
 import org.deri.iris.api.graph.IPredicateGraph;
-import org.deri.iris.facts.IFacts;
 import org.deri.iris.graph.GraphFactory;
-import org.deri.iris.graph.PredicateGraph;
 
 /**
  * A simple implementation that detects recursion in rule sets and splits input rule sets into the recursive and non-recursive parts, if so possible.

@@ -46,6 +46,7 @@ public class FactsConfigurationFactory {
 		return createFactsConfiguration(jobConf);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static IFactsConfiguration createFactsConfiguration(JobConf jobConf) {
 		String factsConfigurationClass = jobConf.get(IFactsConfiguration.FACTS_CONFIGURATION_CLASS);
 		Class<? extends IFactsConfiguration> clazz = null;

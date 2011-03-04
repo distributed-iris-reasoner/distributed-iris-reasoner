@@ -3,7 +3,6 @@
  */
 package eu.larkc.iris.functional.rif;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -16,7 +15,6 @@ import java.util.List;
 
 import junit.framework.Assert;
 
-import org.deri.iris.EvaluationException;
 import org.deri.iris.api.basics.IQuery;
 import org.deri.iris.storage.IRelation;
 import org.junit.Before;
@@ -27,15 +25,8 @@ import org.slf4j.LoggerFactory;
 import at.sti2.rif4j.condition.Formula;
 import at.sti2.rif4j.parser.xml.XmlParser;
 import at.sti2.rif4j.translator.iris.RifToIrisTranslator;
-import at.sti2.rif4j.translator.iris.visitor.DocumentTranslator;
-
-import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryIterator;
-
 import eu.larkc.iris.CascadingTest;
 import eu.larkc.iris.evaluation.EvaluationContext;
-import eu.larkc.iris.functional.InitAndStartupTest;
-import eu.larkc.iris.imports.Importer;
 import eu.larkc.iris.rules.compiler.CascadingRuleCompiler;
 import eu.larkc.iris.rules.compiler.FlowAssembly;
 import eu.larkc.iris.rules.compiler.IDistributedCompiledRule;
@@ -145,6 +136,7 @@ public abstract class RifCoreTest extends CascadingTest {
 			dcr = crc.compile(rules.get(0));
 
 			dcr.evaluate(new EvaluationContext(1, 1, 1));
+			@SuppressWarnings("unused")
 			FlowAssembly fa = dcr.getFlowAssembly();
 
 			// parse conclusion to a Formula object

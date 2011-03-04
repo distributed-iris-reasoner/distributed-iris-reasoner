@@ -26,7 +26,6 @@ import java.util.List;
 
 import org.deri.iris.EvaluationException;
 import org.deri.iris.api.basics.IRule;
-import org.deri.iris.facts.IFacts;
 
 /**
  * An interface for detecting recursive rule sets possibly optimizing recursion.
