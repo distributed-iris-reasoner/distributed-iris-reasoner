@@ -101,7 +101,6 @@ public class Main extends Configured implements Tool {
 	private String rulesFile;
 	private boolean keepResults = false;
 	private String resultsName;
-	private String outputStorageId;
 	
 	private eu.larkc.iris.Configuration defaultConfiguration;
 	//transient private static Map<Object, Object> properties = new HashMap<Object, Object>();
@@ -111,9 +110,9 @@ public class Main extends Configured implements Tool {
 	private void printUsage() {
 		System.out.println("<project_name> <-importRdf storage_id import_name | " +
 				"-importNTriple path_to_file import_name | " + 
-				"-process rules_type:<DATALOG|RIF> rules_file_path keep_results:<true:false> results_name output_storage_id > | " +
+				"-process rules_type:<DATALOG|RIF> rules_file_path keep_results:<true:false> results_name | " +
 				"-exportRdf storage_id results_name | " + 
-				"-exportNTriple path_to_export_file results_name ");
+				"-exportNTriple path_to_export_file results_name> ");
 	}
 	
 	private void processUserArguments(String[] args) {
@@ -137,13 +136,7 @@ public class Main extends Configured implements Tool {
 			processer = true;
 			rulesType = RULES_TYPE.valueOf(args[2].toUpperCase());
 			rulesFile = args[3];
-			if (args[4] != null && !"".equals(args[4])) {
-				//keepResults = Boolean.valueOf(args[4]);
-				resultsName = args[4];
-				if (args.length > 5) {
-					outputStorageId = args[5];
-				}
-			}
+			resultsName = args[4];
 		} else if (operation.equalsIgnoreCase("-exportRdf")) {
 			rdfExporter = true;
 			storageId = args[2];
@@ -246,7 +239,6 @@ public class Main extends Configured implements Tool {
 	public int doProcess() {
 		defaultConfiguration.keepResults = keepResults;
 		defaultConfiguration.resultsName = resultsName;
-		defaultConfiguration.outputStorageId = outputStorageId;
 		try {
 			evaluate(null, new ArrayList<IVariable>(), defaultConfiguration);
 		} catch (EvaluationException e) {

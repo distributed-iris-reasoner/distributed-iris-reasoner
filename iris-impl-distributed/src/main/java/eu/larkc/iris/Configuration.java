@@ -43,7 +43,6 @@ public class Configuration extends org.deri.iris.Configuration
 	public String project;
 	public boolean keepResults = false;
 	public String resultsName;
-	public String outputStorageId;
 
 	public boolean doPredicateIndexing = true;
 	

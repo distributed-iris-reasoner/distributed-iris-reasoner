@@ -1,3 +1,189 @@
+IRIS DISTRIBUTED REASONER
+
+=============
+CONFIGURATION
+=============
+
+=======================================================
+1. Defining a new RDF storage from where to import data
+=======================================================
+
+A new RDF storage is configured through the file facts-storage-configuration.properties, which is part of the jar archive of the application.
+All the properties from this configuration file must begin with a prefix which tells the application to which storage the property is referring to.
+For example if the storage id is "dbpedia" then each property name must be "dbpedia.{$property_name}".
+ Currently only SESAME implementation of RDF repositories can be added and the supported types are HTTP and memory.
+
+1.1 Sesame HTTP repository
+--------------------------
+
+The properties to define such a storage are (where the storage name will be "default") : 
+
+default.rdf2go.adapter=SESAME			#fixed value for SESAME repositories
+default.repository.type=REMOTE			# fixed value for sesame HTTP repositories
+default.server.url=url_to_repository	#for example : http://voker:8080/openrdf-sesame	
+default.repository.id=repository_id		# for exampe : univ
+
+1.2 Sesame memory repository
+----------------------------
+
+The properties to define such a storage are (where the storage name will be "default") : 
+
+default.rdf2go.adapter=SESAME			#fixed value for SESAME repositories
+default.repository.type=MEMORY			# fixed value for sesame HTTP repositories
+
+This will create an in-memory repository with the repository id having as value the storage name (in this case "default").
+
+============================================
+2. How to use an RDF repository in cascading
+============================================
+
+To access from cascading the data from an RDF repository you must create a facts tap.
+The facts tap can behave as a source or a sink.
+To create an instance of the facts tap you must first create an instance of facts factory, like this :
+
+	eu.larkc.iris.storage.FactsFactory.FactsFactory factsFactory = eu.larkc.iris.storage.FactsFactory.getInstance(storageId);
+
+where storage id is the identifier from the configuration file (for example "dbpedia"). If none provided then is assumed to be "default".
+With the facts factory you can now create a facts tap :
+
+	eu.larkc.iris.storage.FactsTap factsTap = factsFactory.getFacts();
+
+This facts tap can now be used in cascading flows as a source or a sink.
+
+=======================
+3. Hadoop configuration
+=======================
+
+The configuration is done through 3 files : core-site.xml, hdfs-site.xml and mapred-site.xml by setting values for properties.
+A property is defined as xml in the as follows :
+
+  <property>
+    <name>property_name</name>
+    <value>property_value</value>
+    <description>property_description</description>
+  </property>
+
+3.1 HDFS replication
+====================
+Configure hadoop for a number of replication of data. The recommended number is 3.
+Set property "dfs.replication" to desired value in the hdfs-site.xml file
+
+3.2 Maximum number of map tasks
+===============================
+To configure the number of map tasks to deploy on each machine set property "mapred.tasktracker.map.tasks.maximum" to the desired values.
+
+3.3 Maximum number of reduce tasks
+==================================
+To configure the number of reduce tasks to deploy on each machine set property "mapred.tasktracker.reduce.tasks.maximum" to the desired values.
+
+
+For more detailed configurations/optimization please check http://developer.yahoo.com/hadoop/tutorial/module7.html
+
+
+
+=====
+USAGE
+=====
+
+================================
+4. Executing application modules
+================================
+
+The application is build as a jar using the build.xml ant file from the root of the project.
+There are 3 main modules of the application : importing, processing and exporting.
+
+The general syntax for running an application operation is :
+
+#./bin/hadoop -jar iris-impl-distributed.jar eu.larkc.iris.Main $project -importNTriple|importRdf|process|exportNTriple|exportRdf|test|viewConfig {application_parameters}
+
+The project is a sting value used to identified for which set of data the application is run.
+Depending on the module the application parameters change.
+
+4.1 Import module
+=================
+
+There two types of import, from ntriple file and RDF storage.
+
+4.1.1 Import from NTriple file
+-------------------------------
+
+To use it set the operation to "-importNTriple"
+The parameters customer to this operation are :
+	- file path : the path to the file to import
+	- import name : identifier used to group all the data imported at this stage into one folder having the identifier's name
+Example :
+	#./bin/hadoop jar ./iris-impl-distributed-0.0.1.jar eu.larkc.iris.Main dbpedia -importNTriple ./instance_types_en.nt instance-types
+
+4.1.2 Import from RDF storage
+-------------------------------
+
+To use it set the operation to "-importRdf"
+The parameters customer to this operation are :
+	- storage id : the storage name to use from the facts storage configuration file
+	- import name : identifier used to group all the data imported at this stage into one folder having the identifier's name
+Example :
+	#./bin/hadoop jar ./iris-impl-distributed-0.0.1.jar eu.larkc.iris.Main dbpedia -importRdf dbpedia_instance_types instance-types
+
+4.2 Processing module
+=====================
+
+To use the process module set operation to "-process"
+The parameters of this module are :
+	- rule types : the language the rules are defined with, two values, RIF or DATALOG
+	- the rules : path to file containing the rules to evaluate
+	- result name : identifier used to group all the data resulted from this evaluation. They will be stored in a folder having the name of this identifier.
+Usage example :
+	#./bin/hadoop jar ./iris-impl-distributed-0.0.1.jar eu.larkc.iris.Main dbpedia -process RIF ./rdfs.xml rdfs
+
+4.3 Exporting module
+====================
+
+There two types of export, from ntriple file and RDF storage.
+
+4.3.1 Export to NTriple file
+-------------------------------
+
+To use it set the operation to "-exportNTriple"
+The parameters customer to this operation are :
+	- file name : path to file where to export data
+	- result name : the identifier used as result name in the process step. This will tell the exporter where from to take the data
+Example :
+	#./bin/hadoop jar ./iris-impl-distributed-0.0.1.jar eu.larkc.iris.Main dbpedia -exportNTriple ./rdfs_export.nt rdfs
+
+4.3.2 Export to RDF storage
+-------------------------------
+
+To use it set the operation to "-exportRdf"
+The parameters customer to this operation are :
+	- storage id : the storage name where to export the data
+	- result name : the identifier used as result name in the process step. This will tell the exporter where from to take the data
+Example :
+	#./bin/hadoop jar ./iris-impl-distributed-0.0.1.jar eu.larkc.iris.Main dbpedia -exportRdf rdfs_storage rdfs
+
+4.4 Testing module
+==================
+
+This module is used just to check the results of a process operation. It displays the first 10 rows ofthe results.
+To use it set the operation to "-test"
+The parameters are :
+	- result path : path to the file we want to display content
+Usage example :
+	#./bin/hadoop jar ./iris-impl-distributed-0.0.1.jar eu.larkc.iris.Main dbpedia -test rdfs/part-00000
+
+4.5 View predicates config
+==========================
+
+This is only available if predicate indexing was enabled.
+It is used to display the content of the predicates indexing configuration.
+In that configuration file are stored the counts for each predicate and to which location the data for the predicate is stored.
+Usage example :
+	#./bin/hadoop jar ./iris-impl-distributed-0.0.1.jar eu.larkc.iris.Main dbpedia -viewConfig
+
+==============
+5. OTHER OLD STUFF
+==============
+
+
 FACTS TAP - HOW IT WORKS
 ========================
 
@@ -48,7 +234,7 @@ java.lang.NullPointerException
 	at java.util.Properties.load(Properties.java:325)
 	at eu.larkc.iris.storage.FactsFactory.<init>(FactsFactory.java:48)
 
-	
+
 Execution
 =========
 
