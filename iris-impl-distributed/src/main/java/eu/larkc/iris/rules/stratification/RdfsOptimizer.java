@@ -16,11 +16,13 @@ import org.deri.iris.api.terms.ITerm;
 import org.deri.iris.compiler.ParserException;
 import org.deri.iris.factory.Factory;
 
+import eu.larkc.iris.evaluation.bottomup.IRuleEvaluationBlocker;
+
 /**
- * @author Florian Fischer, fisf
+ * @author Florian Fischer, fisf, florian.fischer@softgress.com
  */
 public class RdfsOptimizer implements IPostStratificationOptimization,
-		IPreStratificationOptimization {
+		IPreStratificationOptimization, IRuleEvaluationBlocker {
 
 	/**
 	 * Factory for rule elements
@@ -33,6 +35,11 @@ public class RdfsOptimizer implements IPostStratificationOptimization,
 	 * Rules to be ignored for stratification
 	 */
 	private List<IRule> delayRules = new ArrayList<IRule>();
+	
+	/**
+	 * Rules to be completely blocked from re-evaluation.
+	 */
+	private List<IRule> blockRules = new ArrayList<IRule>();
 	
 	/**
 	 * Constructor
@@ -115,6 +122,9 @@ public class RdfsOptimizer implements IPostStratificationOptimization,
 		delayRules.add(rdfs7);
 		delayRules.add(rdfs2);
 		delayRules.add(rdfs3);
+		
+		blockRules.add(rdfs2);
+		blockRules.add(rdfs3);
 	}
 
 	/* (non-Javadoc)
@@ -152,4 +162,8 @@ public class RdfsOptimizer implements IPostStratificationOptimization,
 		return resultList;
 	}
 
+	@Override
+	public boolean block(IRule rule) {	
+		return blockRules.contains(rule);
+	}
 }

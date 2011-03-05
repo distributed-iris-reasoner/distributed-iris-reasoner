@@ -73,7 +73,7 @@
 			</plugin>
 		</plugins>
 	</build>
-
+	<!--
 	<distributionManagement>		
 		<repository>
 			<id>sti2-archiva-external</id>
@@ -88,11 +88,12 @@
 			<uniqueVersion>false</uniqueVersion>
 		</snapshotRepository>
 	</distributionManagement>
-
+	-->
 	<repositories>
 		<repository>
   			<id>conjars.org</id>
   			<url>http://conjars.org/repo</url>
   		</repository>	
 	</repositories>
+	
 </project>

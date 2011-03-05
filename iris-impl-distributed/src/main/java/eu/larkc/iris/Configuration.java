@@ -24,6 +24,7 @@ import org.apache.hadoop.mapred.JobConf;
 
 import eu.larkc.iris.evaluation.IDistributedEvaluationStrategyFactory;
 import eu.larkc.iris.evaluation.bottomup.DistributedBottomUpEvaluationStrategyFactory;
+import eu.larkc.iris.evaluation.bottomup.IRuleEvaluationBlocker;
 import eu.larkc.iris.evaluation.bottomup.naive.DistributedNaiveEvaluatorFactory;
 import eu.larkc.iris.rules.IRecursiveRulePreProcessor;
 import eu.larkc.iris.rules.NonOptimizingRecursiveRulePreProcessor;
@@ -66,6 +67,8 @@ public class Configuration extends org.deri.iris.Configuration
 	
 	public List<IPostStratificationOptimization> postStratificationOptimizations = new ArrayList<IPostStratificationOptimization>();
 	
+	public List<IRuleEvaluationBlocker> ruleEvaluationBlockers = new ArrayList<IRuleEvaluationBlocker>();
+	
 	public Configuration() {		
 		//include default optimizers
 		super();
@@ -74,6 +77,8 @@ public class Configuration extends org.deri.iris.Configuration
 		RdfsOptimizer optimizer = new RdfsOptimizer();
 		preStratificationOptimizer.add(optimizer);
 		postStratificationOptimizations.add(optimizer);
+		ruleEvaluationBlockers.add(optimizer);
+		//end RDFS specific
 		
 		ruleOptimisers.add(new JoinOptimizer());
 		recursiveRulePreProcessors.add(new NonOptimizingRecursiveRulePreProcessor());		
