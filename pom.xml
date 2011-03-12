@@ -6,7 +6,7 @@
 	<artifactId>distributed-iris-reasoner</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<name>Distributed Iris Reasoner</name>
+	<name>IRIS Distributed Reference</name>
 	<description>Distributed Iris Reasoner is an extensible reasoning engine for expressive rule-based languages running on Hadoop distributed platform.</description>
 
 	<modules>
