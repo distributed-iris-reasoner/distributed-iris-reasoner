@@ -76,9 +76,18 @@ public class DistributedNaiveEvaluator implements IDistributedRuleEvaluator {
 		blockers = configuration.ruleEvaluationBlockers;
 		
 		//transform flat list to hashmap reflecting the dependencies between rules (more particularly predicates)
-		transformToDependencyMap(rules);
+		transformToDependencyMap(rules);		
 		
+		HashMap<IDistributedCompiledRule, EvaluationContext> contextMap = new HashMap<IDistributedCompiledRule, EvaluationContext>();
+		
+		//initi for all rules		
+		int ruleNumber = 1;
 		int iterationNumber = 1;
+		for(IDistributedCompiledRule rule : rules) {
+			contextMap.put(rule, new EvaluationContext(stratumNumber, iterationNumber, ruleNumber));
+			ruleNumber++; //we simply enumerate all rules. in combination with stratum and iteration number this gives a unique identifier
+		}		
+	
 		//initially those will be the head predicates
 		while( !predicatesToEvaluate.isEmpty()) {
 			//remove predicate from top of queue
@@ -90,24 +99,32 @@ public class DistributedNaiveEvaluator implements IDistributedRuleEvaluator {
 			if(logger.isDebugEnabled()) {
 				logger.debug("Evaluating rules: " + dependingRules);
 				logger.debug("Depending on predicate: " + toEvaluate);
-			}
+			}			
 			
-			int ruleNumber = 1; //TODO: rulenumber does not really make sense anymore
 			//process all depending rules
-			for (IDistributedCompiledRule depends: dependingRules) {
-				//correct after here
-				boolean delta = depends.evaluate(new EvaluationContext(stratumNumber, iterationNumber, ruleNumber));
-				//new data was derived, take head predicate and push it on the "update queue"
-				if(delta && !isBlocked(depends.getRule())) {
-					IPredicate headPredicate = depends.getRule().getHead().get(0).getAtom().getPredicate();
+			if(dependingRules != null)	{
+				for (IDistributedCompiledRule depends: dependingRules) {
 					
-					//add for re-computation (if not already present)
-					insertForFutureEvaluation(headPredicate);
+					//get evaluation context and increment iterationnumber after evaluation of this rule
+					EvaluationContext ctx = contextMap.get(depends);										
+					boolean delta = depends.evaluate(ctx);
+					if(logger.isDebugEnabled()) {
+						logger.debug("Evaluating rule: " + depends);
+						logger.debug("EvaluationContext: " + ctx);
+					}		
+					
+					ctx.setIterationNumber(ctx.getIterationNumber() + 1);
+					
+					//new data was derived, take head predicate and push it on the "update queue"
+					if(delta && !isBlocked(depends.getRule())) {
+						IPredicate headPredicate = depends.getRule().getHead().get(0).getAtom().getPredicate();
+						
+						//add for re-computation (if not already present)
+						insertForFutureEvaluation(headPredicate);
+					}
+					
 				}
-				ruleNumber++;
-			}
-			
-			iterationNumber++; //TODO: with the new evaluation model this is potentially not useful
+			}			
 		}
 	}
 	
