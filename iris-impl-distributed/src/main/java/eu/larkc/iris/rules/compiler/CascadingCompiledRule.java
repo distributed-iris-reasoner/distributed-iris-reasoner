@@ -49,8 +49,7 @@ public class CascadingCompiledRule implements IDistributedCompiledRule {
 			throw new IllegalArgumentException("Flow assembly must not be null");
 		}			
 
-		throw new RuntimeException();
-		//flowAssembly.evaluate(ruleNumber);
+		throw new RuntimeException();	
 	}
 
 
@@ -66,15 +65,6 @@ public class CascadingCompiledRule implements IDistributedCompiledRule {
 		if(flowAssembly == null) {
 			throw new IllegalArgumentException("Flow assembly must not be null");
 		}		
-	
-		//Overall story:
-		//Naive evaluation does several passes over the rules and finishes when no new tuples are added anymore.
-		//Several passes are actually only needed if the dependency graph contains cycles.
-		//The return here is needed to establish the (possible) delta between iterations.
-		//Naive evaluation will terminate when evaluate returns null.
-		//Until recursion is supported this code will work fine, then a more complex solution is needed.
-		
-		//return mFlowAssembly.hasNewInferences(flow);
 		
 		return flowAssembly.evaluate(evaluationContext);
 	}
@@ -86,8 +76,8 @@ public class CascadingCompiledRule implements IDistributedCompiledRule {
 	@Override
 	public IRelation evaluateIteratively(IFacts deltas)
 			throws EvaluationException {
-		// TODO (fisf) implement later
-		throw new NotImplementedException("Semi-naive evaluation is not implemented yet.");
+	
+		throw new NotImplementedException("Semi-naive evaluation is not supported.");
 	}
 	
 	/*

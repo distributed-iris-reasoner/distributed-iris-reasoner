@@ -48,5 +48,16 @@ public class EvaluationContext {
 	public int getStratumNumber() {
 		return stratumNumber;
 	}
-	
+
+	public void setStratumNumber(int stratumNumber) {
+		this.stratumNumber = stratumNumber;
+	}
+
+	public void setIterationNumber(int iterationNumber) {
+		this.iterationNumber = iterationNumber;
+	}
+
+	public void setRuleNumber(int ruleNumber) {
+		this.ruleNumber = ruleNumber;
+	}
 }
