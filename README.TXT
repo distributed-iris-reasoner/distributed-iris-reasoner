@@ -179,8 +179,42 @@ In that configuration file are stored the counts for each predicate and to which
 Usage example :
 	#./bin/hadoop jar ./iris-impl-distributed-0.0.1.jar eu.larkc.iris.Main dbpedia -viewConfig
 
+=======================
+5. THIRD-PARTY LICENSES
+=======================
+
+http://avro.apache.org/ : Apache License
+http://hadoop.apache.org/ : Apache License
+http://semanticweb.org/wiki/RDF2Go : RDF2GO is released under the new BSD license. Alternative licensing is possible, just ask us.
+http://www.cascading.org/ : Cascading is Open Source and licensed under the GPL. Alternatively Standard or OEM Licenses, and Production and Developer Support can be obtained through Concurrent, Inc.
+http://www.jgrapht.org/ : GNU LESSER GENERAL PUBLIC LICENSE
+http://xmlenc.sourceforge.net/ : BSD Original
+http://commons.apache.org/cli/ : Apache License
+http://www.openrdf.org/ : Sesame 2.x is available under a BSD-style license
+http://jackson.codehaus.org/ : Apache Software License
+http://paranamer.codehaus.org/ : BSD
+http://commons.apache.org/lang/ : Apache License
+http://jetty.codehaus.org/jetty/ : Apache License
+http://commons.apache.org/io/ : Apache License
+http://www.junit.org/ : Common Public License - v 1.0
+http://ccil.org/~cowan/XML/tagsoup/ : Apache License
+http://www.slf4j.org/ : MIT license
+https://github.com/cwensel/riffle/ : Apache License
+http://ant.apache.org/ : Apache License
+http://xircles.codehaus.org/projects/janino : Janino is distributed under the terms of the New BSD License
+http://www.aduna-software.org/ : BSD-style license
+http://logging.apache.org/log4j/ : Apache License
+http://cglib.sourceforge.net/ : This library is free software, freely reusable for personal or commercial purposes.
+http://qdox.codehaus.org/ : Apache License
+http://jstl.java.net/ : Common Development and Distribution License (CDDL) version 1.0 + GNU General Public License (GPL) version 2
+http://asm.ow2.org/ : http://asm.ow2.org/license.html
+http://www.springsource.org/ : Apache License
+http://tomcat.apache.org/taglibs/ : Apache License
+http://commons.apache.org/ : Apache License
+http://aopalliance.sourceforge.net/ : all the source code provided by AOP Alliance is Public Domain.
+
 ==============
-5. OTHER OLD STUFF
+6. OTHER OLD STUFF
 ==============
 
 
