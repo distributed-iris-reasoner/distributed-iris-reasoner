@@ -25,14 +25,15 @@ public class BasicStratificationTest extends LangFeaturesTest {
 
 	public BasicStratificationTest(String string) {
 		super(string);
-		defaultConfiguration = new Configuration();
+		
 	}
 
 	@Override
 	protected void setUp() throws Exception {
 		
 		program = test1;
-		super.setUp();
+		super.setUp();		
+		defaultConfiguration.stratifiers.add(new DependencyMinimizingStratifier(defaultConfiguration));		
 	}
 
 	/**
@@ -60,16 +61,5 @@ public class BasicStratificationTest extends LangFeaturesTest {
 		assertEquals(true, headPredicateSymbol1.equals("http://www.w3.org/2000/01/rdf-schema#p"));
 		String headPredicateSymbol2 = stratifiedRules.get(1).get(0).getHead().get(0).getAtom().getPredicate().getPredicateSymbol();
 		assertEquals(true, headPredicateSymbol2.equals("w"));
-		
-		//make sure the rules compile
-		for (List<IRule> list : stratifiedRules) {			
-			compileStrata(list);		
-		}
-
-	}	
-	
-	protected void compileStrata(List<IRule> strata) throws Exception {
-		rules = strata;
-		super.compile();
-	}	
+	}		
 }

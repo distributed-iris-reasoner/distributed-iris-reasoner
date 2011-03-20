@@ -35,23 +35,7 @@ public class BasicLangFeaturesTest extends LangFeaturesTest {
 		rules = createRules();
 		
 		compile();
-	}
-	
-	/**
-	 * Check that the compilation works with predicates with the same name, but different arities.
-	 * @throws Exception 
-	 */
-	public void testPredicateWithSeveralArities() throws Exception
-	{
-		 program =
-			"p( ?X, ?Y ) :- q( ?X, ?Y ), r( ?Y, ?Z ), s( ?X, ?Z )." +
-			"p( ?X) :- q( ?X, ?Y ), r( ?Y, ?Z, ?K ), s( ?X).";
-		
-		parser.parse(program);
-		rules = createRules();
-
-		compile();
-	}
+	}	
 
 	/**
 	 * Test that datalog programs containing only propositional terms

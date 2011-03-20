@@ -182,8 +182,8 @@ public class LiteralFields extends eu.larkc.iris.rules.compiler.PipeFields {
 				break;
 			}
 		}
-		// TODO fisf: construct appropriate cascading operation
-		// once they are supported
+		
+	
 		if (constructedTerms) {
 			// function symbol
 			throw new NotImplementedException(

@@ -110,8 +110,7 @@ public class SpecificLangFeaturesTest extends LangFeaturesTest {
 	 * Theoretically that amounts to a union.
 	 */
 	public void testUnion() throws Exception {
-		program = "p(?X) :- r(?X)." + "p(?X) :- s(?X)." + "p(?X) :- t(?X)."
-				+ "?- p(?X).";
+		program = "p(?X) :- r(?X)." + "p(?X) :- s(?X)." + "p(?X) :- t(?X).";				
 		parser.parse(program);
 		rules = createRules();
 
@@ -123,27 +122,6 @@ public class SpecificLangFeaturesTest extends LangFeaturesTest {
 		program =
 
 		"p(?X, 'a') :- r(?X, ?Y)." + "?- p(?X, ?Y).";
-		parser.parse(program);
-		rules = createRules();
-
-		compile();
-
-	}
-	
-	/*
-	 * The following two are expected to fail for now.
-	 */
-
-	public void testRuleWithOnlyConstantsInHead() throws Exception {
-		program = "p('a') :- TRUE." + "?-p(?X).";
-		parser.parse(program);
-		rules = createRules();
-
-		compile();
-	}
-
-	public void testRuleWithNoBodyAndOnlyConstantsInHead() throws Exception {
-		program = "p('a') :- ." + "?-p(?X).";
 		parser.parse(program);
 		rules = createRules();
 

@@ -1,1 +1,0 @@
-_:x <http://example.org/example#hasWebSite> "http://www.example.org/" .
