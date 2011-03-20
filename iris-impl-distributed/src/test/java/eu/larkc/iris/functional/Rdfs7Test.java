@@ -65,7 +65,7 @@ public class Rdfs7Test extends CascadingTest {
 	@Override
 	protected  void createFacts() throws IOException {
 		defaultConfiguration.project = "test";
-		defaultConfiguration.doPredicateIndexing = true;
+		defaultConfiguration.doPredicateIndexing = false;
 		if (enableCluster) {
 			new Importer(defaultConfiguration).importFromFile(this.getClass().getResource("/facts/rdfs7.nt").getPath(), "import");
 		} else {

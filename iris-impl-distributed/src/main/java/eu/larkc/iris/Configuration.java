@@ -45,7 +45,7 @@ public class Configuration extends org.deri.iris.Configuration
 	public boolean keepResults = false;
 	public String resultsName;
 
-	public boolean doPredicateIndexing = true;
+	public boolean doPredicateIndexing = false;
 	
 	public org.apache.hadoop.conf.Configuration hadoopConfiguration = null;
 	public JobConf jobConf = null;
