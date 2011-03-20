@@ -54,9 +54,7 @@ public abstract class LangFeaturesTest extends EvaluationTest {
 	/**
 	 * Hadoop specific
 	 */
-	transient private static MiniDFSCluster dfs;
 	protected static FileSystem fileSys;
-	transient private static MiniMRCluster mr;
 	int numMapTasks = 1;
 	int numReduceTasks = 1;
 
