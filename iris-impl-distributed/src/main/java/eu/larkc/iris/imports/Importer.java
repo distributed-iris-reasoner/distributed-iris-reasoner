@@ -69,7 +69,7 @@ public class Importer {
 	 * @param importName the name to give to the import
 	 */
 	public void importFromRdf(String storageId, String importName) {
-		Tap source = FactsFactory.getInstance(storageId).getFacts();
+		Tap source = FactsFactory.getInstance(storageId).getFacts(new Fields(0, 1, 2));
 		
 		SequenceFile sinkScheme = new SequenceFile(source.getSourceFields());
 		sinkScheme.setNumSinkParts(1);

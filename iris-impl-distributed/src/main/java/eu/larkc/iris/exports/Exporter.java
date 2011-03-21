@@ -105,7 +105,7 @@ public class Exporter {
 	public void exportToRdf(String storageId, String resultsName) {
 		Tap source= getSource(resultsName); //new Hfs(new Fields(0, 1, 2), project + "/inferences/" + resultsName, true );
 		
-		Tap sink = FactsFactory.getInstance(storageId).getFacts();
+		Tap sink = FactsFactory.getInstance(storageId).getFacts(new Fields(0, 1, 2));
 		
 		Map<String, Tap> sources = new HashMap<String, Tap>();
 		sources.put("source", source);

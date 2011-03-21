@@ -156,7 +156,7 @@ public class RdfFactsTapTest extends TestCase {
 		IAtom atom = BasicFactory.getInstance().createAtom(predicate, tuple);
 		
 		FactsFactory humansFactsFactory = FactsFactory.getInstance("humans");
-		FactsTap nameFactsTap = humansFactsFactory.getFacts(atom);
+		FactsTap nameFactsTap = humansFactsFactory.getFacts(new Fields("http://www.w3.org/2000/01/rdf-schema#name", "X", "Y"), atom);
 		
 		String output = "./build/test/output/";
 		Tap sink = new Hfs( new Fields("http://www.w3.org/2000/01/rdf-schema#name", "X", "Y"), output , true );
@@ -185,7 +185,7 @@ public class RdfFactsTapTest extends TestCase {
 		Tap source = new Hfs( new Fields("http://www.w3.org/2000/01/rdf-schema#name", "X", "Y"), input, true );
 
 		FactsFactory humansOutFactsFactory = FactsFactory.getInstance("humans_out");
-		Tap sink = humansOutFactsFactory.getFacts();
+		Tap sink = humansOutFactsFactory.getFacts(new Fields("http://www.w3.org/2000/01/rdf-schema#name", "X", "Y"));
 
 		Map<String, Tap> sources = new HashMap<String, Tap>();
 		//sources.put("source", nameFactsTap);

@@ -24,6 +24,8 @@ import org.deri.iris.api.basics.IAtom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cascading.tuple.Fields;
+
 
 /**
  * @author valer
@@ -68,14 +70,14 @@ public class FactsFactory {
 		return new FactsFactory(storageId, factsFactoryProperties);
 	}
 	
-	public FactsTap getFacts(IAtom atom) {
+	public FactsTap getFacts(Fields fields, IAtom atom) {
 		String factsConfigurationClass = properties.getProperty(IFactsConfiguration.FACTS_CONFIGURATION_CLASS);
-		return new FactsTap(factsConfigurationClass, storageId, atom);
+		return new FactsTap(factsConfigurationClass, fields, storageId, atom);
 	}
 	
-	public FactsTap getFacts() {
+	public FactsTap getFacts(Fields fields) {
 		String factsConfigurationClass = properties.getProperty(IFactsConfiguration.FACTS_CONFIGURATION_CLASS);
-		return new FactsTap(factsConfigurationClass, storageId);
+		return new FactsTap(factsConfigurationClass, fields, storageId);
 	}
 
 	public String getStorageId() {

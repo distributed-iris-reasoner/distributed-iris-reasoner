@@ -27,6 +27,7 @@ import org.deri.iris.api.basics.IPredicate;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.TapCollector;
 import cascading.tap.hadoop.TapIterator;
+import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 
@@ -53,22 +54,22 @@ public class FactsTap extends Tap {
 		super(scheme);
 	}
 
-	FactsTap(String factsConfigurationClass, String storageId, IPredicate... predicates) {
-		this(new FactsScheme(storageId, predicates));
+	FactsTap(String factsConfigurationClass, Fields fields, String storageId, IPredicate... predicates) {
+		this(new FactsScheme(fields, storageId, predicates));
 		this.factsConfigurationClass = factsConfigurationClass;
 		this.predicates = predicates;
 		this.storageId = storageId;
 	}
 
-	FactsTap(String factsConfigurationClass, String storageId, IAtom atom) {
-		this(new FactsScheme(storageId, atom));
+	FactsTap(String factsConfigurationClass, Fields fields, String storageId, IAtom atom) {
+		this(new FactsScheme(fields, storageId, atom));
 		this.factsConfigurationClass = factsConfigurationClass;
 		this.atom = atom;
 		this.storageId = storageId;
 	}
 
-	FactsTap(String factsConfigurationClass, String storageId) {
-		this(new FactsScheme(storageId));
+	FactsTap(String factsConfigurationClass, Fields fields, String storageId) {
+		this(new FactsScheme(fields, storageId));
 		this.factsConfigurationClass = factsConfigurationClass;
 		this.storageId = storageId;
 	}

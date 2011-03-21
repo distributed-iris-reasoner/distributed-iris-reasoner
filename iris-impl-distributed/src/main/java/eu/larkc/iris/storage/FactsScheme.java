@@ -58,13 +58,15 @@ public class FactsScheme extends Scheme {
 	private IPredicate[] predicates = null;
 	private IAtom atom = null;
 	
-	public FactsScheme(String storageId) {
+	public FactsScheme(Fields fields, String storageId) {
 		this.storageId = storageId;
+		setSourceFields(fields);
+		setSinkFields(fields);
 	}
 
-	public FactsScheme(String storageId, IPredicate... predicates) {
-		this(storageId);
-		this.predicates = predicates;		
+	public FactsScheme(Fields fields, String storageId, IPredicate... predicates) {
+		this.storageId = storageId;
+		this.predicates = predicates;
 		int arity = -1;
 		for (IPredicate predicate : predicates) {
 			int aArity = predicate.getArity();
@@ -73,18 +75,20 @@ public class FactsScheme extends Scheme {
 			}
 			arity = aArity;
 		}
+		/*
 		Fields sourceFields = new Fields("PREDICATE");
 		for (int i = 0; i < arity; i++) {
 			sourceFields = sourceFields.append(new Fields("TERM" + (i+1)));
 		}
-		setSourceFields(sourceFields);
+		*/
+		setSourceFields(fields);
 	}
 	
-	public FactsScheme(String storageId, IAtom atom) {
-		this(storageId);
+	public FactsScheme(Fields fields, String storageId, IAtom atom) {
+		this.storageId = storageId;
 		this.atom = atom;
 
-		setSourceFields(new Fields(0, 1, 2));
+		setSourceFields(fields);
 		//setSinkFields(sourceFields); // TODO the sink fields I guess will be the
 										// variables of the head of the rule
 	}

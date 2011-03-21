@@ -35,6 +35,7 @@ import org.deri.iris.api.terms.concrete.IIri;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
 import cascading.pipe.assembly.Rename;
+import cascading.tuple.Fields;
 import eu.larkc.iris.Configuration;
 import eu.larkc.iris.evaluation.ConstantFilter;
 import eu.larkc.iris.indexing.DistributedFileSystemManager;
@@ -137,7 +138,8 @@ public class LiteralFields extends eu.larkc.iris.rules.compiler.PipeFields {
 		} else {
 			pipe = new Pipe(getId().toString());
 		}
-		pipe = new Rename(pipe, new cascading.tuple.Fields(0, 1, 2), getFields());
+		//pipe = new Rename(pipe, new cascading.tuple.Fields(0, 1, 2), getFields());
+		pipe = new Rename(pipe, cascading.tuple.Fields.ALL, getFields());
 		
 		pipe = filterConstants(pipe);
 	}
