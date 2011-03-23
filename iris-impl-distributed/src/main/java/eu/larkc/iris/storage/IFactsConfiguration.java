@@ -68,10 +68,10 @@ public interface IFactsConfiguration {
 	
 	public Class<? extends AtomRecord> getInputClass();
 	
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings("unchecked")
 	public Class<? extends InputFormat> getInputFormat();
 	
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings("unchecked")
 	public Class<? extends OutputFormat> getOutputFormat();
 	
 }

@@ -35,7 +35,6 @@ import org.deri.iris.api.terms.concrete.IIri;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
 import cascading.pipe.assembly.Rename;
-import cascading.tuple.Fields;
 import eu.larkc.iris.Configuration;
 import eu.larkc.iris.evaluation.ConstantFilter;
 import eu.larkc.iris.indexing.DistributedFileSystemManager;
@@ -212,7 +211,7 @@ public class LiteralFields extends eu.larkc.iris.rules.compiler.PipeFields {
 	 * @param tuple
 	 * @return
 	 */
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings("unchecked")
 	protected Pipe filterConstants(Pipe attachTo) {
 		Map<String, WritableComparable> constantTerms = new HashMap<String, WritableComparable>();
 

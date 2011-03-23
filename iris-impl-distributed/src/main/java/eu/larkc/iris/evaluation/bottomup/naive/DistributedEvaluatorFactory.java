@@ -22,15 +22,15 @@ import eu.larkc.iris.evaluation.bottomup.IDistributedRuleEvaluatorFactory;
  * Factory to create distributed naive evaluators
  * Two types of evaluators are used the single-pass and naive. Single-pass is used for non-recursive rules and naive for recursive stratified rules.
  * 
- * @author valer.roman@softgress.com
+ * @author florian.fischer@softgress.com
  *
  */
-public class DistributedNaiveEvaluatorFactory implements IDistributedRuleEvaluatorFactory {
+public class DistributedEvaluatorFactory implements IDistributedRuleEvaluatorFactory {
 
 	
 	@Override
 	public IDistributedRuleEvaluator createEvaluator() {
-		return new DistributedNaiveEvaluator();
+		return new DistributedDependencyAwareEvaluator();
 	}
 
 	@Override
@@ -39,6 +39,8 @@ public class DistributedNaiveEvaluatorFactory implements IDistributedRuleEvaluat
 		case SINGLEPASSEVALUATOR:
 			return new DistributedOnePassEvaluator();			
 		case RECURSIONAWAREEVALUATOR:
+			return new DistributedDependencyAwareEvaluator();
+		case NAIVEEVALAUTOR:
 			return new DistributedNaiveEvaluator();
 		default:
 			return null;

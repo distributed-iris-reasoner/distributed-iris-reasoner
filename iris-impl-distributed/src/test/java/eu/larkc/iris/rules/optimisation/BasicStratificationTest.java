@@ -8,7 +8,6 @@ import java.util.List;
 import org.deri.iris.api.basics.IRule;
 import org.deri.iris.rules.IRuleStratifier;
 
-import eu.larkc.iris.Configuration;
 import eu.larkc.iris.functional.features.LangFeaturesTest;
 import eu.larkc.iris.rules.stratification.DependencyMinimizingStratifier;
 

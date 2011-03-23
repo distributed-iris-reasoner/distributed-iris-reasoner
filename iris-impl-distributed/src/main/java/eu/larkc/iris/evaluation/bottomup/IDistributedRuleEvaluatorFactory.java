@@ -18,15 +18,16 @@ package eu.larkc.iris.evaluation.bottomup;
 /**
  * Factory for creating distributed rule evaluators
  * 
- * @author valer.roman@softgress.com
+ * @author florian.fischer@softgress.com
  *
  */
 public interface IDistributedRuleEvaluatorFactory {
 
 	public final static int SINGLEPASSEVALUATOR = 0;
 	
-	public final static int RECURSIONAWAREEVALUATOR = 1;
+	public final static int RECURSIONAWAREEVALUATOR = 1;	
 	
+	public final static int NAIVEEVALAUTOR = 2;
 	
 	/**
 	 * Create a new evaluator.

@@ -25,7 +25,7 @@ import cascading.operation.DebugLevel;
 
 import eu.larkc.iris.Configuration;
 import eu.larkc.iris.evaluation.bottomup.DistributedBottomUpEvaluationStrategyFactory;
-import eu.larkc.iris.evaluation.bottomup.naive.DistributedNaiveEvaluatorFactory;
+import eu.larkc.iris.evaluation.bottomup.naive.DistributedEvaluatorFactory;
 import eu.larkc.iris.evaluation.distributed.EvaluationTest;
 import eu.larkc.iris.rules.compiler.CascadingRuleCompiler;
 import eu.larkc.iris.rules.compiler.IDistributedCompiledRule;
@@ -80,7 +80,7 @@ public abstract class LangFeaturesTest extends EvaluationTest {
 		defaultConfiguration.ruleOptimisers.clear();
 
 		defaultConfiguration.evaluationStrategyFactory = new DistributedBottomUpEvaluationStrategyFactory(
-				new DistributedNaiveEvaluatorFactory());
+				new DistributedEvaluatorFactory());
 
 		if (jobConf != null)
 			return;

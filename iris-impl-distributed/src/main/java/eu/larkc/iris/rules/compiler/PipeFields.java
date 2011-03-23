@@ -98,7 +98,7 @@ public class PipeFields extends Fields {
 		return new PipeFields(join, this, fields, Math.min(getCount(), fields.getCount()));
 	}
 
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "unchecked" })
 	/**
 	 * Gets the unique variable fields for this stream
 	 */

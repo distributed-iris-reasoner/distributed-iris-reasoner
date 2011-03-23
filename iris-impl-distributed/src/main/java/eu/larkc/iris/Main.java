@@ -53,7 +53,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryIterator;
 import eu.larkc.iris.evaluation.bottomup.DistributedBottomUpEvaluationStrategyFactory;
-import eu.larkc.iris.evaluation.bottomup.naive.DistributedNaiveEvaluatorFactory;
+import eu.larkc.iris.evaluation.bottomup.naive.DistributedEvaluatorFactory;
 import eu.larkc.iris.exports.Exporter;
 import eu.larkc.iris.imports.Importer;
 import eu.larkc.iris.indexing.DistributedFileSystemManager;
@@ -346,7 +346,7 @@ public class Main extends Configured implements Tool {
 		setConf(configuration);
 		
 		defaultConfiguration = new eu.larkc.iris.Configuration();
-		defaultConfiguration.evaluationStrategyFactory = new DistributedBottomUpEvaluationStrategyFactory(new DistributedNaiveEvaluatorFactory());
+		defaultConfiguration.evaluationStrategyFactory = new DistributedBottomUpEvaluationStrategyFactory(new DistributedEvaluatorFactory());
 	}
 	
 	public static void main(String[] args) throws Exception {

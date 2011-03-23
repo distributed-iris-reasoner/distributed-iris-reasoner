@@ -15,23 +15,14 @@
  */
 package eu.larkc.iris.evaluation.bottomup.naive;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Queue;
 
 import org.deri.iris.EvaluationException;
-import org.deri.iris.api.basics.ILiteral;
-import org.deri.iris.api.basics.IPredicate;
-import org.deri.iris.api.basics.IRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.larkc.iris.evaluation.EvaluationContext;
 import eu.larkc.iris.evaluation.bottomup.IDistributedRuleEvaluator;
-import eu.larkc.iris.evaluation.bottomup.IRuleEvaluationBlocker;
 import eu.larkc.iris.rules.compiler.IDistributedCompiledRule;
 
 /**
@@ -46,181 +37,26 @@ public class DistributedNaiveEvaluator implements IDistributedRuleEvaluator {
 
 	private static final Logger logger = LoggerFactory.getLogger(DistributedNaiveEvaluator.class);
 	
-//	@Override
-//	public void evaluateRules( Integer stratumNumber, List<IDistributedCompiledRule> rules, eu.larkc.iris.Configuration configuration)
-//			throws EvaluationException {
-//		int iterationNumber = 1;
-//		boolean cont = true;
-//		while( cont )
-//		{
-//			cont = false;
-//			
-//			int ruleNumber = 1;
-//			// For each rule in the collection (stratum)
-//			for (final IDistributedCompiledRule rule : rules )
-//			{
-//				logger.info("evaluate stratum : " + stratumNumber + ", iteration : " + iterationNumber + ", ruleNumber : " + ruleNumber + ", rule : " + rule.getRule());
-//				boolean delta = rule.evaluate(new EvaluationContext(stratumNumber, iterationNumber, ruleNumber));
-//				cont = delta ?  delta : cont;
-//				ruleNumber++;
-//			}
-//			iterationNumber++;
-//		}
-//
-//	}
-	
 	@Override
-	public void evaluateRules(Integer stratumNumber, List<IDistributedCompiledRule> rules, eu.larkc.iris.Configuration configuration) throws EvaluationException {
-		
-		//optionally: completely block some rules from re-evaluation
-		blockers = configuration.ruleEvaluationBlockers;
-		
-		//transform flat list to hashmap reflecting the dependencies between rules (more particularly predicates)
-		transformToDependencyMap(rules);		
-		
-		HashMap<IDistributedCompiledRule, EvaluationContext> contextMap = new HashMap<IDistributedCompiledRule, EvaluationContext>();
-		
-		//initi for all rules		
-		int ruleNumber = 1;
+	public void evaluateRules( Integer stratumNumber, List<IDistributedCompiledRule> rules, eu.larkc.iris.Configuration configuration)
+			throws EvaluationException {
 		int iterationNumber = 1;
-		for(IDistributedCompiledRule rule : rules) {
-			contextMap.put(rule, new EvaluationContext(stratumNumber, iterationNumber, ruleNumber));
-			ruleNumber++; //we simply enumerate all rules. in combination with stratum and iteration number this gives a unique identifier
-		}		
-	
-		//initially those will be the head predicates
-		while( !predicatesToEvaluate.isEmpty()) {
-			//remove predicate from top of queue
-			IPredicate toEvaluate = predicatesToEvaluate.poll();
+		boolean cont = true;
+		while( cont )
+		{
+			cont = false;
 			
-			//get rules that depend on this predicate (i.e. it is a body predicate of them)
-			List<IDistributedCompiledRule> dependingRules = dynamicDependencyMap.get(toEvaluate);
-	
-			if(logger.isDebugEnabled()) {
-				logger.debug("Evaluating rules: " + dependingRules);
-				logger.debug("Depending on predicate: " + toEvaluate);
-			}			
-			
-			//process all depending rules
-			if(dependingRules != null)	{
-				for (IDistributedCompiledRule depends: dependingRules) {
-					
-					//get evaluation context and increment iterationnumber after evaluation of this rule
-					EvaluationContext ctx = contextMap.get(depends);										
-					boolean delta = depends.evaluate(ctx);
-					if(logger.isDebugEnabled()) {
-						logger.debug("Evaluating rule: " + depends);
-						logger.debug("EvaluationContext: " + ctx);
-					}		
-					
-					ctx.setIterationNumber(ctx.getIterationNumber() + 1);
-					
-					//new data was derived, take head predicate and push it on the "update queue"
-					if(delta && !isBlocked(depends.getRule())) {
-						IPredicate headPredicate = depends.getRule().getHead().get(0).getAtom().getPredicate();
-						
-						//add for re-computation (if not already present)
-						insertForFutureEvaluation(headPredicate);
-					}
-					
-				}
-			}			
-		}
-	}
-	
-	
-	/**
-	 * This method transforms the flat last of rules into a HashMap that reflects the dependency of rules on its body predicates.
-	 * This allows to get all rules that need to be recomputed when a specific predicate is updated.
-	 * 
-	 * @param rules
-	 */
-	protected void transformToDependencyMap(List<IDistributedCompiledRule> rules) {
-		
-		for (IDistributedCompiledRule currentRule : rules) {
-			//head predicate. we initially add each predicate once in order to ensure that each rule is evaluated at least once
-			IPredicate headPredicate = currentRule.getRule().getHead().get(0).getAtom().getPredicate();
-			
-			insertForFutureEvaluation(headPredicate);
-			
-			//now, for each body predicate we keep track of the rules that it occurs in.
-			//each time when the body predicate is updated from some other location
-			//we can look up rules depending on it and re-evaluate those.
-			List<ILiteral> bodyLiterals = currentRule.getRule().getBody();
-			for (ILiteral bodyLit : bodyLiterals) {
-				IPredicate bodyPredicate = bodyLit.getAtom().getPredicate();
-				insertOrUpdateDependency(bodyPredicate, currentRule);
+			int ruleNumber = 1;
+			// For each rule in the collection (stratum)
+			for (final IDistributedCompiledRule rule : rules )
+			{
+				logger.info("evaluate stratum : " + stratumNumber + ", iteration : " + iterationNumber + ", ruleNumber : " + ruleNumber + ", rule : " + rule.getRule());
+				boolean delta = rule.evaluate(new EvaluationContext(stratumNumber, iterationNumber, ruleNumber));
+				cont = delta ?  delta : cont;
+				ruleNumber++;
 			}
+			iterationNumber++;
 		}
+
 	}
-	
-	/**
-	 * Inserts a predicate for future evaluation. If the predicate is already scheduled this returns false.
-	 * 
-	 * @param predicate
-	 * @return True if the predicate was inserted for re-computation. False if the predicate was already scheduled.
-	 */
-	private boolean insertForFutureEvaluation(IPredicate predicate) {
-		
-		//TODO: Java's queue is quite dumb, essentially what would be needed is a Set-based backend for it
-		if(predicatesToEvaluate.contains(predicate)) {
-			return false;
-		} else {
-			if(logger.isDebugEnabled()) {
-				logger.debug("Inserting predicate for evaluation: " + predicate);
-			}			
-			return predicatesToEvaluate.add(predicate);
-		}
-	}
-	
-	/** 
-	 * @param p
-	 * @param rule
-	 */
-	private void insertOrUpdateDependency(IPredicate p, IDistributedCompiledRule rule) {
-		if( !dynamicDependencyMap.containsKey(p)) {
-			List<IDistributedCompiledRule> rules = new ArrayList<IDistributedCompiledRule>();			
-			dynamicDependencyMap.put(p, rules);
-		}
-		
-		if(logger.isDebugEnabled()) {
-			logger.debug("Adding rule " + rule.getRule() + " as dependant on predicate " + p);
-		}	
-		dynamicDependencyMap.get(p).add(rule);
-	}
-	
-	/**
-	 * Checks if a rule should not be re-evaluated at all.
-	 * 
-	 * @param rule
-	 * @return
-	 */
-	private boolean isBlocked(IRule rule) {
-		
-		for (IRuleEvaluationBlocker blocker : blockers) {
-			if(blocker.block(rule)) {
-				if(logger.isDebugEnabled()) {
-					logger.debug("Rule blocked: " + rule);
-				}
-				return true;
-			}
-		}
-		
-		return false;
-	}
-	
-	/**
-	 * Keeps track of predicates and rules that need to be re-evaluated when the predicate is updated in some way
-	 */
-	private Map<IPredicate, List<IDistributedCompiledRule>> dynamicDependencyMap = new HashMap<IPredicate, List<IDistributedCompiledRule>>(); 
-	
-	/**
-	 * Allows to block rules for performance reasons.
-	 */
-	private List<IRuleEvaluationBlocker> blockers;
-	
-	/**
-	 * Queued up set of predicates that have been updated and determine rules to be re-evaluated.
-	 */
-	private Queue<IPredicate> predicatesToEvaluate = new LinkedList<IPredicate>();
 }

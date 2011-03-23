@@ -155,13 +155,13 @@ public class RdfFactsConfiguration extends FactsConfiguration {
 		return RdfRecord.class;
 	}
 
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings("unchecked")
 	@Override
 	public Class<? extends InputFormat> getInputFormat() {
 		return RdfInputFormat.class;
 	}
 
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings("unchecked")
 	@Override
 	public Class<? extends OutputFormat> getOutputFormat() {
 		return RdfOutputFormat.class;

@@ -36,7 +36,7 @@ import eu.larkc.iris.storage.IRIWritable;
  * @history Nov 1, 2010, fisf, creation
  * @author Florian Fischer
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings("unchecked")
 public class ConstantFilter extends BaseOperation implements Filter {
 
 	/**

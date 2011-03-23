@@ -29,7 +29,7 @@ import eu.larkc.iris.storage.StringTermWritable;
  * @author valer.roman@softgress.com
  *
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings(value = "unchecked")
 public class TextImporterFunction extends BaseOperation implements Function {
 
 	/**

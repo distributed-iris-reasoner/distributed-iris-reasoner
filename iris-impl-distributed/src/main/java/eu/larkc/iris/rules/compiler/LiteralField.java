@@ -35,7 +35,7 @@ public class LiteralField extends Field {
 	 */
 	TermId id;
 	
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings("unchecked")
 	public LiteralField(TermId termId, Comparable source) {
 		super(source);
 		this.id = termId;

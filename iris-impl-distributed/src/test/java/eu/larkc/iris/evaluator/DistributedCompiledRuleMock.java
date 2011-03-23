@@ -7,12 +7,8 @@ import org.deri.iris.EvaluationException;
 import org.deri.iris.api.basics.IRule;
 import org.deri.iris.facts.IFacts;
 import org.deri.iris.storage.IRelation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import eu.larkc.iris.evaluation.EvaluationContext;
-import eu.larkc.iris.evaluation.bottomup.naive.DistributedNaiveEvaluator;
-import eu.larkc.iris.rules.compiler.CascadingCompiledRule;
 import eu.larkc.iris.rules.compiler.FlowAssembly;
 import eu.larkc.iris.rules.compiler.IDistributedCompiledRule;
 

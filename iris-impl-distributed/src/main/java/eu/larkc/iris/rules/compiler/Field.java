@@ -25,7 +25,7 @@ import org.deri.iris.api.terms.IVariable;
  * @author valer.roman@softgress.com
  *
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings("unchecked")
 public class Field {
 
 	private String name;

@@ -25,7 +25,7 @@ import org.apache.hadoop.mapred.JobConf;
 import eu.larkc.iris.evaluation.IDistributedEvaluationStrategyFactory;
 import eu.larkc.iris.evaluation.bottomup.DistributedBottomUpEvaluationStrategyFactory;
 import eu.larkc.iris.evaluation.bottomup.IRuleEvaluationBlocker;
-import eu.larkc.iris.evaluation.bottomup.naive.DistributedNaiveEvaluatorFactory;
+import eu.larkc.iris.evaluation.bottomup.naive.DistributedEvaluatorFactory;
 import eu.larkc.iris.rules.IRecursiveRulePreProcessor;
 import eu.larkc.iris.rules.NonOptimizingRecursiveRulePreProcessor;
 import eu.larkc.iris.rules.optimisation.JoinOptimizer;
@@ -59,7 +59,7 @@ public class Configuration extends org.deri.iris.Configuration
 	public final String PREDICATE_COUNT_TAIL_HFS_ROOT_PATH = "tmp/predicate_count";
 	
 	/** The evaluation strategy to use. */
-	public IDistributedEvaluationStrategyFactory evaluationStrategyFactory = new DistributedBottomUpEvaluationStrategyFactory( new DistributedNaiveEvaluatorFactory() );
+	public IDistributedEvaluationStrategyFactory evaluationStrategyFactory = new DistributedBottomUpEvaluationStrategyFactory( new DistributedEvaluatorFactory() );
 
 	public final List<IRecursiveRulePreProcessor> recursiveRulePreProcessors = new ArrayList<IRecursiveRulePreProcessor>();
 	

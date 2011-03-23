@@ -28,7 +28,7 @@ import cascading.flow.MultiMapReducePlanner;
 import cascading.operation.DebugLevel;
 import cascading.tuple.TupleEntryIterator;
 import eu.larkc.iris.evaluation.bottomup.DistributedBottomUpEvaluationStrategyFactory;
-import eu.larkc.iris.evaluation.bottomup.naive.DistributedNaiveEvaluatorFactory;
+import eu.larkc.iris.evaluation.bottomup.naive.DistributedEvaluatorFactory;
 import eu.larkc.iris.evaluation.distributed.ProgramEvaluationTest;
 import eu.larkc.iris.storage.FactsConfigurationFactory;
 import eu.larkc.iris.storage.FactsFactory;
@@ -111,7 +111,7 @@ public abstract class CascadingTest extends ProgramEvaluationTest {
 	protected void setUp() throws Exception {
 		// Create the default configuration.
 		defaultConfiguration = new eu.larkc.iris.Configuration();
-		defaultConfiguration.evaluationStrategyFactory = new DistributedBottomUpEvaluationStrategyFactory(new DistributedNaiveEvaluatorFactory());
+		defaultConfiguration.evaluationStrategyFactory = new DistributedBottomUpEvaluationStrategyFactory(new DistributedEvaluatorFactory());
 
 		if (jobConf != null)
 			return;

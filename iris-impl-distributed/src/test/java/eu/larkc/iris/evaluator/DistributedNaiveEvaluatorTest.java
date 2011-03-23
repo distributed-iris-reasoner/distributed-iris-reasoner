@@ -9,7 +9,7 @@ import java.util.List;
 import org.deri.iris.api.basics.IRule;
 
 import eu.larkc.iris.evaluation.bottomup.IDistributedRuleEvaluator;
-import eu.larkc.iris.evaluation.bottomup.naive.DistributedNaiveEvaluator;
+import eu.larkc.iris.evaluation.bottomup.naive.DistributedDependencyAwareEvaluator;
 import eu.larkc.iris.functional.features.LangFeaturesTest;
 import eu.larkc.iris.rules.compiler.CascadingRuleCompiler;
 import eu.larkc.iris.rules.compiler.IDistributedCompiledRule;
@@ -47,7 +47,7 @@ public class DistributedNaiveEvaluatorTest extends LangFeaturesTest {
 		compile();
 		
 		int stratum = 1;		
-		IDistributedRuleEvaluator eval = new DistributedNaiveEvaluator();
+		IDistributedRuleEvaluator eval = new DistributedDependencyAwareEvaluator();
 		eval.evaluateRules(stratum, compiledRules, super.defaultConfiguration);	
 		
 		DistributedCompiledRuleMock pathHead = ((DistributedCompiledRuleMock)compiledRules.get(0));
