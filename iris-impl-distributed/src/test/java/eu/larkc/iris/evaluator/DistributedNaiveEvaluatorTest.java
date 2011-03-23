@@ -17,7 +17,6 @@ import eu.larkc.iris.rules.compiler.IDistributedRuleCompiler;
 
 /**
  * @author Florian Fischer
- *
  */
 public class DistributedNaiveEvaluatorTest extends LangFeaturesTest {
 	
@@ -41,7 +40,7 @@ public class DistributedNaiveEvaluatorTest extends LangFeaturesTest {
 
 	public void testEvaluateRulesRecursive() throws Exception	{
 		program = "path(?X, ?Y) :- edge(?X, ?Y)."
-			+ "path(?X, ?Y) :- path(?X, ?Z), path(?Z, ?Y).";
+			+ "edge(?X, ?Y) :- path(?X, ?Z).";
 		parser.parse(program);
 		rules = createRules();
 
@@ -49,8 +48,16 @@ public class DistributedNaiveEvaluatorTest extends LangFeaturesTest {
 		
 		int stratum = 1;		
 		IDistributedRuleEvaluator eval = new DistributedNaiveEvaluator();
-		eval.evaluateRules(stratum, compiledRules, super.defaultConfiguration);
-		//TODO: finish and adapt DistributedNaiveEvaluator
+		eval.evaluateRules(stratum, compiledRules, super.defaultConfiguration);	
+		
+		DistributedCompiledRuleMock pathHead = ((DistributedCompiledRuleMock)compiledRules.get(0));
+		//both count to 2, evaluation starts widh "edge"
+		assertEquals(2, pathHead.getEvaluations()); 
+		
+		DistributedCompiledRuleMock edgeHead = ((DistributedCompiledRuleMock)compiledRules.get(1));
+		//final evaluation of "path" foces one more update for "edge" in which it returns no new inferences
+		//-> no additional recomputation for "path"
+		assertEquals(3, edgeHead.getEvaluations());	
 	}
 
 	@Override
@@ -60,7 +67,8 @@ public class DistributedNaiveEvaluatorTest extends LangFeaturesTest {
 			IDistributedRuleCompiler rc = new CascadingRuleCompiler(
 					defaultConfiguration);		
 			IDistributedCompiledRule compiledRule = rc.compile(rule);
-			compiledRules.add(compiledRule);
+			
+			compiledRules.add(new DistributedCompiledRuleMock(compiledRule));
 		}
 	}	
 	

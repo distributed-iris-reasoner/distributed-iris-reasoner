@@ -179,8 +179,7 @@ public class DistributedNaiveEvaluator implements IDistributedRuleEvaluator {
 	 */
 	private void insertOrUpdateDependency(IPredicate p, IDistributedCompiledRule rule) {
 		if( !dynamicDependencyMap.containsKey(p)) {
-			List<IDistributedCompiledRule> rules = new ArrayList<IDistributedCompiledRule>();
-			rules.add(rule);
+			List<IDistributedCompiledRule> rules = new ArrayList<IDistributedCompiledRule>();			
 			dynamicDependencyMap.put(p, rules);
 		}
 		
