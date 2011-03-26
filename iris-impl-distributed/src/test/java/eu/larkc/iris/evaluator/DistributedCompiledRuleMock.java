@@ -40,7 +40,7 @@ public class DistributedCompiledRuleMock implements IDistributedCompiledRule {
 		System.out.println("Rule: " + rule.getRule() + " Internal iteration: " + evaluations);
 				
 		//simulate two iterations (excluding updated due to dependencies)
-		if(evaluations < 3) {			
+		if(evaluations < maxEvaluations) {			
 			return true;
 		}				
 		
@@ -75,6 +75,19 @@ public class DistributedCompiledRuleMock implements IDistributedCompiledRule {
 	public int getEvaluations() {
 		return evaluations;
 	}
+	
+
+	public int getMaxEvaluations() {
+		return maxEvaluations;
+	}
+
+	public void setMaxEvaluations(int maxEvaluations) {
+		this.maxEvaluations = maxEvaluations;
+	}
+
+
+
+	private int maxEvaluations = 3;
 
 	private int evaluations = 0;
 	

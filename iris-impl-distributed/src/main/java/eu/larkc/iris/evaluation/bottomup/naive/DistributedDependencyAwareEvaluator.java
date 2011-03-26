@@ -47,22 +47,36 @@ public class DistributedDependencyAwareEvaluator implements IDistributedRuleEval
 	
 	@Override
 	public void evaluateRules(Integer stratumNumber, List<IDistributedCompiledRule> rules, eu.larkc.iris.Configuration configuration) throws EvaluationException {
+		String methodName = "evaluateRules(Integer, List<IDistributedCompiledRule, Configuration)";
 		
+		if(logger.isInfoEnabled()) {
+			StringBuilder log = new StringBuilder();
+			log.append("Method " + methodName + "\n");
+			log.append("Stratum: " + stratumNumber + "\n");
+			log.append("Rules:");
+			for (IDistributedCompiledRule rule : rules) {
+				log.append("\n" + rule.getRule());
+			}
+			
+			logger.info(log.toString());
+		}
+		
+		//clear objects after each evaluation
+		dynamicDependencyMap.clear();
+		predicatesToEvaluate.clear();
+		contextMap.clear();
+			
 		//optionally: completely block some rules from re-evaluation
 		blockers = configuration.ruleEvaluationBlockers;
 		
 		//transform flat list to hashmap reflecting the dependencies between rules (more particularly predicates)
-		transformToDependencyMap(rules);		
+		transformToDependencyMap(rules);
 		
-		HashMap<IDistributedCompiledRule, EvaluationContext> contextMap = new HashMap<IDistributedCompiledRule, EvaluationContext>();
+		//init all rules		
+		initEvaluationContext(rules, stratumNumber);
 		
-		//initi for all rules		
-		int ruleNumber = 1;
-		int iterationNumber = 1;
-		for(IDistributedCompiledRule rule : rules) {
-			contextMap.put(rule, new EvaluationContext(stratumNumber, iterationNumber, ruleNumber));
-			ruleNumber++; //we simply enumerate all rules. in combination with stratum and iteration number this gives a unique identifier
-		}		
+		//one initial round of evaluation over all rules
+		internalEvaluate(rules);
 	
 		//initially those will be the head predicates
 		while( !predicatesToEvaluate.isEmpty()) {
@@ -72,36 +86,75 @@ public class DistributedDependencyAwareEvaluator implements IDistributedRuleEval
 			//get rules that depend on this predicate (i.e. it is a body predicate of them)
 			List<IDistributedCompiledRule> dependingRules = dynamicDependencyMap.get(toEvaluate);
 	
-			if(logger.isDebugEnabled()) {
-				logger.debug("Evaluating rules: " + dependingRules);
-				logger.debug("Depending on predicate: " + toEvaluate);
+			if(logger.isInfoEnabled()) {
+				logger.info("Evaluating rules: " + dependingRules);
+				logger.info("Depending on predicate: " + toEvaluate);
 			}			
 			
 			//process all depending rules
-			if(dependingRules != null)	{
-				for (IDistributedCompiledRule depends: dependingRules) {
-					
-					//get evaluation context and increment iterationnumber after evaluation of this rule
-					EvaluationContext ctx = contextMap.get(depends);										
-					boolean delta = depends.evaluate(ctx);
-					if(logger.isDebugEnabled()) {
-						logger.debug("Evaluating rule: " + depends);
-						logger.debug("EvaluationContext: " + ctx);
-					}		
-					
-					ctx.setIterationNumber(ctx.getIterationNumber() + 1);
-					
-					//new data was derived, take head predicate and push it on the "update queue"
-					if(delta && !isBlocked(depends.getRule())) {
-						IPredicate headPredicate = depends.getRule().getHead().get(0).getAtom().getPredicate();
-						
-						//add for re-computation (if not already present)
-						insertForFutureEvaluation(headPredicate);
-					}
-					
-				}
+			if(dependingRules != null && !dependingRules.isEmpty())	{
+				internalEvaluate(dependingRules);					
 			}			
 		}
+	}
+	
+	/**
+	 * Internal evaluation method.
+	 * 
+	 * @param toEvaluate
+	 * @throws EvaluationException 
+	 */
+	private void internalEvaluate(List<IDistributedCompiledRule> toEvaluate) throws EvaluationException {		
+		String methodName = "internalEvaluate(List<IDistributedCompiledRule)";
+		
+		if(logger.isInfoEnabled()) {
+			StringBuilder log = new StringBuilder();
+			log.append("Method " + methodName + "\n");
+			log.append("Rules:");
+			for (IDistributedCompiledRule rule : toEvaluate) {
+				log.append("\n" + rule.getRule());
+			}
+			
+			logger.info(log.toString());
+		}
+		
+		
+		for (IDistributedCompiledRule currentRule: toEvaluate) {
+			
+			//get evaluation context and increment iteration number after evaluation of this rule
+			EvaluationContext ctx = contextMap.get(currentRule);			
+			if(logger.isInfoEnabled()) {
+				logger.info("Evaluating rule: " + currentRule);
+				logger.info("EvaluationContext: " + ctx);
+			}	
+			
+			boolean delta = currentRule.evaluate(ctx);
+			ctx.setIterationNumber(ctx.getIterationNumber() + 1);
+			
+			//new data was derived, take head predicate and push it on the "update queue"
+			if(delta && !isBlocked(currentRule.getRule())) {
+				IPredicate headPredicate = currentRule.getRule().getHead().get(0).getAtom().getPredicate();
+				
+				//add for re-computation (if not already present)
+				insertForFutureEvaluation(headPredicate);
+			}
+			
+		}
+	}
+	
+	/**
+	 * Initializes an evaluation context for each rule
+	 * 
+	 * @param rules
+	 * @param stratumNumber
+	 */
+	private void initEvaluationContext(List<IDistributedCompiledRule> rules, Integer stratumNumber) {
+		int ruleNumber = 1;
+		int iterationNumber = 1;
+		for(IDistributedCompiledRule rule : rules) {
+			contextMap.put(rule, new EvaluationContext(stratumNumber, iterationNumber, ruleNumber));
+			ruleNumber++; //we simply enumerate all rules. in combination with stratum and iteration number this gives a unique identifier
+		}		
 	}
 	
 	
@@ -111,15 +164,10 @@ public class DistributedDependencyAwareEvaluator implements IDistributedRuleEval
 	 * 
 	 * @param rules
 	 */
-	protected void transformToDependencyMap(List<IDistributedCompiledRule> rules) {
+	private void transformToDependencyMap(List<IDistributedCompiledRule> rules) {
 		
-		for (IDistributedCompiledRule currentRule : rules) {
-			//head predicate. we initially add each predicate once in order to ensure that each rule is evaluated at least once
-			IPredicate headPredicate = currentRule.getRule().getHead().get(0).getAtom().getPredicate();
-			
-			insertForFutureEvaluation(headPredicate);
-			
-			//now, for each body predicate we keep track of the rules that it occurs in.
+		for (IDistributedCompiledRule currentRule : rules) {			
+			//for each body predicate we keep track of the rules that it occurs in.
 			//each time when the body predicate is updated from some other location
 			//we can look up rules depending on it and re-evaluate those.
 			List<ILiteral> bodyLiterals = currentRule.getRule().getBody();
@@ -138,12 +186,11 @@ public class DistributedDependencyAwareEvaluator implements IDistributedRuleEval
 	 */
 	private boolean insertForFutureEvaluation(IPredicate predicate) {
 		
-		//TODO: Java's queue is quite dumb, essentially what would be needed is a Set-based backend for it
 		if(predicatesToEvaluate.contains(predicate)) {
 			return false;
 		} else {
-			if(logger.isDebugEnabled()) {
-				logger.debug("Inserting predicate for evaluation: " + predicate);
+			if(logger.isInfoEnabled()) {
+				logger.info("Inserting predicate for evaluation: " + predicate);
 			}			
 			return predicatesToEvaluate.add(predicate);
 		}
@@ -154,13 +201,14 @@ public class DistributedDependencyAwareEvaluator implements IDistributedRuleEval
 	 * @param rule
 	 */
 	private void insertOrUpdateDependency(IPredicate p, IDistributedCompiledRule rule) {
+		
 		if( !dynamicDependencyMap.containsKey(p)) {
 			List<IDistributedCompiledRule> rules = new ArrayList<IDistributedCompiledRule>();			
 			dynamicDependencyMap.put(p, rules);
 		}
 		
-		if(logger.isDebugEnabled()) {
-			logger.debug("Adding rule " + rule.getRule() + " as dependant on predicate " + p);
+		if(logger.isInfoEnabled()) {
+			logger.info("Adding rule " + rule.getRule() + " as dependant on predicate " + p);
 		}	
 		dynamicDependencyMap.get(p).add(rule);
 	}
@@ -175,8 +223,8 @@ public class DistributedDependencyAwareEvaluator implements IDistributedRuleEval
 		
 		for (IRuleEvaluationBlocker blocker : blockers) {
 			if(blocker.block(rule)) {
-				if(logger.isDebugEnabled()) {
-					logger.debug("Rule blocked: " + rule);
+				if(logger.isInfoEnabled()) {
+					logger.info("Rule blocked: " + rule);
 				}
 				return true;
 			}
@@ -199,4 +247,9 @@ public class DistributedDependencyAwareEvaluator implements IDistributedRuleEval
 	 * Queued up set of predicates that have been updated and determine rules to be re-evaluated.
 	 */
 	private Queue<IPredicate> predicatesToEvaluate = new LinkedList<IPredicate>();
+	
+	/**
+	 * Map to keep track and update the evaluation context of a rule.
+	 */
+	Map<IDistributedCompiledRule, EvaluationContext> contextMap = new HashMap<IDistributedCompiledRule, EvaluationContext>();
 }
