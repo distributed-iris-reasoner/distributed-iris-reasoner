@@ -3,12 +3,15 @@
  */
 package eu.larkc.iris.evaluator;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.deri.iris.EvaluationException;
 import org.deri.iris.api.basics.IRule;
 import org.deri.iris.facts.IFacts;
 import org.deri.iris.storage.IRelation;
 
 import eu.larkc.iris.evaluation.EvaluationContext;
+import eu.larkc.iris.rules.compiler.CascadingCompiledRule;
 import eu.larkc.iris.rules.compiler.FlowAssembly;
 import eu.larkc.iris.rules.compiler.IDistributedCompiledRule;
 
@@ -84,7 +87,32 @@ public class DistributedCompiledRuleMock implements IDistributedCompiledRule {
 	public void setMaxEvaluations(int maxEvaluations) {
 		this.maxEvaluations = maxEvaluations;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
 
+		if (obj instanceof CascadingCompiledRule == false) {
+			return false;
+		}
+		if (this == obj) {
+			return true;
+		}
+		final CascadingCompiledRule otherObject = (CascadingCompiledRule) obj;
+
+		return new EqualsBuilder().append(this.rule, otherObject.getRule())
+				.isEquals();
+
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder().append(rule.toString()).toHashCode();
+	}
+
+	@Override
+	public String toString() {
+		return rule.toString();
+	}
 
 
 	private int maxEvaluations = 3;
