@@ -51,9 +51,9 @@ public class DistributedDependencyAwareEvaluator implements IDistributedRuleEval
 		
 		if(logger.isInfoEnabled()) {
 			StringBuilder log = new StringBuilder();
-			log.append("Method " + methodName + "\n");
+			log.append("Method: " + methodName + "\n");
 			log.append("Stratum: " + stratumNumber + "\n");
-			log.append("Rules:");
+			log.append("Rules: ");
 			for (IDistributedCompiledRule rule : rules) {
 				log.append("\n" + rule.getRule());
 			}
@@ -87,7 +87,7 @@ public class DistributedDependencyAwareEvaluator implements IDistributedRuleEval
 			List<IDistributedCompiledRule> dependingRules = dynamicDependencyMap.get(toEvaluate);
 	
 			if(logger.isInfoEnabled()) {
-				logger.info("Evaluating rules: " + dependingRules);
+				logger.info("Depending rules: " + dependingRules);
 				logger.info("Depending on predicate: " + toEvaluate);
 			}			
 			
@@ -95,6 +95,14 @@ public class DistributedDependencyAwareEvaluator implements IDistributedRuleEval
 			if(dependingRules != null && !dependingRules.isEmpty())	{
 				internalEvaluate(dependingRules);					
 			}			
+		}
+		
+		if(logger.isInfoEnabled()) {
+			StringBuilder log = new StringBuilder();
+			log.append("Method: " + methodName + "\n");
+			log.append("Done with Stratum: " + stratumNumber + "\n");
+			
+			logger.info(log.toString());
 		}
 	}
 	
@@ -109,10 +117,10 @@ public class DistributedDependencyAwareEvaluator implements IDistributedRuleEval
 		
 		if(logger.isInfoEnabled()) {
 			StringBuilder log = new StringBuilder();
-			log.append("Method " + methodName + "\n");
+			log.append("Method: " + methodName + "\n");
 			log.append("Rules:");
 			for (IDistributedCompiledRule rule : toEvaluate) {
-				log.append("\n" + rule.getRule());
+				log.append("\n" + rule.toString());
 			}
 			
 			logger.info(log.toString());
@@ -185,12 +193,16 @@ public class DistributedDependencyAwareEvaluator implements IDistributedRuleEval
 	 * @return True if the predicate was inserted for re-computation. False if the predicate was already scheduled.
 	 */
 	private boolean insertForFutureEvaluation(IPredicate predicate) {
+		String methodName = "insertForFutureEvaluation(IPredicate)";
 		
 		if(predicatesToEvaluate.contains(predicate)) {
 			return false;
 		} else {
 			if(logger.isInfoEnabled()) {
-				logger.info("Inserting predicate for evaluation: " + predicate);
+				StringBuilder log = new StringBuilder();
+				log.append("Method: " + methodName + "\n");
+				log.append("IPredicate: " + predicate);
+				logger.info(log.toString());
 			}			
 			return predicatesToEvaluate.add(predicate);
 		}
@@ -201,6 +213,7 @@ public class DistributedDependencyAwareEvaluator implements IDistributedRuleEval
 	 * @param rule
 	 */
 	private void insertOrUpdateDependency(IPredicate p, IDistributedCompiledRule rule) {
+		String methodName = "insertOrUpdateDependency(IPredicate, IDistributedCompiledRule)";
 		
 		if( !dynamicDependencyMap.containsKey(p)) {
 			List<IDistributedCompiledRule> rules = new ArrayList<IDistributedCompiledRule>();			
@@ -208,7 +221,11 @@ public class DistributedDependencyAwareEvaluator implements IDistributedRuleEval
 		}
 		
 		if(logger.isInfoEnabled()) {
-			logger.info("Adding rule " + rule.getRule() + " as dependant on predicate " + p);
+			StringBuilder log = new StringBuilder();
+			log.append("Method: " + methodName + "\n");
+			log.append("IPredicate: " + p + "\n");
+			log.append("IDistributedCompiledRule: " + rule);
+			logger.info(log.toString());
 		}	
 		dynamicDependencyMap.get(p).add(rule);
 	}
