@@ -84,8 +84,6 @@ public class DistributedBottomUpEvaluationStrategy implements
 		
 		List<IRule> safeRules = utils.applyRuleSafetyProcessor(rules);		
 		
-		//TODO (fisf): make it possible to enable/disable this with a switch on mConfiguration
-		//this should be encapsulated in EvaluationUtilities when there are multiple implementations that e.g. can be chained
 		IRecursiveRulePreProcessor recursiveRuleProcessor = new NonOptimizingRecursiveRulePreProcessor();
 		recursiveRuleProcessor.process(safeRules);
 		List<IRule> singlePassRules = recursiveRuleProcessor.getNonrecursive();

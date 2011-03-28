@@ -15,6 +15,10 @@
  */
 package eu.larkc.iris.evaluation;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
+
 /**
  * 
  * Maintains information about the evaluation context (under which context a rule is evaluated, stratum, iteration, rule identifier)
@@ -60,4 +64,21 @@ public class EvaluationContext {
 	public void setRuleNumber(int ruleNumber) {
 		this.ruleNumber = ruleNumber;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return EqualsBuilder.reflectionEquals(this, obj);
+	}
+
+	@Override
+	public int hashCode() {
+		return HashCodeBuilder.reflectionHashCode(this);
+	}
+
+	@Override
+	public String toString() {
+		return ToStringBuilder.reflectionToString(this);
+	}
+	
+	
 }
