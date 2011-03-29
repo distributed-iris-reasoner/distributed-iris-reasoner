@@ -124,6 +124,31 @@ public class DistributedDependencyAwareEvaluatorTest extends LangFeaturesTest {
 		rules = createRules();
 		
 		compile();		
+		
+		DistributedCompiledRuleMock kekHead = ((DistributedCompiledRuleMock)compiledRules.get(0));	
+		kekHead.setMaxEvaluations(3);
+		
+		eval.evaluateRules(stratum, compiledRules, super.defaultConfiguration);	
+		assertEquals(2, pathHead.getEvaluations()); 		
+	}
+	
+	public void testSamePredicateRecursive() throws Exception {
+	
+		
+		program = "edge(?X, ?Z) :- edge(?X, ?Y), edge(?Y, ?Z).";		
+		parser.parse(program);
+		rules = createRules();
+
+		compile();
+		
+		int stratum = 1;		
+		IDistributedRuleEvaluator eval = new DistributedDependencyAwareEvaluator();
+		DistributedCompiledRuleMock pathHead = ((DistributedCompiledRuleMock)compiledRules.get(0));
+		pathHead.setMaxEvaluations(3); // 1 time internal + 1 additional simulated delta
+		
+		eval.evaluateRules(stratum, compiledRules, super.defaultConfiguration);				
+	
+		assertEquals(3, pathHead.getEvaluations()); 	
 	}
 
 	@Override

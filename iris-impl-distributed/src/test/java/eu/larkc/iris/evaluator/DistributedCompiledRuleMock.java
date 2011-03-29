@@ -39,8 +39,7 @@ public class DistributedCompiledRuleMock implements IDistributedCompiledRule {
 	public boolean evaluate(EvaluationContext evaluationContext)
 			throws EvaluationException {
 		
-		evaluations++;
-		System.out.println("Rule: " + rule.getRule() + " Internal iteration: " + evaluations);
+		evaluations++;		
 				
 		//simulate two iterations (excluding updated due to dependencies)
 		if(evaluations < maxEvaluations) {			
@@ -91,13 +90,13 @@ public class DistributedCompiledRuleMock implements IDistributedCompiledRule {
 	@Override
 	public boolean equals(Object obj) {
 
-		if (obj instanceof CascadingCompiledRule == false) {
+		if (obj instanceof DistributedCompiledRuleMock == false) {
 			return false;
 		}
 		if (this == obj) {
 			return true;
 		}
-		final CascadingCompiledRule otherObject = (CascadingCompiledRule) obj;
+		final DistributedCompiledRuleMock otherObject = (DistributedCompiledRuleMock) obj;
 
 		return new EqualsBuilder().append(this.rule, otherObject.getRule())
 				.isEquals();

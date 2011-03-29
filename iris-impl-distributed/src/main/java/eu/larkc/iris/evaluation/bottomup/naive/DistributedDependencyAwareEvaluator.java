@@ -136,11 +136,11 @@ public class DistributedDependencyAwareEvaluator implements IDistributedRuleEval
 				logger.info("EvaluationContext: " + ctx);
 			}	
 			
-			boolean delta = currentRule.evaluate(ctx);
-			ctx.setIterationNumber(ctx.getIterationNumber() + 1);
+			boolean delta = currentRule.evaluate(ctx);			
 			
 			//new data was derived, take head predicate and push it on the "update queue"
 			if(delta && !isBlocked(currentRule.getRule())) {
+				ctx.setIterationNumber(ctx.getIterationNumber() + 1); //one more iteration iteration
 				IPredicate headPredicate = currentRule.getRule().getHead().get(0).getAtom().getPredicate();
 				
 				//add for re-computation (if not already present)
@@ -219,15 +219,19 @@ public class DistributedDependencyAwareEvaluator implements IDistributedRuleEval
 			List<IDistributedCompiledRule> rules = new ArrayList<IDistributedCompiledRule>();			
 			dynamicDependencyMap.put(p, rules);
 		}
-		
-		if(logger.isInfoEnabled()) {
-			StringBuilder log = new StringBuilder();
-			log.append("Method: " + methodName + "\n");
-			log.append("IPredicate: " + p + "\n");
-			log.append("IDistributedCompiledRule: " + rule);
-			logger.info(log.toString());
-		}	
-		dynamicDependencyMap.get(p).add(rule);
+		List<IDistributedCompiledRule> rules = dynamicDependencyMap.get(p);
+		//this prevents double entries in the case of multiple predicates of the same name in a rule
+		//using a list is not ideal in terms of performance but ok for now since those collections will be small
+		if(!rules.contains(rule)) {
+			if(logger.isInfoEnabled()) {
+				StringBuilder log = new StringBuilder();
+				log.append("Method: " + methodName + "\n");
+				log.append("IPredicate: " + p + "\n");
+				log.append("IDistributedCompiledRule: " + rule);
+				logger.info(log.toString());
+			}	
+			rules.add(rule);
+		}
 	}
 	
 	/**
