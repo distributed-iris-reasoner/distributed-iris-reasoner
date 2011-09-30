@@ -215,20 +215,35 @@ public class LiteralFields extends eu.larkc.iris.rules.compiler.PipeFields {
 	protected Pipe filterConstants(Pipe attachTo) {
 		Map<String, WritableComparable> constantTerms = new HashMap<String, WritableComparable>();
 
+		boolean hasPredicateFilter = false;
+		boolean hasConstantFilter = false;
 		for (Field field : this) {
 			if (field.getSource() instanceof IPredicate) {
 				constantTerms.put(field.getName(), WritableFactory.fromPredicate((IPredicate) field.getSource())); //added one because of the predicate field
+				hasPredicateFilter = true;
 			} else if (field.getSource() instanceof ITerm) {
 				ITerm term = (ITerm) field.getSource();
 				// not a variable, we filter the tuples
 				if (term.isGround()) {
 					constantTerms.put(field.getName(), WritableFactory.fromTerm(term)); //added one because of the predicate field
+					hasConstantFilter = true;
 				}
 			}
 		}
 
 		// did we actually find at least one constant?
 		if (!constantTerms.isEmpty()) {
+			if (this.count == Long.MAX_VALUE) {
+				if (hasPredicateFilter) {
+					if (hasConstantFilter) {
+						this.count = new Long(-3);
+					} else {
+						this.count = new Long(-1); //a filter by predicate might have less results than a predicate by subject or object
+					}
+				} else {
+					this.count = new Long(-2);
+				}
+			}
 			Pipe filter = new Each(attachTo, new ConstantFilter(constantTerms));
 			return filter;
 		}

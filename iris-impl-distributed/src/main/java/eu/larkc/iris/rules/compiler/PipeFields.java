@@ -55,7 +55,7 @@ public class PipeFields extends Fields {
 	//the maximal possible number of records that this stream can contained, is calculated from the joins of 
 	//literal fields used create it (it's value is the minimal count fo the literal fields used for join
 	//only used when with predicate indexing
-	protected Long count = new Long(0);
+	protected Long count = Long.MAX_VALUE;
 	
 	protected PipeFields() {}
 	

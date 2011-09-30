@@ -1,0 +1,295 @@
+<http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl> <http://www.w3.org/2000/01/rdf-schema#comment> "An university ontology for benchmark tests" .
+<http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl> <http://www.w3.org/2000/01/rdf-schema#label> "Univ-bench Ontology" .
+<http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl> <http://www.w3.org/2002/07/owl#versionInfo> "univ-bench-ontology-owl, ver April 1, 2004" .
+<http://univ-bench.com#AdministrativeStaff> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#AdministrativeStaff> <http://www.w3.org/2000/01/rdf-schema#label> "administrative staff worker" .
+<http://univ-bench.com#AdministrativeStaff> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Employee> .
+<http://univ-bench.com#Article> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#Article> <http://www.w3.org/2000/01/rdf-schema#label> "article" .
+<http://univ-bench.com#Article> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Publication> .
+<http://univ-bench.com#AssistantProfessor> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#AssistantProfessor> <http://www.w3.org/2000/01/rdf-schema#label> "assistant professor" .
+<http://univ-bench.com#AssistantProfessor> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Professor> .
+<http://univ-bench.com#AssociateProfessor> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#AssociateProfessor> <http://www.w3.org/2000/01/rdf-schema#label> "associate professor" .
+<http://univ-bench.com#AssociateProfessor> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Professor> .
+<http://univ-bench.com#Book> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#Book> <http://www.w3.org/2000/01/rdf-schema#label> "book" .
+<http://univ-bench.com#Book> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Publication> .
+<http://univ-bench.com#Chair> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#Chair> <http://www.w3.org/2000/01/rdf-schema#label> "chair" .
+<http://univ-bench.com#Chair> <http://www.w3.org/2002/07/owl#intersectionOf> _:node15n67q1f2x1 .
+_:node15n67q1f2x1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://univ-bench.com#Person> .
+<http://univ-bench.com#Person> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+_:node15n67q1f2x1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:node15n67q1f2x3 .
+_:node15n67q1f2x3 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> _:node15n67q1f2x2 .
+_:node15n67q1f2x2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction> .
+_:node15n67q1f2x2 <http://www.w3.org/2002/07/owl#onProperty> <http://univ-bench.com#headOf> .
+_:node15n67q1f2x2 <http://www.w3.org/2002/07/owl#someValuesFrom> <http://univ-bench.com#Department> .
+<http://univ-bench.com#Department> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+_:node15n67q1f2x3 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://univ-bench.com#Chair> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Professor> .
+<http://univ-bench.com#ClericalStaff> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#ClericalStaff> <http://www.w3.org/2000/01/rdf-schema#label> "clerical staff worker" .
+<http://univ-bench.com#ClericalStaff> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#AdministrativeStaff> .
+<http://univ-bench.com#College> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#College> <http://www.w3.org/2000/01/rdf-schema#label> "school" .
+<http://univ-bench.com#College> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Organization> .
+<http://univ-bench.com#ConferencePaper> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#ConferencePaper> <http://www.w3.org/2000/01/rdf-schema#label> "conference paper" .
+<http://univ-bench.com#ConferencePaper> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Article> .
+<http://univ-bench.com#Course> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#Course> <http://www.w3.org/2000/01/rdf-schema#label> "teaching course" .
+<http://univ-bench.com#Course> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Work> .
+<http://univ-bench.com#Dean> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#Dean> <http://www.w3.org/2000/01/rdf-schema#label> "dean" .
+<http://univ-bench.com#Dean> <http://www.w3.org/2002/07/owl#intersectionOf> _:node15n67q1f2x4 .
+_:node15n67q1f2x4 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://univ-bench.com#Person> .
+_:node15n67q1f2x4 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:node15n67q1f2x6 .
+_:node15n67q1f2x6 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> _:node15n67q1f2x5 .
+_:node15n67q1f2x5 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction> .
+_:node15n67q1f2x5 <http://www.w3.org/2002/07/owl#onProperty> <http://univ-bench.com#headOf> .
+_:node15n67q1f2x5 <http://www.w3.org/2002/07/owl#someValuesFrom> <http://univ-bench.com#College> .
+_:node15n67q1f2x6 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://univ-bench.com#Dean> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Professor> .
+<http://univ-bench.com#Department> <http://www.w3.org/2000/01/rdf-schema#label> "university department" .
+<http://univ-bench.com#Department> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Organization> .
+<http://univ-bench.com#Director> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#Director> <http://www.w3.org/2000/01/rdf-schema#label> "director" .
+<http://univ-bench.com#Director> <http://www.w3.org/2002/07/owl#intersectionOf> _:node15n67q1f2x7 .
+_:node15n67q1f2x7 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://univ-bench.com#Person> .
+_:node15n67q1f2x7 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:node15n67q1f2x9 .
+_:node15n67q1f2x9 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> _:node15n67q1f2x8 .
+_:node15n67q1f2x8 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction> .
+_:node15n67q1f2x8 <http://www.w3.org/2002/07/owl#onProperty> <http://univ-bench.com#headOf> .
+_:node15n67q1f2x8 <http://www.w3.org/2002/07/owl#someValuesFrom> <http://univ-bench.com#Program> .
+<http://univ-bench.com#Program> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+_:node15n67q1f2x9 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://univ-bench.com#Employee> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#Employee> <http://www.w3.org/2000/01/rdf-schema#label> "Employee" .
+<http://univ-bench.com#Employee> <http://www.w3.org/2002/07/owl#intersectionOf> _:node15n67q1f2x10 .
+_:node15n67q1f2x10 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://univ-bench.com#Person> .
+_:node15n67q1f2x10 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:node15n67q1f2x12 .
+_:node15n67q1f2x12 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> _:node15n67q1f2x11 .
+_:node15n67q1f2x11 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction> .
+_:node15n67q1f2x11 <http://www.w3.org/2002/07/owl#onProperty> <http://univ-bench.com#worksFor> .
+_:node15n67q1f2x11 <http://www.w3.org/2002/07/owl#someValuesFrom> <http://univ-bench.com#Organization> .
+<http://univ-bench.com#Organization> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+_:node15n67q1f2x12 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://univ-bench.com#Faculty> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#Faculty> <http://www.w3.org/2000/01/rdf-schema#label> "faculty member" .
+<http://univ-bench.com#Faculty> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Employee> .
+<http://univ-bench.com#FullProfessor> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#FullProfessor> <http://www.w3.org/2000/01/rdf-schema#label> "full professor" .
+<http://univ-bench.com#FullProfessor> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Professor> .
+<http://univ-bench.com#GraduateCourse> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#GraduateCourse> <http://www.w3.org/2000/01/rdf-schema#label> "Graduate Level Courses" .
+<http://univ-bench.com#GraduateCourse> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Course> .
+<http://univ-bench.com#GraduateStudent> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#GraduateStudent> <http://www.w3.org/2000/01/rdf-schema#label> "graduate student" .
+<http://univ-bench.com#GraduateStudent> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Person> .
+<http://univ-bench.com#GraduateStudent> <http://www.w3.org/2000/01/rdf-schema#subClassOf> _:node15n67q1f2x13 .
+_:node15n67q1f2x13 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction> .
+_:node15n67q1f2x13 <http://www.w3.org/2002/07/owl#onProperty> <http://univ-bench.com#takesCourse> .
+_:node15n67q1f2x13 <http://www.w3.org/2002/07/owl#someValuesFrom> <http://univ-bench.com#GraduateCourse> .
+<http://univ-bench.com#Institute> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#Institute> <http://www.w3.org/2000/01/rdf-schema#label> "institute" .
+<http://univ-bench.com#Institute> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Organization> .
+<http://univ-bench.com#JournalArticle> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#JournalArticle> <http://www.w3.org/2000/01/rdf-schema#label> "journal article" .
+<http://univ-bench.com#JournalArticle> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Article> .
+<http://univ-bench.com#Lecturer> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#Lecturer> <http://www.w3.org/2000/01/rdf-schema#label> "lecturer" .
+<http://univ-bench.com#Lecturer> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Faculty> .
+<http://univ-bench.com#Manual> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#Manual> <http://www.w3.org/2000/01/rdf-schema#label> "manual" .
+<http://univ-bench.com#Manual> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Publication> .
+<http://univ-bench.com#Organization> <http://www.w3.org/2000/01/rdf-schema#label> "organization" .
+<http://univ-bench.com#Person> <http://www.w3.org/2000/01/rdf-schema#label> "person" .
+<http://univ-bench.com#PostDoc> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#PostDoc> <http://www.w3.org/2000/01/rdf-schema#label> "post doctorate" .
+<http://univ-bench.com#PostDoc> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Faculty> .
+<http://univ-bench.com#Professor> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#Professor> <http://www.w3.org/2000/01/rdf-schema#label> "professor" .
+<http://univ-bench.com#Professor> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Faculty> .
+<http://univ-bench.com#Program> <http://www.w3.org/2000/01/rdf-schema#label> "program" .
+<http://univ-bench.com#Program> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Organization> .
+<http://univ-bench.com#Publication> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#Publication> <http://www.w3.org/2000/01/rdf-schema#label> "publication" .
+<http://univ-bench.com#Research> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#Research> <http://www.w3.org/2000/01/rdf-schema#label> "research work" .
+<http://univ-bench.com#Research> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Work> .
+<http://univ-bench.com#ResearchAssistant> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#ResearchAssistant> <http://www.w3.org/2000/01/rdf-schema#label> "university research assistant" .
+<http://univ-bench.com#ResearchAssistant> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Student> .
+<http://univ-bench.com#ResearchAssistant> <http://www.w3.org/2000/01/rdf-schema#subClassOf> _:node15n67q1f2x14 .
+_:node15n67q1f2x14 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction> .
+_:node15n67q1f2x14 <http://www.w3.org/2002/07/owl#onProperty> <http://univ-bench.com#worksFor> .
+_:node15n67q1f2x14 <http://www.w3.org/2002/07/owl#someValuesFrom> <http://univ-bench.com#ResearchGroup> .
+<http://univ-bench.com#ResearchGroup> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#ResearchGroup> <http://www.w3.org/2000/01/rdf-schema#label> "research group" .
+<http://univ-bench.com#ResearchGroup> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Organization> .
+<http://univ-bench.com#Schedule> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#Schedule> <http://www.w3.org/2000/01/rdf-schema#label> "schedule" .
+<http://univ-bench.com#Software> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#Software> <http://www.w3.org/2000/01/rdf-schema#label> "software program" .
+<http://univ-bench.com#Software> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Publication> .
+<http://univ-bench.com#Specification> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#Specification> <http://www.w3.org/2000/01/rdf-schema#label> "published specification" .
+<http://univ-bench.com#Specification> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Publication> .
+<http://univ-bench.com#Student> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#Student> <http://www.w3.org/2000/01/rdf-schema#label> "student" .
+<http://univ-bench.com#Student> <http://www.w3.org/2002/07/owl#intersectionOf> _:node15n67q1f2x15 .
+_:node15n67q1f2x15 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://univ-bench.com#Person> .
+_:node15n67q1f2x15 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:node15n67q1f2x17 .
+_:node15n67q1f2x17 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> _:node15n67q1f2x16 .
+_:node15n67q1f2x16 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction> .
+_:node15n67q1f2x16 <http://www.w3.org/2002/07/owl#onProperty> <http://univ-bench.com#takesCourse> .
+_:node15n67q1f2x16 <http://www.w3.org/2002/07/owl#someValuesFrom> <http://univ-bench.com#Course> .
+_:node15n67q1f2x17 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://univ-bench.com#SystemsStaff> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#SystemsStaff> <http://www.w3.org/2000/01/rdf-schema#label> "systems staff worker" .
+<http://univ-bench.com#SystemsStaff> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#AdministrativeStaff> .
+<http://univ-bench.com#TeachingAssistant> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#TeachingAssistant> <http://www.w3.org/2000/01/rdf-schema#label> "university teaching assistant" .
+<http://univ-bench.com#TeachingAssistant> <http://www.w3.org/2002/07/owl#intersectionOf> _:node15n67q1f2x18 .
+_:node15n67q1f2x18 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://univ-bench.com#Person> .
+_:node15n67q1f2x18 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:node15n67q1f2x20 .
+_:node15n67q1f2x20 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> _:node15n67q1f2x19 .
+_:node15n67q1f2x19 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction> .
+_:node15n67q1f2x19 <http://www.w3.org/2002/07/owl#onProperty> <http://univ-bench.com#teachingAssistantOf> .
+_:node15n67q1f2x19 <http://www.w3.org/2002/07/owl#someValuesFrom> <http://univ-bench.com#Course> .
+_:node15n67q1f2x20 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://univ-bench.com#TechnicalReport> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#TechnicalReport> <http://www.w3.org/2000/01/rdf-schema#label> "technical report" .
+<http://univ-bench.com#TechnicalReport> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Article> .
+<http://univ-bench.com#UndergraduateStudent> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#UndergraduateStudent> <http://www.w3.org/2000/01/rdf-schema#label> "undergraduate student" .
+<http://univ-bench.com#UndergraduateStudent> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Student> .
+<http://univ-bench.com#University> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#University> <http://www.w3.org/2000/01/rdf-schema#label> "university" .
+<http://univ-bench.com#University> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Organization> .
+<http://univ-bench.com#UnofficialPublication> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#UnofficialPublication> <http://www.w3.org/2000/01/rdf-schema#label> "unnoficial publication" .
+<http://univ-bench.com#UnofficialPublication> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Publication> .
+<http://univ-bench.com#VisitingProfessor> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#VisitingProfessor> <http://www.w3.org/2000/01/rdf-schema#label> "visiting professor" .
+<http://univ-bench.com#VisitingProfessor> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://univ-bench.com#Professor> .
+<http://univ-bench.com#Work> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://univ-bench.com#Work> <http://www.w3.org/2000/01/rdf-schema#label> "Work" .
+<http://univ-bench.com#advisor> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://univ-bench.com#advisor> <http://www.w3.org/2000/01/rdf-schema#label> "is being advised by" .
+<http://univ-bench.com#advisor> <http://www.w3.org/2000/01/rdf-schema#domain> <http://univ-bench.com#Person> .
+<http://univ-bench.com#advisor> <http://www.w3.org/2000/01/rdf-schema#range> <http://univ-bench.com#Professor> .
+<http://univ-bench.com#affiliatedOrganizationOf> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://univ-bench.com#affiliatedOrganizationOf> <http://www.w3.org/2000/01/rdf-schema#label> "is affiliated with" .
+<http://univ-bench.com#affiliatedOrganizationOf> <http://www.w3.org/2000/01/rdf-schema#domain> <http://univ-bench.com#Organization> .
+<http://univ-bench.com#affiliatedOrganizationOf> <http://www.w3.org/2000/01/rdf-schema#range> <http://univ-bench.com#Organization> .
+<http://univ-bench.com#affiliateOf> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://univ-bench.com#affiliateOf> <http://www.w3.org/2000/01/rdf-schema#label> "is affiliated with" .
+<http://univ-bench.com#affiliateOf> <http://www.w3.org/2000/01/rdf-schema#domain> <http://univ-bench.com#Organization> .
+<http://univ-bench.com#affiliateOf> <http://www.w3.org/2000/01/rdf-schema#range> <http://univ-bench.com#Person> .
+<http://univ-bench.com#age> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://univ-bench.com#age> <http://www.w3.org/2000/01/rdf-schema#label> "is age" .
+<http://univ-bench.com#age> <http://www.w3.org/2000/01/rdf-schema#domain> <http://univ-bench.com#Person> .
+<http://univ-bench.com#degreeFrom> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://univ-bench.com#degreeFrom> <http://www.w3.org/2000/01/rdf-schema#label> "has a degree from" .
+<http://univ-bench.com#degreeFrom> <http://www.w3.org/2000/01/rdf-schema#domain> <http://univ-bench.com#Person> .
+<http://univ-bench.com#degreeFrom> <http://www.w3.org/2000/01/rdf-schema#range> <http://univ-bench.com#University> .
+<http://univ-bench.com#degreeFrom> <http://www.w3.org/2002/07/owl#inverseOf> <http://univ-bench.com#hasAlumnus> .
+<http://univ-bench.com#doctoralDegreeFrom> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://univ-bench.com#doctoralDegreeFrom> <http://www.w3.org/2000/01/rdf-schema#label> "has a doctoral degree from" .
+<http://univ-bench.com#doctoralDegreeFrom> <http://www.w3.org/2000/01/rdf-schema#domain> <http://univ-bench.com#Person> .
+<http://univ-bench.com#doctoralDegreeFrom> <http://www.w3.org/2000/01/rdf-schema#range> <http://univ-bench.com#University> .
+<http://univ-bench.com#doctoralDegreeFrom> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://univ-bench.com#degreeFrom> .
+<http://univ-bench.com#emailAddress> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://univ-bench.com#emailAddress> <http://www.w3.org/2000/01/rdf-schema#label> "can be reached at" .
+<http://univ-bench.com#emailAddress> <http://www.w3.org/2000/01/rdf-schema#domain> <http://univ-bench.com#Person> .
+<http://univ-bench.com#hasAlumnus> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://univ-bench.com#hasAlumnus> <http://www.w3.org/2000/01/rdf-schema#label> "has as an alumnus" .
+<http://univ-bench.com#hasAlumnus> <http://www.w3.org/2000/01/rdf-schema#domain> <http://univ-bench.com#University> .
+<http://univ-bench.com#hasAlumnus> <http://www.w3.org/2000/01/rdf-schema#range> <http://univ-bench.com#Person> .
+<http://univ-bench.com#hasAlumnus> <http://www.w3.org/2002/07/owl#inverseOf> <http://univ-bench.com#degreeFrom> .
+<http://univ-bench.com#headOf> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://univ-bench.com#headOf> <http://www.w3.org/2000/01/rdf-schema#label> "is the head of" .
+<http://univ-bench.com#headOf> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://univ-bench.com#worksFor> .
+<http://univ-bench.com#listedCourse> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://univ-bench.com#listedCourse> <http://www.w3.org/2000/01/rdf-schema#label> "lists as a course" .
+<http://univ-bench.com#listedCourse> <http://www.w3.org/2000/01/rdf-schema#domain> <http://univ-bench.com#Schedule> .
+<http://univ-bench.com#listedCourse> <http://www.w3.org/2000/01/rdf-schema#range> <http://univ-bench.com#Course> .
+<http://univ-bench.com#mastersDegreeFrom> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://univ-bench.com#mastersDegreeFrom> <http://www.w3.org/2000/01/rdf-schema#label> "has a masters degree from" .
+<http://univ-bench.com#mastersDegreeFrom> <http://www.w3.org/2000/01/rdf-schema#domain> <http://univ-bench.com#Person> .
+<http://univ-bench.com#mastersDegreeFrom> <http://www.w3.org/2000/01/rdf-schema#range> <http://univ-bench.com#University> .
+<http://univ-bench.com#mastersDegreeFrom> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://univ-bench.com#degreeFrom> .
+<http://univ-bench.com#member> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://univ-bench.com#member> <http://www.w3.org/2000/01/rdf-schema#label> "has as a member" .
+<http://univ-bench.com#member> <http://www.w3.org/2000/01/rdf-schema#domain> <http://univ-bench.com#Organization> .
+<http://univ-bench.com#member> <http://www.w3.org/2000/01/rdf-schema#range> <http://univ-bench.com#Person> .
+<http://univ-bench.com#memberOf> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://univ-bench.com#memberOf> <http://www.w3.org/2000/01/rdf-schema#label> "member of" .
+<http://univ-bench.com#memberOf> <http://www.w3.org/2002/07/owl#inverseOf> <http://univ-bench.com#member> .
+<http://univ-bench.com#name> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://univ-bench.com#name> <http://www.w3.org/2000/01/rdf-schema#label> "name" .
+<http://univ-bench.com#officeNumber> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://univ-bench.com#officeNumber> <http://www.w3.org/2000/01/rdf-schema#label> "office room No." .
+<http://univ-bench.com#orgPublication> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://univ-bench.com#orgPublication> <http://www.w3.org/2000/01/rdf-schema#label> "publishes" .
+<http://univ-bench.com#orgPublication> <http://www.w3.org/2000/01/rdf-schema#domain> <http://univ-bench.com#Organization> .
+<http://univ-bench.com#orgPublication> <http://www.w3.org/2000/01/rdf-schema#range> <http://univ-bench.com#Publication> .
+<http://univ-bench.com#publicationAuthor> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://univ-bench.com#publicationAuthor> <http://www.w3.org/2000/01/rdf-schema#label> "was written by" .
+<http://univ-bench.com#publicationAuthor> <http://www.w3.org/2000/01/rdf-schema#domain> <http://univ-bench.com#Publication> .
+<http://univ-bench.com#publicationAuthor> <http://www.w3.org/2000/01/rdf-schema#range> <http://univ-bench.com#Person> .
+<http://univ-bench.com#publicationDate> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://univ-bench.com#publicationDate> <http://www.w3.org/2000/01/rdf-schema#label> "was written on" .
+<http://univ-bench.com#publicationDate> <http://www.w3.org/2000/01/rdf-schema#domain> <http://univ-bench.com#Publication> .
+<http://univ-bench.com#publicationResearch> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://univ-bench.com#publicationResearch> <http://www.w3.org/2000/01/rdf-schema#label> "is about" .
+<http://univ-bench.com#publicationResearch> <http://www.w3.org/2000/01/rdf-schema#domain> <http://univ-bench.com#Publication> .
+<http://univ-bench.com#publicationResearch> <http://www.w3.org/2000/01/rdf-schema#range> <http://univ-bench.com#Research> .
+<http://univ-bench.com#researchInterest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://univ-bench.com#researchInterest> <http://www.w3.org/2000/01/rdf-schema#label> "is researching" .
+<http://univ-bench.com#researchProject> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://univ-bench.com#researchProject> <http://www.w3.org/2000/01/rdf-schema#label> "has as a research project" .
+<http://univ-bench.com#researchProject> <http://www.w3.org/2000/01/rdf-schema#domain> <http://univ-bench.com#ResearchGroup> .
+<http://univ-bench.com#researchProject> <http://www.w3.org/2000/01/rdf-schema#range> <http://univ-bench.com#Research> .
+<http://univ-bench.com#softwareDocumentation> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://univ-bench.com#softwareDocumentation> <http://www.w3.org/2000/01/rdf-schema#label> "is documented in" .
+<http://univ-bench.com#softwareDocumentation> <http://www.w3.org/2000/01/rdf-schema#domain> <http://univ-bench.com#Software> .
+<http://univ-bench.com#softwareDocumentation> <http://www.w3.org/2000/01/rdf-schema#range> <http://univ-bench.com#Publication> .
+<http://univ-bench.com#softwareVersion> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://univ-bench.com#softwareVersion> <http://www.w3.org/2000/01/rdf-schema#label> "is version" .
+<http://univ-bench.com#softwareVersion> <http://www.w3.org/2000/01/rdf-schema#domain> <http://univ-bench.com#Software> .
+<http://univ-bench.com#subOrganizationOf> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#TransitiveProperty> .
+<http://univ-bench.com#subOrganizationOf> <http://www.w3.org/2000/01/rdf-schema#label> "is part of" .
+<http://univ-bench.com#subOrganizationOf> <http://www.w3.org/2000/01/rdf-schema#domain> <http://univ-bench.com#Organization> .
+<http://univ-bench.com#subOrganizationOf> <http://www.w3.org/2000/01/rdf-schema#range> <http://univ-bench.com#Organization> .
+<http://univ-bench.com#takesCourse> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://univ-bench.com#takesCourse> <http://www.w3.org/2000/01/rdf-schema#label> "is taking" .
+<http://univ-bench.com#teacherOf> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://univ-bench.com#teacherOf> <http://www.w3.org/2000/01/rdf-schema#label> "teaches" .
+<http://univ-bench.com#teacherOf> <http://www.w3.org/2000/01/rdf-schema#domain> <http://univ-bench.com#Faculty> .
+<http://univ-bench.com#teacherOf> <http://www.w3.org/2000/01/rdf-schema#range> <http://univ-bench.com#Course> .
+<http://univ-bench.com#teachingAssistantOf> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://univ-bench.com#teachingAssistantOf> <http://www.w3.org/2000/01/rdf-schema#label> "is a teaching assistant for" .
+<http://univ-bench.com#teachingAssistantOf> <http://www.w3.org/2000/01/rdf-schema#domain> <http://univ-bench.com#TeachingAssistant> .
+<http://univ-bench.com#teachingAssistantOf> <http://www.w3.org/2000/01/rdf-schema#range> <http://univ-bench.com#Course> .
+<http://univ-bench.com#telephone> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://univ-bench.com#telephone> <http://www.w3.org/2000/01/rdf-schema#label> "telephone number" .
+<http://univ-bench.com#telephone> <http://www.w3.org/2000/01/rdf-schema#domain> <http://univ-bench.com#Person> .
+<http://univ-bench.com#tenured> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://univ-bench.com#tenured> <http://www.w3.org/2000/01/rdf-schema#label> "is tenured:" .
+<http://univ-bench.com#tenured> <http://www.w3.org/2000/01/rdf-schema#domain> <http://univ-bench.com#Professor> .
+<http://univ-bench.com#title> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://univ-bench.com#title> <http://www.w3.org/2000/01/rdf-schema#label> "title" .
+<http://univ-bench.com#title> <http://www.w3.org/2000/01/rdf-schema#domain> <http://univ-bench.com#Person> .
+<http://univ-bench.com#undergraduateDegreeFrom> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://univ-bench.com#undergraduateDegreeFrom> <http://www.w3.org/2000/01/rdf-schema#label> "has an undergraduate degree from" .
+<http://univ-bench.com#undergraduateDegreeFrom> <http://www.w3.org/2000/01/rdf-schema#domain> <http://univ-bench.com#Person> .
+<http://univ-bench.com#undergraduateDegreeFrom> <http://www.w3.org/2000/01/rdf-schema#range> <http://univ-bench.com#University> .
+<http://univ-bench.com#undergraduateDegreeFrom> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://univ-bench.com#degreeFrom> .
+<http://univ-bench.com#worksFor> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://univ-bench.com#worksFor> <http://www.w3.org/2000/01/rdf-schema#label> "Works For" .
+<http://univ-bench.com#worksFor> <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://univ-bench.com#memberOf> .

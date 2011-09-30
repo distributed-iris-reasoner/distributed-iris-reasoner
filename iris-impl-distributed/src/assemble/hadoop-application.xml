@@ -23,7 +23,7 @@
         <include>at.sti2.rif4j:rif4j-parser</include>
         
         <include>commons-lang:commons-lang</include>
-        <include>org.jgrapht:jgrapht-jdk1.5</include>
+        <include>org.jgrapht:jgrapht-jdk1.6</include>
         <include>org.semweb4j:rdf2go.api</include>
         <include>org.semweb4j:rdf2go.impl.sesame23</include>
         <include>org.openrdf:openrdf-sesame</include>

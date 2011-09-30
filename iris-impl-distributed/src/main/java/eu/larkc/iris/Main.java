@@ -158,20 +158,46 @@ public class Main extends Configured implements Tool {
 		
 	    // run the job here.
 		
+		/* REAL CLUSTER */
+		jobConf.set("dfs.blocksize", "536870912");
+		jobConf.set("dfs.namenode.handler.count", "40");
+		//jobConf.set("dfs.replication", "1");
+		jobConf.set("mapreduce.reduce.shuffle.parallelcopies", "10");
+		jobConf.set("mapreduce.task.io.sort.factor", "100");
+		jobConf.set("mapreduce.task.io.sort.mb", "1024");
+		jobConf.set("io.file.buffer.size", "131072");
+		jobConf.set("mapred.child.java.opts", "-Xmx2560m");
+		jobConf.set("mapred.child.ulimit", "4194304");
+		jobConf.set("mapred.min.split.size", "536870912");
+		jobConf.set("mapreduce.input.fileinputformat.split.minsize", "536870912");
+		jobConf.set("mapreduce.reduce.merge.inmem.threshold", "0");
+		/**/
+		
+		/* compression settings 
+		jobConf.set("mapreduce.map.output.compress", "false");
+		jobConf.set("mapreduce.output.fileoutputformat.compress", "true");
+		jobConf.set("mapreduce.output.fileoutputformat.compression.type", "BLOCK");
+		 ~~~ */
+		
+		//!!!IMPORTANT, if not : Caused by: java.io.FileNotFoundException: File does not exist: hdfs://ec2-50-19-191-200.compute-1.amazonaws.com:8020/user/root/lubm/facts/lubm50/data
 		jobConf.setBoolean("mapred.input.dir.recursive", true);
 		
 		jobConf.set("cascading.serialization.tokens", "130=eu.larkc.iris.storage.IRIWritable,131=eu.larkc.iris.storage.StringTermWritable");
 		defaultConfiguration.flowProperties.put("cascading.serialization.tokens", "130=eu.larkc.iris.storage.IRIWritable,131=eu.larkc.iris.storage.StringTermWritable");
 		
+		/*
 	    if( System.getProperty("log4j.logger") != null )
 	    	defaultConfiguration.flowProperties.put( "log4j.logger", System.getProperty("log4j.logger") );
-
-		jobConf.set("mapred.child.java.opts", "-Xms64m -Xmx512m");
+		*/
+	    
+		//jobConf.set("mapred.min.split.size", "134217728");
+		//jobConf.set("mapred.child.java.opts", "-Xms64m -Xmx512m");
 		jobConf.setMapSpeculativeExecution(false);
 		jobConf.setReduceSpeculativeExecution(false);
 
-		jobConf.setNumMapTasks(8);
-		jobConf.setNumReduceTasks(2);
+		//FIXME
+		//jobConf.setNumMapTasks(8);
+		jobConf.setNumReduceTasks(32);
 
 		FlowConnector.setDebugLevel(defaultConfiguration.flowProperties, DebugLevel.VERBOSE);
 		MultiMapReducePlanner.setJobConf( defaultConfiguration.flowProperties, jobConf );

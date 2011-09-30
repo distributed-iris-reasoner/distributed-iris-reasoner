@@ -121,10 +121,20 @@ public class Importer {
 	 * Does the actual import from a n-triple file
 	 */
 	public void processNTriple(String inPath, String importName) throws IOException {
-		Tap source = new Lfs(new TextLine(), inPath);
-
+		//FIXME
+		//configuration.jobConf.set("mapreduce.input.fileinputformat.split.minsize", "268435456");
+		FileSystem fs = FileSystem.get(configuration.hadoopConfiguration);
+		
+		String fileName = configuration.project + "/" + DistributedFileSystemManager.TMP_FOLDER + "/" + inPath.substring(inPath.lastIndexOf("/") + 1);
+		logger.info("copy start: " + inPath + " to hdfs : " + fileName);
+		fs.copyFromLocalFile(new Path(inPath), new Path(fileName));
+		logger.info("copy done : " + inPath + " to hdfs : " + fileName);
+		
+		//Tap source = new Lfs(new TextLine(), inPath);
+		Tap source = new Hfs(new TextLine(), fileName);
+		
 		SequenceFile sinkScheme = new SequenceFile(new Fields(0, 1, 2));
-		sinkScheme.setNumSinkParts(1);
+		//sinkScheme.setNumSinkParts(1);
 		String importPath = distributedFileSystemManager.getImportPath(importName);
 		Tap sink = new Hfs(sinkScheme, importPath, true );
 		
@@ -136,10 +146,12 @@ public class Importer {
 		Flow aFlow = new FlowConnector(configuration.flowProperties).connect(source, sink, sourcePipe);
 		aFlow.complete();
 		
+		fs.delete(new Path(fileName), false);
+		
 		if (configuration.doPredicateIndexing) {
 			processIndexing(importName);
 			
-			FileSystem fs = FileSystem.get(configuration.hadoopConfiguration);
+			//FileSystem fs = FileSystem.get(configuration.hadoopConfiguration);
 			fs.delete(new Path(importPath), true);
 		}
 	}

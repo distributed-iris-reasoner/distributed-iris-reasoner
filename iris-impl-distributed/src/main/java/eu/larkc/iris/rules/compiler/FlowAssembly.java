@@ -101,7 +101,7 @@ public class FlowAssembly {
 		Map<String, Tap> sources = prepareSourceTaps();
 		
 		SequenceFile sinkScheme = new SequenceFile(fields);
-		sinkScheme.setNumSinkParts(1);
+		//sinkScheme.setNumSinkParts(1); //FIXME
 		Tap headSink = new Hfs(sinkScheme, output, true );
 
 		Map<String, Tap> sinks = new HashMap<String, Tap>();
@@ -116,7 +116,7 @@ public class FlowAssembly {
 		
 		flow = new FlowConnector(mConfiguration.flowProperties).connect(flowName, sources, sinks, pipes.toArray(new Pipe[0]));
 		if(flow != null) {
-			flow.writeDOT("flow.dot");
+			//flow.writeDOT("flow.dot");
 		}
 		flow.complete();
 		
@@ -132,6 +132,30 @@ public class FlowAssembly {
 		}
 		if (!hasNewInferences) {
 			deleteResults(new Path(path));
+		} else {
+			//merge part files FIXME
+			FileSystem fs = FileSystem.get(mConfiguration.hadoopConfiguration);
+			
+			//delete empty results (could be from reducers running on no data)
+			int index = 0;
+			while (true) {
+				String value = String.valueOf(index);
+				String file = path + "/" + "part-" + "00000".substring(0, 5 - value.length()) + value;
+				Path filePath = new Path(file);
+				if (fs.exists(filePath)) {
+					Tap source = new Hfs(new Fields(0, 1, 2), file);
+					TupleEntryIterator tei = source.openForRead(mConfiguration.jobConf);
+					boolean noData = !tei.hasNext();
+					tei.close();
+					if (noData) {
+						logger.info("delete empty result : " + file);
+						fs.delete(filePath, false);	
+					}
+				} else {
+					break;
+				}
+				index++;
+			}
 		}
 
 		if (hasNewInferences && mConfiguration.doPredicateIndexing) {
